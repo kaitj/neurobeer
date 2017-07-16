@@ -7,7 +7,7 @@ in other modules.
 
 import numpy as np
 
-def corrcoef(data1, data2):
+def corr(data1, data2):
     """ Perform correlation coefficient calculation using numpy library.
           Used for parallel, row-by-row correlation, returning only off-diagonal value.
 
