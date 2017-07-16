@@ -76,6 +76,8 @@ def _pairwiseSimilarity_matrix(inputVTK, sigma, no_of_jobs):
     sigmasq = np.square(sigma)
     similarities = distance.gausKernel_similarity(distances, sigmasq)
 
+    similarities = np.array(similarities)
+
     return similarities
 
 def _pairwiseQSimilarity_matrix(inputVTK, scalarData, scalarType, no_of_jobs):
@@ -93,7 +95,7 @@ def _pairwiseQSimilarity_matrix(inputVTK, scalarData, scalarType, no_of_jobs):
     fiberArray = fibers.FiberArray()
     scalarArray = scalars.FiberArrayScalar()
 
-    fiberArray.convertFromVTK(inputVTK, no_of_pts=20)
+    fiberArray.convertFromVTK(inputVTK, pts_per_fiber=20)
     scalarArray.addScalar(inputVTK, fiberArray, scalarData, scalarType)
 
     qSimilarity = Parallel(n_jobs=no_of_jobs, verbose=0)(

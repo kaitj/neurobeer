@@ -42,7 +42,7 @@ def _fiberDistance_internal(fiber, fiberArray):
 def fiberDistance(fiber, fiberArray):
     """ Computes the distance between one fiber and individual fibers within a
     group (array) of fibers. This function also handles equivalent fiber
-    representations. 
+    representations.
 
     INPUT:
         fiber - single fiber to be compared
@@ -65,7 +65,7 @@ def fiberDistance(fiber, fiberArray):
 
     return distance
 
-def gausKernel_similarity(distance, sigmasq=100):
+def gausKernel_similarity(distance, sigmasq):
     """ Computes the similarity using a Gaussian kernel
 
     INPUT:
@@ -78,6 +78,6 @@ def gausKernel_similarity(distance, sigmasq=100):
     """
 
     # Computes similarity using a Gaussian kernel
-    similarities = np.exp(-distance / (sigmasq))
+    similarities = np.exp(-distance / sigmasq)
 
     return similarities
