@@ -6,7 +6,7 @@ parameters pertaining to clusters.
 """
 
 import numpy as np
-import fibers, distance, scalars
+import fibers, distance, scalars, misc
 from joblib import Parallel, delayed
 
 class Cluster:
@@ -92,18 +92,23 @@ def _pairwiseQSimilarity_matrix(inputVTK, scalarData, scalarType, no_of_jobs):
         qSimilarity - NxN matrix containing correlation values between fibers
     """
 
+    # Import data
     fiberArray = fibers.FiberArray()
-    scalarArray = scalars.FiberArrayScalar()
-
     fiberArray.convertFromVTK(inputVTK, pts_per_fiber=20)
+    scalarArray = scalars.FiberArrayScalar()
     scalarArray.addScalar(inputVTK, fiberArray, scalarData, scalarType)
 
-    qSimilarity = Parallel(n_jobs=no_of_jobs, verbose=0)(
-            delayed(np.corrcoef[0][1])(
-                    scalarArray.getScalar(fiberArray, scalarType)[fidx],
-                    scalarArray)
-            for fidx in range(0, fiberArray.no_of_fibers))
+    # Get number of fibers and dimensions of similarity matrix
+    noFibers = fiberArray.no_of_fibers
+    matDim = scalarData.shape[0]
 
-    qSimilarity = np.array(qSimilarity)
+    # Calculate and return correlation coefficient
+    qSimilarity = Parallel(n_jobs=no_of_jobs, verbose=0)(
+            delayed(misc.corr)(
+                    scalarArray.getScalar(fiberArray, scalarType)[fidx],
+                    scalarArray[count])
+            for fidx in range(0, noFibers) for count in range(0, noFibers))
+
+    qSimilarity = np.array(qSimilarity).reshape(matDim, matDim)
 
     return qSimilarity
