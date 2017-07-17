@@ -100,15 +100,14 @@ def _pairwiseQSimilarity_matrix(inputVTK, scalarData, scalarType, no_of_jobs):
 
     # Get number of fibers and dimensions of similarity matrix
     noFibers = fiberArray.no_of_fibers
-    matDim = scalarData.shape[0]
 
     # Calculate and return correlation coefficient
     qSimilarity = Parallel(n_jobs=no_of_jobs, verbose=0)(
             delayed(misc.corr)(
                     scalarArray.getScalar(fiberArray, scalarType)[fidx],
-                    scalarArray[count])
-            for fidx in range(0, noFibers) for count in range(0, noFibers))
+                    scalarArray.getScalar(fiberArray, scalarType)[count])
+            for count in range(0, noFibers) for fidx in range(0, noFibers))
 
-    qSimilarity = np.array(qSimilarity).reshape(matDim, matDim)
+    qSimilarity = np.array(qSimilarity).reshape(noFibers, noFibers)
 
     return qSimilarity
