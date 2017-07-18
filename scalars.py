@@ -117,20 +117,6 @@ class FiberArrayScalar:
 
         return reverseList
 
-    #def getReverseScalar(self, fidx):
-	#""" Extracts the scalar information of a specified scalarType pertaining to
-        #a single fiber in reverse. """
-
-#        scalarList = np.zeros(fiberArray.pts_per_fiber)
-#
- #       for pidx in range(fiberArray.pts_per_fiber, 0, -1):
-  #
-#	    scalarValue = \
- #               self.fiberTree_scalar[fidx][pidx][scalarType]
-  #          scalarList[pidx] = float(scalarValue)
-#
- #       return scalarList
-
     def getScalars(self, fiberArray, scalarType):
         """ Extracts scalar information of a speficied scalarType pertaining to
         a group of fibers
