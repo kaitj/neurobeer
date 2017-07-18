@@ -103,7 +103,7 @@ class FiberArrayScalar:
 
         scalarList = np.zeros(fiberArray.pts_per_fiber)
 
-	for pidx in range(0, fiberArray.pts_per_fiber):
+        for pidx in range(0, fiberArray.pts_per_fiber):
 
             scalarValue = \
                 self.fiberTree_scalar[fidx][pidx][scalarType]
@@ -124,7 +124,7 @@ class FiberArrayScalar:
 #        scalarList = np.zeros(fiberArray.pts_per_fiber)
 #
  #       for pidx in range(fiberArray.pts_per_fiber, 0, -1):
-  #          
+  #
 #	    scalarValue = \
  #               self.fiberTree_scalar[fidx][pidx][scalarType]
   #          scalarList[pidx] = float(scalarValue)
