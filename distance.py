@@ -39,6 +39,30 @@ def _fiberDistance_internal(fiber, fiberArray):
 
     return distance
 
+def _scalarDistance_internal(fiber, fiberArray, scalarArray, scalarType):
+    """ Computes the "distance" between the scalar values between one fiber and
+    the fibers within a group (array) of fibers using MeanSquared method.
+
+    INPUT:
+        fiber - single fiber to be compared
+        fiberArray - group of fibers that lone fiber is to be compared to
+        scalarArray - array consisting ot quantitative data
+        scalarType - type of quantitative data
+    OUTPUT:
+        qDistance - computed distance between single fiber and group
+    """
+
+    # Calculates distance between points
+    dq = scalarArray.getScalars(fiberArray, scalarType) - \
+        scalarArray.getScalar(fiber, scalarType)
+
+    dq_sq = np.square(dq)
+
+    qDistance = np.sum(dq_sq, 1)
+    qDistance = qDistance / float(fiberArray.pts_per_fiber)
+
+    return qDistance
+
 def fiberDistance(fiber, fiberArray):
     """ Computes the distance between one fiber and individual fibers within a
     group (array) of fibers. This function also handles equivalent fiber
@@ -62,6 +86,17 @@ def fiberDistance(fiber, fiberArray):
 
     # Minimum distance more likely to be part of cluster; return distance
     distance = np.minimum(distance1, distance2)
+
+    return distance
+
+def scalarDistance(fiber, fiberArray, scalarArray, scalarType):
+    """ Computes the distance between one fiber and individual fibers within a
+    group (array) of fibers. This function also handles equivalent fiber
+    representations.
+    """
+
+    # Compute distances for fiber and fiber equivalent to fiber group
+    distance = _scalarDistance_internal(fiber, fiberArray, scalarArray, scalarType)
 
     return distance
 

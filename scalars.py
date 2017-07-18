@@ -111,12 +111,6 @@ class FiberArrayScalar:
 
         return scalarList
 
-    def getReverseScalar(self, scalarList):
-
-        reverseList = scalarList[::-1]
-
-        return reverseList
-
     def getScalars(self, fiberArray, scalarType):
         """ Extracts scalar information of a speficied scalarType pertaining to
         a group of fibers
