@@ -111,7 +111,7 @@ class FiberArrayScalar:
 
         return scalarList
 
-    def getScalars(self, fiberArray, scalarType):
+    def getScalars(self, fiberArray, fidxes, scalarType):
         """ Extracts scalar information of a speficied scalarType pertaining to
         a group of fibers
 
@@ -123,12 +123,13 @@ class FiberArrayScalar:
             scalarList - List of scalar values indexed by fiber and point
         """
 
-        scalarList = np.zeros((fiberArray.no_of_fibers,
+        no_of_fibers = len(fidxes)
+
+        scalarList = np.zeros((no_of_fibers,
                                       fiberArray.pts_per_fiber))
 
-        for fidx in range(0, fiberArray.no_of_fibers):
+        for fidx in fidxes:
             for pidx in range(0, fiberArray.pts_per_fiber):
-
                 scalarValue = \
                     self.fiberTree_scalar[fidx][pidx][scalarType]
                 scalarList[fidx][pidx] = float(scalarValue)
