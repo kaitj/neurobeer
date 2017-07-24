@@ -83,7 +83,6 @@ class FiberArrayScalar:
 
                 # Find point index
                 ptidx = ptIds.GetId(int(round(lineIdx)))
-
                 self.fiberTree_scalar[fidx][pidx][scalarType] = \
                     scalarData[ptidx]
 
@@ -128,10 +127,13 @@ class FiberArrayScalar:
         scalarList = np.zeros((no_of_fibers,
                                       fiberArray.pts_per_fiber))
 
+        idx = 0
         for fidx in fidxes:
             for pidx in range(0, fiberArray.pts_per_fiber):
                 scalarValue = \
                     self.fiberTree_scalar[fidx][pidx][scalarType]
-                scalarList[fidx][pidx] = float(scalarValue)
+                scalarList[idx][pidx] = float(scalarValue)
+            
+            idx += 1
 
         return scalarList
