@@ -80,6 +80,25 @@ def _pairwiseSimilarity_matrix(inputVTK, sigma, no_of_jobs):
 
     return similarities
 
+def _pairwiseQDistance_matrix(inputVTK, scalarData, scalarType, no_of_jobs):
+    """ An internal function used to compute the "distance" between quantitative
+    points along a fiber. """
+
+    fiberArray = fibers.FiberArray()
+    fiberArray.convertFromVTK(inputVTK, pts_per_fiber=20)
+    scalarArray = scalars.FiberArrayScalar()
+    scalarArray.addScalar(inputVTK, fiberArray, scalarData, scalarType)
+
+    qDistances = Parallel(n_jobs=1, verbose=0)(
+            delayed(distance.scalarDistance)(scalarArray.getScalar(fiberArray, fidx, scalarType),
+                scalarArray)
+            for fidx in range(0, fiberArray.no_of_fibers)
+    )
+
+    qDistances = np.array(qDistances)
+
+    return qDistances
+
 def _pairwiseQSimilarity_matrix(inputVTK, scalarData, scalarType, no_of_jobs):
     """ An internal function used to compute the cross-correlation between
     quantitative metrics along a fiber.
