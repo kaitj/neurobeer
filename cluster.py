@@ -86,20 +86,23 @@ def _pairwiseQDistance_matrix(inputVTK, scalarData, scalarType, no_of_jobs):
 
     fiberArray = fibers.FiberArray()
     fiberArray.convertFromVTK(inputVTK, pts_per_fiber=20)
+    no_of_fibers = fiberArray.no_of_fibers
     scalarArray = scalars.FiberArrayScalar()
     scalarArray.addScalar(inputVTK, fiberArray, scalarData, scalarType)
 
-    qDistances = Parallel(n_jobs=1, verbose=0)(
-            delayed(distance.scalarDistance)(scalarArray.getScalar(fiberArray, fidx, scalarType),
-                scalarArray)
-            for fidx in range(0, fiberArray.no_of_fibers)
-    )
+    qDistances = Parallel(n_jobs=no_of_jobs, verbose=0)(
+            delayed(distance.scalarDistance)(
+                scalarArray.getScalar(fiberArray, fidx, scalarType),
+                scalarArray.getScalars(fiberArray, range(no_of_fibers), scalarType))
+            for fidx in range(0, no_of_fibers)
+            )
 
     qDistances = np.array(qDistances)
 
     return qDistances
 
-def _pairwiseQSimilarity_matrix(inputVTK, scalarData, scalarType, no_of_jobs):
+#def _pairwiseQSimilarity_matrix(inputVTK, scalarData, scalarType, no_of_jobs):
+def _pairwiseQSimilarity_matrix(inputVTK, scalarData, scalarType, sigma, no_of_jobs):
     """ An internal function used to compute the cross-correlation between
     quantitative metrics along a fiber.
 
@@ -111,22 +114,30 @@ def _pairwiseQSimilarity_matrix(inputVTK, scalarData, scalarType, no_of_jobs):
         qSimilarity - NxN matrix containing correlation values between fibers
     """
 
-    # Import data
-    fiberArray = fibers.FiberArray()
-    fiberArray.convertFromVTK(inputVTK, pts_per_fiber=20)
-    scalarArray = scalars.FiberArrayScalar()
-    scalarArray.addScalar(inputVTK, fiberArray, scalarData, scalarType)
+    qDistances = _pairwiseQDistance_matrix(inputVTK, scalarData, scalarType, no_of_jobs)
 
-    # Get number of fibers and dimensions of similarity matrix
-    noFibers = fiberArray.no_of_fibers
+    sigmasq = np.square(sigma)
+    qSimilarity = distance.gausKernel_similarity(qDistances, sigmasq)
 
-    # Calculate and return correlation coefficient
-    qSimilarity = Parallel(n_jobs=no_of_jobs, verbose=0)(
-            delayed(misc.corr)(
-                    scalarArray.getScalar(fiberArray, scalarType)[fidx],
-                    scalarArray.getScalar(fiberArray, scalarType)[count])
-            for count in range(0, noFibers) for fidx in range(0, noFibers))
-
-    qSimilarity = np.array(qSimilarity).reshape(noFibers, noFibers)
+    qSimilarity = np.array(qSimilarity)
 
     return qSimilarity
+
+    # Import data
+    #fiberArray = fibers.FiberArray()
+    #fiberArray.convertFromVTK(inputVTK, pts_per_fiber=20)
+    #no_of_fibers = fiberArray.no_of_fibers
+    #scalarArray = scalars.FiberArrayScalar()
+    #scalarArray.addScalar(inputVTK, fiberArray, scalarData, scalarType)
+
+    # Calculate and return correlation coefficient
+    #qSimilarity = Parallel(n_jobs=no_of_jobs, verbose=0)(
+    #        delayed(misc.corr)(
+    #                scalarArray.getScalar(fiberArray, fidx, scalarType),
+    #                scalarArray.getScalars(fiberARray, range(no_of_fibers), scalarType))
+    #        for fidx in range(0, no_of_fibers)
+    #        )
+
+    #qSimilarity = np.array(qSimilarity)
+
+    #return qSimilarity
