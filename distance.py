@@ -33,7 +33,7 @@ def _fiberDistance_internal(fiber, fiberArray):
     # Sums the squared values of the distances in each axis
     distance = dx_sq + dy_sq + dz_sq
 
-    # Sum along fiber and normalize
+    # Sum along fiber
     distance = np.sum(distance, 1)
     distance = distance / float(fiberArray.pts_per_fiber)
 
@@ -56,7 +56,7 @@ def _scalarDistance_internal(fiberScalar, fiberScalarArray):
     dq = fiberScalarArray - fiberScalar
 
     dq_sq = np.square(dq)
-    
+
     pts_per_fiber = len(fiberScalar)
     qDistance = np.sum(dq_sq, 1)
     qDistance = qDistance / float(pts_per_fiber)
@@ -113,6 +113,6 @@ def gausKernel_similarity(distance, sigmasq):
     """
 
     # Computes similarity using a Gaussian kernel
-    similarities = np.exp(-distance / sigmasq)
+    similarities = np.exp(-distance / (2 * sigmasq))
 
     return similarities

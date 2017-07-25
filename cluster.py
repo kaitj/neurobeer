@@ -6,7 +6,7 @@ parameters pertaining to clusters.
 """
 
 import numpy as np
-import fibers, distance, scalars, misc
+import fibers, distance, scalars
 from joblib import Parallel, delayed
 
 class Cluster:
@@ -95,13 +95,12 @@ def _pairwiseQDistance_matrix(inputVTK, scalarData, scalarType, no_of_jobs):
                 scalarArray.getScalar(fiberArray, fidx, scalarType),
                 scalarArray.getScalars(fiberArray, range(no_of_fibers), scalarType))
             for fidx in range(0, no_of_fibers)
-            )
+    )
 
     qDistances = np.array(qDistances)
 
     return qDistances
 
-#def _pairwiseQSimilarity_matrix(inputVTK, scalarData, scalarType, no_of_jobs):
 def _pairwiseQSimilarity_matrix(inputVTK, scalarData, scalarType, sigma, no_of_jobs):
     """ An internal function used to compute the cross-correlation between
     quantitative metrics along a fiber.
@@ -122,22 +121,3 @@ def _pairwiseQSimilarity_matrix(inputVTK, scalarData, scalarType, sigma, no_of_j
     qSimilarity = np.array(qSimilarity)
 
     return qSimilarity
-
-    # Import data
-    #fiberArray = fibers.FiberArray()
-    #fiberArray.convertFromVTK(inputVTK, pts_per_fiber=20)
-    #no_of_fibers = fiberArray.no_of_fibers
-    #scalarArray = scalars.FiberArrayScalar()
-    #scalarArray.addScalar(inputVTK, fiberArray, scalarData, scalarType)
-
-    # Calculate and return correlation coefficient
-    #qSimilarity = Parallel(n_jobs=no_of_jobs, verbose=0)(
-    #        delayed(misc.corr)(
-    #                scalarArray.getScalar(fiberArray, fidx, scalarType),
-    #                scalarArray.getScalars(fiberARray, range(no_of_fibers), scalarType))
-    #        for fidx in range(0, no_of_fibers)
-    #        )
-
-    #qSimilarity = np.array(qSimilarity)
-
-    #return qSimilarity
