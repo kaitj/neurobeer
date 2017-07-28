@@ -6,13 +6,15 @@ parameters pertaining to clusters.
 """
 
 import numpy as np
+import scipy.cluster
 import fibers, distance, scalars
 from joblib import Parallel, delayed
 
 class Cluster:
-    """ Clustering of whole-brain tractography data from subject """
+    """ Clustering of whole-brain tractography data from subject using normalized, random
+    walk Laplacian"""
 
-    def cluster(inputVTK, k_clusters, sigma, no_of_jobs):
+    def spectralClustering(inputVTK, scalarData=None, scalarType=None, k_clusters=3, no_of_eigvec=20,                           sigma=60, no_of_jobs=2):
         """
         Clustering of fibers based on pairwise fiber similarity
 
@@ -21,6 +23,8 @@ class Cluster:
                 k_clusters - number of clusters via k-means clustering
                 sigma - width of kernel; adjust to alter sensitivity
                 no_of_jobs - processes to use to perform computation
+
+        TODO: weighted quantitative clustering
         """
 
         noFibers = inputVTK.GetNumberOfLines()
@@ -32,6 +36,37 @@ class Cluster:
             print "No. of fibers:", noFibers
             print "No. of clusters:", k_clusters
 
+        # 1. Compute similarty matrix
+        W = _pairwiseSimilarity_matrix(inputVTK, sigma, no_of_jobs)
+
+        # 2. Compute degree matrix
+        D = _degreeMatrix(W)
+
+        # 3. Compute unnormalized Laplacian
+        L = D - W
+
+        # 4. Compute normalized Laplacian (random-walk)
+        Lrw = np.dot(np.diag(np.divide(1, np.sum(D, 0))), L)
+
+        # 5. Compute eigenvalues and eigenvectors of generalized eigenproblem
+        # vectors are columns ([:, n]) of matrix
+        eigval, eigvec = np.linalg.eig(Lrw)
+
+        # 6. Compute information for clustering using "N" number of smallest eigenvalues
+        U = eigvec[:, 0:no_of_eigvec]
+
+        # 7. Find clusters using K-means clustering
+        # Sort centroids by eigenvector order
+        centroids, clusterIdx = scipy.cluster.vq.kmeans2(U, k_clusters, minit='points')
+        centroid_order = numpy.argsort(centroids[:,0])
+
+        colour = _cluster_to_rgb(U)
+
+        # 8. Return results
+        outputData = inputVTK
+        outputPolydata = _format_outputVTK(outputData, clusterIdx, colour, centroids)
+
+        return outputPolydata, clusterIDx, colour, centroids
 
 def _pairwiseDistance_matrix(inputVTK, sigma, no_of_jobs):
     """ An internal function used to compute an NxN distance matrix for all
@@ -121,3 +156,51 @@ def _pairwiseQSimilarity_matrix(inputVTK, scalarData, scalarType, sigma, no_of_j
     qSimilarity = np.array(qSimilarity)
 
     return qSimilarity
+
+def _degreeMatrix(inputMatrix):
+    """ An internal function used to compute the Degree matrix, D """
+
+    # Determine the degree matrix
+    degMat = np.diag(np.sum(inputMatrix, 0))
+
+    return degMat
+
+def _cluster_to_rgb(data):
+    """ Generate cluster color from first three components of data """ 
+
+    colour = data[:, 0:3]
+
+    # Normalize color
+    colour_len = np.sqrt(np.sum(np.power(colour, 2), 1))
+    colour = np.divide(colour.T, colour_len).T
+
+    # Convert range from 0 to 255
+    colour = 127.5 + (colour * 127.5)
+
+    return colour
+
+def _format_outputVTK(polyData, clusterIdx, colour, data):
+    """ Output polydata with colours, cluster numbers and coordinates """
+
+    dataColour = vtk.vtkUnsignedCharArray()
+    dataColour.SetNumberOfComponents(3)
+    dataColour.SetName('DataColour')
+
+    dataCoord = vtk.vtkFloatArray()
+    dataCoord.SetNumberOfComponents(data.shape[1])
+    dataCoord.SetName('DataCoordinates')
+
+    clusterColour = vtk.vtkIntArray()
+    clusterColour.SetName('ClusterColour')
+
+    for fidx in range(0, polyData.GetNumberOfLines()):
+        dataColour.InsertNextTuple3(
+                colour[fidx, 0], colour[fidx, 1], colour[fidx, 2])
+        clusterColour.InsertNextTuple1(int(clusterIdx[fidx]))
+        dataCoord.InsertNextTupleValue(data[fidx, :])
+
+    polyData.GetCellData().AddArray(dataColour)
+    polyData.GetCellData().AddArray(dataCoord)
+    polyData.GetCellData().AddArray(clusterColour)
+
+    return polyData
