@@ -8,13 +8,14 @@ parameters pertaining to clusters.
 import numpy as np
 import scipy.cluster
 import fibers, distance, scalars
+import vtk
 from joblib import Parallel, delayed
 
 class Cluster:
     """ Clustering of whole-brain tractography data from subject using normalized, random
     walk Laplacian"""
 
-    def spectralClustering(inputVTK, scalarData=None, scalarType=None, k_clusters=3, no_of_eigvec=20,                           sigma=60, no_of_jobs=2):
+def spectralClustering(inputVTK, scalarData=None, scalarType=None, k_clusters=3, no_of_eigvec=20,                           sigma=60, no_of_jobs=2):
         """
         Clustering of fibers based on pairwise fiber similarity
 
@@ -38,6 +39,7 @@ class Cluster:
 
         # 1. Compute similarty matrix
         W = _pairwiseSimilarity_matrix(inputVTK, sigma, no_of_jobs)
+        #W = _pairwiseQSimilarity_matrix(inputVTK, scalarData, scalarType, sigma, no_of_jobs)
 
         # 2. Compute degree matrix
         D = _degreeMatrix(W)
@@ -53,20 +55,21 @@ class Cluster:
         eigval, eigvec = np.linalg.eig(Lrw)
 
         # 6. Compute information for clustering using "N" number of smallest eigenvalues
-        U = eigvec[:, 0:no_of_eigvec]
+        # Skip first eigenvector, no information provided for clustering???
+        U = eigvec[:, 1:no_of_eigvec+1]
 
         # 7. Find clusters using K-means clustering
         # Sort centroids by eigenvector order
         centroids, clusterIdx = scipy.cluster.vq.kmeans2(U, k_clusters, minit='points')
-        centroid_order = numpy.argsort(centroids[:,0])
+        centroid_order = np.argsort(centroids[:,0])
 
-        colour = _cluster_to_rgb(U)
+        colour = _cluster_to_rgb(centroids)
 
         # 8. Return results
         outputData = inputVTK
-        outputPolydata = _format_outputVTK(outputData, clusterIdx, colour, centroids)
+        outputPolydata = _format_outputVTK(outputData, clusterIdx, colour, U)
 
-        return outputPolydata, clusterIDx, colour, centroids
+        return outputPolydata, clusterIdx, colour, centroids
 
 def _pairwiseDistance_matrix(inputVTK, sigma, no_of_jobs):
     """ An internal function used to compute an NxN distance matrix for all
@@ -166,6 +169,7 @@ def _degreeMatrix(inputMatrix):
     return degMat
 
 def _cluster_to_rgb(data):
+    
     """ Generate cluster color from first three components of data """ 
 
     colour = data[:, 0:3]
@@ -186,21 +190,23 @@ def _format_outputVTK(polyData, clusterIdx, colour, data):
     dataColour.SetNumberOfComponents(3)
     dataColour.SetName('DataColour')
 
-    dataCoord = vtk.vtkFloatArray()
-    dataCoord.SetNumberOfComponents(data.shape[1])
-    dataCoord.SetName('DataCoordinates')
+    #dataCoord = vtk.vtkFloatArray()
+    #dataCoord.SetNumberOfComponents(data.shape[1])
+    #dataCoord.SetName('DataCoordinates')
 
     clusterColour = vtk.vtkIntArray()
-    clusterColour.SetName('ClusterColour')
+    clusterColour.SetName('ClusterNumber')
 
     for fidx in range(0, polyData.GetNumberOfLines()):
         dataColour.InsertNextTuple3(
-                colour[fidx, 0], colour[fidx, 1], colour[fidx, 2])
+                colour[clusterIdx[fidx], 0], colour[clusterIdx[fidx], 1], colour[clusterIdx[fidx], 2])
         clusterColour.InsertNextTuple1(int(clusterIdx[fidx]))
-        dataCoord.InsertNextTupleValue(data[fidx, :])
+        #dataCoord.InsertNextTupleValue(data[fidx, :])
 
     polyData.GetCellData().AddArray(dataColour)
-    polyData.GetCellData().AddArray(dataCoord)
+    #polyData.GetCellData().AddArray(dataCoord)
     polyData.GetCellData().AddArray(clusterColour)
+
+    polyData.GetCellData().SetScalars(dataColour)
 
     return polyData
