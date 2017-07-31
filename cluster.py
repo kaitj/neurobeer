@@ -56,7 +56,7 @@ def spectralClustering(inputVTK, scalarData=None, scalarType=None, k_clusters=3,
 
         # 6. Compute information for clustering using "N" number of smallest eigenvalues
         # Skip first eigenvector, no information provided for clustering???
-        U = eigvec[:, 1:no_of_eigvec+1]
+        U = eigvec[:, 0:no_of_eigvec]
 
         # 7. Find clusters using K-means clustering
         # Sort centroids by eigenvector order
@@ -169,8 +169,8 @@ def _degreeMatrix(inputMatrix):
     return degMat
 
 def _cluster_to_rgb(data):
-    
-    """ Generate cluster color from first three components of data """ 
+
+    """ Generate cluster color from first three components of data """
 
     colour = data[:, 0:3]
 
