@@ -10,6 +10,7 @@ import scipy.cluster
 import fibers, distance, scalars
 import vtk
 from joblib import Parallel, delayed
+import sklearn.cluster, sklearn.preprocessing
 
 class Cluster:
     """ Clustering of whole-brain tractography data from subject using normalized, random
@@ -27,6 +28,10 @@ def spectralClustering(inputVTK, scalarData=None, scalarType=None, k_clusters=3,
 
         TODO: weighted quantitative clustering
         """
+        
+        if no_of_eigvec == 1:
+            print "Clustering cannot be performed with single eigenvector!"
+            return
 
         noFibers = inputVTK.GetNumberOfLines()
         if noFibers == 0:
@@ -60,10 +65,13 @@ def spectralClustering(inputVTK, scalarData=None, scalarType=None, k_clusters=3,
 
         # 7. Find clusters using K-means clustering
         # Sort centroids by eigenvector order
-        centroids, clusterIdx = scipy.cluster.vq.kmeans2(U, k_clusters, minit='points')
+        centroids, clusterIdx = scipy.cluster.vq.kmeans2(U.astype('float'), k_clusters, minit='points')
         centroid_order = np.argsort(centroids[:,0])
 
-        colour = _cluster_to_rgb(centroids)
+        if no_of_eigvec == 2:
+            colour = _cluster_to_rgb(U)
+        else: 
+            colour = _cluster_to_rgb(centroids)
 
         # 8. Return results
         outputData = inputVTK
@@ -93,6 +101,8 @@ def _pairwiseDistance_matrix(inputVTK, sigma, no_of_jobs):
             for fidx in range(0, fiberArray.no_of_fibers))
 
     distances = np.array(distances)
+    # Normalize between 0 and 1
+    distances = sklearn.preprocessing.MinMaxScaler().fit_transform(distances)
 
     return distances
 
@@ -134,8 +144,12 @@ def _pairwiseQDistance_matrix(inputVTK, scalarData, scalarType, no_of_jobs):
                 scalarArray.getScalars(fiberArray, range(no_of_fibers), scalarType))
             for fidx in range(0, no_of_fibers)
     )
-
+	
     qDistances = np.array(qDistances)
+   
+    # Normalize if not already normalized between 0 and 1 
+    if np.max(qDistances) > 1.0:
+        qDistances = sklearn.preprocessing.MinMaxScaler().fit_transform(qDistances)
 
     return qDistances
 
@@ -169,8 +183,8 @@ def _degreeMatrix(inputMatrix):
     return degMat
 
 def _cluster_to_rgb(data):
-
-    """ Generate cluster color from first three components of data """
+    
+    """ Generate cluster color from first three components of data """ 
 
     colour = data[:, 0:3]
 
@@ -207,6 +221,6 @@ def _format_outputVTK(polyData, clusterIdx, colour, data):
     #polyData.GetCellData().AddArray(dataCoord)
     polyData.GetCellData().AddArray(clusterColour)
 
-    polyData.GetCellData().SetScalars(dataColour)
+    polyData.GetPointData().SetScalars(dataColour)
 
     return polyData
