@@ -18,7 +18,7 @@ def corr(data1, data2):
           OUTPUT:
             val - Off-diagonal correlation value
 
-    """
+   """
 
     val = np.corrcoef(data1, data2)
     val = val[0][1]
