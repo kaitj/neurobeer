@@ -19,6 +19,7 @@ class Cluster:
 def spectralClustering(inputVTK, scalarData=None, scalarType=None, k_clusters=3, no_of_eigvec=20,                           sigma=60, no_of_jobs=2):
         """
         Clustering of fibers based on pairwise fiber similarity
+        See paper: "A tutorial on spectral clustering" (von Luxburg, 2007)
 
             INPUT:
                 inputVTK - input polydata file
@@ -28,7 +29,7 @@ def spectralClustering(inputVTK, scalarData=None, scalarType=None, k_clusters=3,
 
         TODO: weighted quantitative clustering
         """
-        
+
         if no_of_eigvec == 1:
             print "Clustering cannot be performed with single eigenvector!"
             return
@@ -70,7 +71,7 @@ def spectralClustering(inputVTK, scalarData=None, scalarType=None, k_clusters=3,
 
         if no_of_eigvec == 2:
             colour = _cluster_to_rgb(U)
-        else: 
+        else:
             colour = _cluster_to_rgb(centroids)
 
         # 8. Return results
@@ -144,10 +145,10 @@ def _pairwiseQDistance_matrix(inputVTK, scalarData, scalarType, no_of_jobs):
                 scalarArray.getScalars(fiberArray, range(no_of_fibers), scalarType))
             for fidx in range(0, no_of_fibers)
     )
-	
+
     qDistances = np.array(qDistances)
-   
-    # Normalize if not already normalized between 0 and 1 
+
+    # Normalize if not already normalized between 0 and 1
     if np.max(qDistances) > 1.0:
         qDistances = sklearn.preprocessing.MinMaxScaler().fit_transform(qDistances)
 
@@ -183,8 +184,8 @@ def _degreeMatrix(inputMatrix):
     return degMat
 
 def _cluster_to_rgb(data):
-    
-    """ Generate cluster color from first three components of data """ 
+
+    """ Generate cluster color from first three components of data """
 
     colour = data[:, 0:3]
 
