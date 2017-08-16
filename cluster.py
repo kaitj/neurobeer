@@ -67,7 +67,6 @@ def spectralClustering(inputVTK, scalarData=None, scalarType=None, k_clusters=3,
         # 7. Find clusters using K-means clustering
         # Sort centroids by eigenvector order
         centroids, clusterIdx = scipy.cluster.vq.kmeans2(U.astype('float'), k_clusters, minit='points')
-        centroid_order = np.argsort(centroids[:,0])
 
         if no_of_eigvec == 2:
             colour = _cluster_to_rgb(U)
@@ -148,9 +147,8 @@ def _pairwiseQDistance_matrix(inputVTK, scalarData, scalarType, no_of_jobs):
 
     qDistances = np.array(qDistances)
 
-    # Normalize if not already normalized between 0 and 1
-    if np.max(qDistances) > 1.0:
-        qDistances = sklearn.preprocessing.MinMaxScaler().fit_transform(qDistances)
+    # Normalize distance measurements
+    qDistances = sklearn.preprocessing.MinMaxScaler().fit_transform(qDistances)
 
     return qDistances
 
