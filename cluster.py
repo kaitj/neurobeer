@@ -80,7 +80,7 @@ def spectralClustering(inputVTK, scalarData=None, scalarType=None, k_clusters=3,
 
         return outputPolydata, clusterIdx, colour, centroids
 
-def _pairwiseDistance_matrix(inputVTK, sigma, no_of_jobs):
+def _pairwiseDistance_matrix(inputVTK, no_of_jobs):
     """ An internal function used to compute an NxN distance matrix for all
     fibers (N) in the input data
 
@@ -120,7 +120,7 @@ def _pairwiseSimilarity_matrix(inputVTK, sigma, no_of_jobs):
         similarity - NxN matrix containing similarity between fibers
     """
 
-    distances = _pairwiseDistance_matrix(inputVTK, sigma, no_of_jobs)
+    distances = _pairwiseDistance_matrix(inputVTK, no_of_jobs)
 
     sigmasq = np.square(sigma)
     similarities = distance.gausKernel_similarity(distances, sigmasq)
