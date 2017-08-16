@@ -215,8 +215,7 @@ class FiberArray:
 
                 ptIds.InsertNextId(idx)
 
-                outScalars.InsertNextValue\
-                    (float(scalarArray.fiberTree_scalar[fidx][pidx][scalarType]))
+                outScalars.InsertNextValue(float(scalarArray.fiberTree_scalar[fidx][pidx][scalarType]))
 
             outFibers.InsertNextCell(ptIds)
 
