@@ -45,7 +45,7 @@ def spectralClustering(inputVTK, scalarData=None, scalarType=None, k_clusters=3,
 
         # 1. Compute similarty matrix
         W = _pairwiseSimilarity_matrix(inputVTK, sigma, no_of_jobs)
-        
+
         # 2. Compute degree matrix
         D = _degreeMatrix(W)
 
@@ -67,7 +67,9 @@ def spectralClustering(inputVTK, scalarData=None, scalarType=None, k_clusters=3,
         # Sort centroids by eigenvector order
         centroids, clusterIdx = scipy.cluster.vq.kmeans2(U.astype('float'), k_clusters, minit='points')
 
-        if no_of_eigvec == 2:
+        if no_of_eigvec == 1:
+            print('Not enough eigenvectors selected!')
+        elif no_of_eigvec == 2:
             colour = _cluster_to_rgb(U)
         else:
             colour = _cluster_to_rgb(centroids)
@@ -193,7 +195,7 @@ def _cluster_to_rgb(data):
     # Convert range from 0 to 255
     colour = 127.5 + (colour * 127.5)
 
-    return colour
+    return colour.astype('int')
 
 def _format_outputVTK(polyData, clusterIdx, colour, data):
     """ Output polydata with colours, cluster numbers and coordinates """
@@ -214,6 +216,6 @@ def _format_outputVTK(polyData, clusterIdx, colour, data):
     polyData.GetCellData().AddArray(clusterNumber)
 
     # Set default colour upon opening VTK file
-    polyData.GetCellData().SetScalars(dataColour)
+    polyData.GetPointData().AddArray(dataColour)
 
     return polyData
