@@ -45,8 +45,7 @@ def spectralClustering(inputVTK, scalarData=None, scalarType=None, k_clusters=3,
 
         # 1. Compute similarty matrix
         W = _pairwiseSimilarity_matrix(inputVTK, sigma, no_of_jobs)
-        #W = _pairwiseQSimilarity_matrix(inputVTK, scalarData, scalarType, sigma, no_of_jobs)
-
+        
         # 2. Compute degree matrix
         D = _degreeMatrix(W)
 
@@ -203,23 +202,18 @@ def _format_outputVTK(polyData, clusterIdx, colour, data):
     dataColour.SetNumberOfComponents(3)
     dataColour.SetName('DataColour')
 
-    #dataCoord = vtk.vtkFloatArray()
-    #dataCoord.SetNumberOfComponents(data.shape[1])
-    #dataCoord.SetName('DataCoordinates')
-
-    clusterColour = vtk.vtkIntArray()
-    clusterColour.SetName('ClusterNumber')
+    clusterNumber = vtk.vtkIntArray()
+    clusterNumber.SetName('ClusterNumber')
 
     for fidx in range(0, polyData.GetNumberOfLines()):
         dataColour.InsertNextTuple3(
                 colour[clusterIdx[fidx], 0], colour[clusterIdx[fidx], 1], colour[clusterIdx[fidx], 2])
-        clusterColour.InsertNextTuple1(int(clusterIdx[fidx]))
-        #dataCoord.InsertNextTupleValue(data[fidx, :])
+        clusterNumber.InsertNextTuple1(int(clusterIdx[fidx]))
 
     polyData.GetCellData().AddArray(dataColour)
-    #polyData.GetCellData().AddArray(dataCoord)
-    polyData.GetCellData().AddArray(clusterColour)
+    polyData.GetCellData().AddArray(clusterNumber)
 
-    polyData.GetPointData().SetScalars(dataColour)
+    # Set default colour upon opening VTK file
+    polyData.GetCellData().SetScalars(dataColour)
 
     return polyData
