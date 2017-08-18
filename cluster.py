@@ -8,6 +8,7 @@ parameters pertaining to clusters.
 import numpy as np
 import scipy.cluster
 from joblib import Parallel, delayed
+from sys import exit
 import fibers, distance, scalars
 import vtk
 
@@ -94,7 +95,7 @@ def addScalarToVTK(polyData, scalarData, scalarType):
     data = vtk.vtkFloatArray()
     data.SetName(scalarType.split('/', -1)[-1])
 
-    for pidx in range(0, polyData.GetNumberofPoints()):
+    for pidx in range(0, polyData.GetNumberOfPoints()):
         data.InsertNextValue(float(scalarData[pidx]))
 
     polyData.GetPointData().AddArray(data)
@@ -241,11 +242,14 @@ def _format_outputVTK(polyData, clusterIdx, colour, data):
 def _weightedSimilarity(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWeightList=[],
                                         sigma=1, no_of_jobs=1):
     """ Computes and returns a single weighted similarity matrix.
-          Weight list should include weight for distance and sum to 1 """
+          Weight list should include weight for distance and sum to 1
+
+          NOTE: May need to change exit function
+    """
 
     if ((scalarWeightList == []) & (scalarDataList != [])):
         print "\nNo weights given for provided measurements! Exiting..."
-        return
+        exit()
     elif ((scalarDataList != []) & (scalarTypeList == [])):
         print "\nPlease also specify measurement(s) type. Exiting..."
         exit()
