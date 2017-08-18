@@ -29,17 +29,17 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
         """
 
         if no_of_eigvec == 1:
-            print("Clustering cannot be performed with single eigenvector!")
+            print "\nClustering cannot be performed with single eigenvector!"
             return
 
         noFibers = inputVTK.GetNumberOfLines()
         if noFibers == 0:
-            print("ERROR: Input data has 0 fibers!")
+            print "\nERROR: Input data has 0 fibers!"
             return
         else:
-            print("Starting clustering...")
-            print("No. of fibers:", noFibers)
-            print("No. of clusters:", k_clusters)
+            print "\nStarting clustering..."
+            print "No. of fibers:", noFibers
+            print "No. of clusters:", k_clusters
 
         # 1. Compute similarty matrix
         W = _weightedSimilarity(inputVTK, scalarDataList, scalarTypeList, scalarWeightList,
@@ -77,6 +77,10 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
         # 8. Return results
         outputData = inputVTK
         outputPolydata = _format_outputVTK(outputData, clusterIdx, colour, U)
+
+        # 9. Also add measurements from those used to cluster
+        for i in range(len(scalarDataList)):
+            outputPolydata = addScalarToVTK(outputPolydata, scalarDataList[i], scalarTypeList[i])
 
         return outputPolydata, clusterIdx, colour, centroids
 
@@ -240,17 +244,14 @@ def _weightedSimilarity(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWe
           Weight list should include weight for distance and sum to 1 """
 
     if ((scalarWeightList == []) & (scalarDataList != [])):
-        print('')
-        print('No weights given for provided measurements! Exiting...')
+        print "\nNo weights given for provided measurements! Exiting..."
         return
     elif ((scalarDataList != []) & (scalarTypeList == [])):
-        print('')
-        print('Please also specify measurement(s) type. Exiting...')
+        print "\nPlease also specify measurement(s) type. Exiting..."
         exit()
     elif (scalarDataList == []):
-        print('')
-        print('No measurements provided!')
-        print('Calculating similarity based on geometry.')
+        print "\nNo measurements provided!"
+        print "\nCalculating similarity based on geometry."
         wSimilarity = _pairwiseSimilarity_matrix(inputVTK, sigma, no_of_jobs)
     else:   # Calculate weighted similarity
         wSimilarity = _pairwiseSimilarity_matrix(inputVTK, sigma,
