@@ -9,13 +9,17 @@ import numpy as np
 import scipy.cluster
 from joblib import Parallel, delayed
 from sys import exit
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+import matplotlib.pyplot as plt
+
 import fibers, distance, scalars
 import vtk
 
 import sklearn.cluster, sklearn.preprocessing
 
 def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWeightList=[],
-                                    k_clusters=4, no_of_eigvec=20, sigma=0.4, no_of_jobs=2):
+                                    k_clusters=4, no_of_eigvec=20, sigma=0.4, saveAllSimilarity=0,
+                                    saveWSimilarity=0, no_of_jobs=2):
         """
         Clustering of fibers based on pairwise fiber similarity
         See paper: "A tutorial on spectral clustering" (von Luxburg, 2007)
@@ -44,7 +48,22 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
 
         # 1. Compute similarty matrix
         W = _weightedSimilarity(inputVTK, scalarDataList, scalarTypeList, scalarWeightList,
-                                                    sigma, no_of_jobs)
+                                                    sigma, saveAllSimilarity, no_of_jobs)
+
+        if saveWSimilarity == 1:
+            # Temporary solution, need to decide how to store location to save matrix
+            dirpath = raw_input("Enter path to save weighted similarity matrix: ")
+
+            f = plt.figure(figsize=(10, 10))
+            im = plt.imshow(W, cmap='viridis')
+            plt.title('Weighted Similarity', fontsize=16)
+            ax = plt.gca()
+            ax.tick_params(axis='both', labelsize=14)
+            div = make_axes_locatable(ax)
+            cax = div.append_axes("right", size="5%", pad=0.25)
+            cax.tick_params(labelsize=14)
+            plt.colorbar(im, cax=cax)
+            plt.savefig(dirpath + '/weightedSimilarity.png')
 
         # 2. Compute degree matrix
         D = _degreeMatrix(W)
@@ -240,7 +259,7 @@ def _format_outputVTK(polyData, clusterIdx, colour, data):
     return polyData
 
 def _weightedSimilarity(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWeightList=[],
-                                        sigma=1, no_of_jobs=1):
+                                        sigma=1, saveAllSimilarity=0, no_of_jobs=1):
     """ Computes and returns a single weighted similarity matrix.
           Weight list should include weight for distance and sum to 1
 
@@ -250,21 +269,53 @@ def _weightedSimilarity(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWe
     if ((scalarWeightList == []) & (scalarDataList != [])):
         print "\nNo weights given for provided measurements! Exiting..."
         exit()
+
     elif ((scalarDataList != []) & (scalarTypeList == [])):
         print "\nPlease also specify measurement(s) type. Exiting..."
         exit()
+
     elif (scalarDataList == []):
         print "\nNo measurements provided!"
         print "\nCalculating similarity based on geometry."
         wSimilarity = _pairwiseSimilarity_matrix(inputVTK, sigma, no_of_jobs)
+
+        dirpath = raw_input("Enter path to save geometry similarity matrix: ")
+
+        if saveAllSimilarity == 1:
+            f = plt.figure(figsize=(10, 10))
+            im = plt.imshow(wSimilarity, cmap='viridis')
+            plt.title(('Geometry Similarity'), fontsize=16)
+            ax = plt.gca()
+            ax.tick_params(axis='both', labelsize=14)
+            div = make_axes_locatable(ax)
+            cax = div.append_axes("right", size="5%", pad=0.25)
+            cax.tick_params(labelsize=14)
+            plt.colorbar(im, cax=cax)
+            plt.savefig(dirpath + '/geometrySimilarity.png')
+
     else:   # Calculate weighted similarity
         wSimilarity = _pairwiseSimilarity_matrix(inputVTK, sigma,
                                                                             no_of_jobs) * scalarWeightList[0]
 
+        dirpath = raw_input("Enter path to save similarity matrices: ")
+
         for i in range(len(scalarDataList)):
             similarity = _pairwiseQSimilarity_matrix(inputVTK, scalarDataList[i],
-                scalarTypeList[i], sigma, no_of_jobs) * scalarWeightList[i+1]
-            wSimilarity += similarity
+                scalarTypeList[i], sigma, no_of_jobs)
+
+            if saveAllSimilarity == 1:
+                f = plt.figure(figsize=(10, 10))
+                im = plt.imshow(similarity, cmap='viridis')
+                plt.title((scalarTypeList[i].split('/', -1)[-1] + ' Similarity'), fontsize=16)
+                ax = plt.gca()
+                ax.tick_params(axis='both', labelsize=14)
+                div = make_axes_locatable(ax)
+                cax = div.append_axes("right", size="5%", pad=0.25)
+                cax.tick_params(labelsize=14)
+                plt.colorbar(im, cax=cax)
+                plt.savefig(dirpath + '/' + scalarTypeList[i].split('/', -1)[-1] + '_Similarity.png')
+
+            wSimilarity += similarity * scalarWeightList[i+1]
 
         del similarity
 
