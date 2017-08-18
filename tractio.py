@@ -82,8 +82,7 @@ def readScalar(scalarfile):
         scalarType - Type of scalar information (ie. FA, T1)
     """
 
-    if VERBOSE:
-        print ("\nReading", scalarfile, "...")
+    print ("\nReading", scalarfile, "...")
 
     scalarType, ext = os.path.splitext(scalarfile)
 
