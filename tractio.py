@@ -17,14 +17,14 @@ def readVTK(vtkfile):
     OUTPUT:
         outData - Polydata stored within the .vtk file
     """
-    print("\nReading", vtkfile, "...")
+    print "\nReading", vtkfile, "..."
 
     filename, ext = os.path.splitext(vtkfile)
 
     if (ext == '.vtk'):
         vtkReader = vtk.vtkPolyDataReader()
     else:
-        print("File format invalid / not recognized.")
+        print "File format invalid / not recognized."
         return None
 
     vtkReader.SetFileName(vtkfile)
@@ -33,8 +33,8 @@ def readVTK(vtkfile):
 
     del vtkReader
 
-    print ("Finished reading tractography data...")
-    print ("Number of fibers found:", outData.GetNumberOfLines())
+    print "Finished reading tractography data..."
+    print "Number of fibers found:", outData.GetNumberOfLines()
 
     return outData
 
@@ -50,7 +50,7 @@ def writeVTK(data, vtkfile):
         none
     """
 
-    print("\nWriting", vtkfile, "...")
+    print"\nWriting", vtkfile, "..."
 
     filename, ext = os.path.splitext(vtkfile)
 
@@ -58,7 +58,7 @@ def writeVTK(data, vtkfile):
         vtkWriter = vtk.vtkPolyDataWriter()
         vtkWriter.SetFileTypeToBinary()
     else:
-        print ("Invalid file format")
+        print "Invalid file format"
         return None
 
     vtkWriter.SetFileName(vtkfile)
@@ -67,7 +67,7 @@ def writeVTK(data, vtkfile):
 
     del vtkWriter
 
-    print ("Finished writing data to ", filename)
+    print "Finished writing data to ", filename
 
 def readScalar(scalarfile):
     """
@@ -81,15 +81,14 @@ def readScalar(scalarfile):
         scalarData - List of scalar values from file
         scalarType - Type of scalar information (ie. FA, T1)
     """
-
-    print ("\nReading", scalarfile, "...")
+    print "\nReading", scalarfile, "..."
 
     scalarType, ext = os.path.splitext(scalarfile)
 
     if (ext == '.txt'):
         fileReader = open(scalarfile, 'rU')
     else:
-        print("File format invalid / not recognized.")
+        print "File format invalid / not recognized."
         return None
 
     scalarData = fileReader.readlines()
@@ -98,6 +97,6 @@ def readScalar(scalarfile):
     for i in range(len(scalarData)):
         scalarData[i] = scalarData[i].rstrip('\n')
 
-    print("Finished reading scalar data...")
+    print "Finished reading scalar data..."
 
     return scalarData, scalarType

@@ -144,9 +144,9 @@ class FiberArray:
         # Determine number of lines (assumes all from tractogrpahy)
         self.no_of_fibers = inputVTK.GetNumberOfLines()
 
-        print("\n<fibers.py> Converting polydata to array representation.")
-        print ("Fibers:", self.no_of_fibers)
-        print("Points along fiber:", self.pts_per_fiber)
+        print "\n<fibers.py> Converting polydata to array representation."
+        print "Fibers:", self.no_of_fibers
+        print "Points along fiber:", self.pts_per_fiber
 
         # Initialize fiber storage array: number of fibers, fiber length
         self.fiberArray_x = np.zeros((self.no_of_fibers,
