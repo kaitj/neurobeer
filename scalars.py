@@ -111,7 +111,7 @@ class FiberArrayScalar:
         return scalarList
 
     def getScalars(self, fiberArray, fidxes, scalarType):
-        """ Extracts scalar information of a speficied scalarType pertaining to
+        """ Extracts scalar information of a specified scalarType pertaining to
         a group of fibers
 
         INPUT:
@@ -133,7 +133,7 @@ class FiberArrayScalar:
                 scalarValue = \
                     self.fiberTree_scalar[fidx][pidx][scalarType]
                 scalarList[idx][pidx] = float(scalarValue)
-            
+
             idx += 1
 
         return scalarList
