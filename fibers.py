@@ -126,7 +126,7 @@ class FiberArray:
 
         return fibers
 
-    def convertFromVTK(self, inputVTK, pts_per_fiber=None):
+    def convertFromVTK(self, inputVTK, pts_per_fiber=None, verbose=0):
         """ Convert input tractography VTK data to array form
 
         INPUT:
@@ -144,9 +144,10 @@ class FiberArray:
         # Determine number of lines (assumes all from tractogrpahy)
         self.no_of_fibers = inputVTK.GetNumberOfLines()
 
-        print "\n<fibers.py> Converting polydata to array representation."
-        print "Fibers:", self.no_of_fibers
-        print "Points along fiber:", self.pts_per_fiber
+        if verbose == 1:
+            print "\n<fibers.py> Converting polydata to array representation."
+            print "Fibers:", self.no_of_fibers
+            print "Points along fiber:", self.pts_per_fiber
 
         # Initialize fiber storage array: number of fibers, fiber length
         self.fiberArray_x = np.zeros((self.no_of_fibers,
