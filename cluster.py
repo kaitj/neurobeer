@@ -16,7 +16,8 @@ class Cluster:
     """ Clustering of whole-brain tractography data from subject using normalized, random
     walk Laplacian"""
 
-def spectralClustering(inputVTK, scalarData=None, scalarType=None, k_clusters=3, no_of_eigvec=20,                           sigma=60, no_of_jobs=2):
+def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWeightList=[],
+                                    k_clusters=4, no_of_eigvec=20, sigma=0.4, no_of_jobs=2):
         """
         Clustering of fibers based on pairwise fiber similarity
         See paper: "A tutorial on spectral clustering" (von Luxburg, 2007)
@@ -44,7 +45,8 @@ def spectralClustering(inputVTK, scalarData=None, scalarType=None, k_clusters=3,
             print "No. of clusters:", k_clusters
 
         # 1. Compute similarty matrix
-        W = _pairwiseSimilarity_matrix(inputVTK, sigma, no_of_jobs)
+        W = _weightedSimilarity(inputVTK, scalarDataList, scalarTypeList, scalarWeightList,
+                                                    sigma, no_of_jobs)
 
         # 2. Compute degree matrix
         D = _degreeMatrix(W)
@@ -62,10 +64,11 @@ def spectralClustering(inputVTK, scalarData=None, scalarType=None, k_clusters=3,
         # 6. Compute information for clustering using "N" number of smallest eigenvalues
         # Skip first eigenvector, no information provided for clustering???
         U = eigvec[:, 0:no_of_eigvec]
+        U = U.astype('float')
 
         # 7. Find clusters using K-means clustering
         # Sort centroids by eigenvector order
-        centroids, clusterIdx = scipy.cluster.vq.kmeans2(U.astype('float'), k_clusters, minit='points')
+        centroids, clusterIdx = scipy.cluster.vq.kmeans2(U, k_clusters, minit='points')
 
         if no_of_eigvec == 1:
             print('Not enough eigenvectors selected!')
@@ -215,7 +218,29 @@ def _format_outputVTK(polyData, clusterIdx, colour, data):
     polyData.GetCellData().AddArray(dataColour)
     polyData.GetCellData().AddArray(clusterNumber)
 
-    # Set default colour upon opening VTK file
-    polyData.GetPointData().AddArray(dataColour)
-
     return polyData
+
+def _weightedSimilarity(inputVTK, scalarDataList, scalarTypeList, scalarWeightList, sigma,
+                                        no_of_jobs):
+    """ Computes and returns a single weighted similarity matrix.
+          Weight list should include weight for distance and sum to 1 """
+
+    if ((scalarWeightList == []) & (scalarDataList != [])):
+        print('No weights given for provided measurements! Exiting...')
+        exit(0)
+    elif (scalarDataList == []):
+        print('No measurements provided!')
+        print('Calculating similarity based on geometry.')
+        wSimilarity = _pairwiseSimilarity_matrix(inputVTK, sigma, no_of_jobs)
+    else:   # Calculate weighted similarity
+        wSimilarity = _pairwiseSimilarity_matrix(inputVTK, sigma,
+                                                                            no_of_jobs) * scalarWeightList[0]
+
+        for i in range(len(scalarDataList)):
+            similarity = _pairwiseQSimilarity_matrix(inputVTK, scalarDataList[i],
+                scalarTypeList[i], sigma, no_of_jobs) * scalarWeightList[i+1]
+            wSimilarity += similarity
+
+        del similarity
+
+    return wSimilarity
