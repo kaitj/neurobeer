@@ -7,9 +7,11 @@ parameters pertaining to clusters.
 
 import numpy as np
 import scipy.cluster
+from joblib import Parallel, delayed
+from sys import exit
 import fibers, distance, scalars
 import vtk
-from joblib import Parallel, delayed
+
 import sklearn.cluster, sklearn.preprocessing
 
 class Cluster:
@@ -220,15 +222,21 @@ def _format_outputVTK(polyData, clusterIdx, colour, data):
 
     return polyData
 
-def _weightedSimilarity(inputVTK, scalarDataList, scalarTypeList, scalarWeightList, sigma,
-                                        no_of_jobs):
+def _weightedSimilarity(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWeightList=[],
+                                        sigma=1, no_of_jobs=1):
     """ Computes and returns a single weighted similarity matrix.
           Weight list should include weight for distance and sum to 1 """
 
     if ((scalarWeightList == []) & (scalarDataList != [])):
+        print('')
         print('No weights given for provided measurements! Exiting...')
-        exit(0)
+        exit()
+    elif ((scalarDataList != []) & (scalarTypeList == [])):
+        print('')
+        print('Please also specify measurement(s) type. Exiting...')
+        exit()
     elif (scalarDataList == []):
+        print('')
         print('No measurements provided!')
         print('Calculating similarity based on geometry.')
         wSimilarity = _pairwiseSimilarity_matrix(inputVTK, sigma, no_of_jobs)
