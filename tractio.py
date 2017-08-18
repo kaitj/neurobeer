@@ -7,8 +7,6 @@ Module provides input and output functionality for VTK tractography files.
 import os
 import vtk
 
-VERBOSE = 0
-
 def readVTK(vtkfile):
     """
     Reads tractography .vtk file (vtkPolyData).
@@ -19,16 +17,14 @@ def readVTK(vtkfile):
     OUTPUT:
         outData - Polydata stored within the .vtk file
     """
-
-    if VERBOSE:
-        print "\nReading", vtkfile, "..."
+    print("\nReading", vtkfile, "...")
 
     filename, ext = os.path.splitext(vtkfile)
 
     if (ext == '.vtk'):
         vtkReader = vtk.vtkPolyDataReader()
     else:
-        print "File format invalid / not recognized."
+        print("File format invalid / not recognized.")
         return None
 
     vtkReader.SetFileName(vtkfile)
@@ -37,9 +33,8 @@ def readVTK(vtkfile):
 
     del vtkReader
 
-    if VERBOSE:
-        print "Finished reading tractography data..."
-        print "Number of fibers found:", outData.GetNumberOfLines()
+    print ("Finished reading tractography data...")
+    print ("Number of fibers found:", outData.GetNumberOfLines())
 
     return outData
 
@@ -55,26 +50,24 @@ def writeVTK(data, vtkfile):
         none
     """
 
-    if VERBOSE:
-        print "\nWriting", vtkfile, "..."
+    print("\nWriting", vtkfile, "...")
 
     filename, ext = os.path.splitext(vtkfile)
 
     if (ext == '.vtk'):
-        writer = vtk.vtkPolyDataWriter()
-        writer.SetFileTypeToBinary()
+        vtkWriter = vtk.vtkPolyDataWriter()
+        vtkWriter.SetFileTypeToBinary()
     else:
-        print 'Invalid file format'
+        print ("Invalid file format")
         return None
 
-    writer.SetFileName(vtkfile)
-    writer.SetInputData(data)
-    writer.Update()
+    vtkWriter.SetFileName(vtkfile)
+    vtkWriter.SetInputData(data)
+    vtkWriter.Update()
 
-    del writer
+    del vtkWriter
 
-    if VERBOSE:
-        print "Finished writing data to ", filename
+    print ("Finished writing data to ", filename)
 
 def readScalar(scalarfile):
     """
@@ -90,14 +83,14 @@ def readScalar(scalarfile):
     """
 
     if VERBOSE:
-        print "\nReading", scalarfile, "..."
+        print ("\nReading", scalarfile, "...")
 
     scalarType, ext = os.path.splitext(scalarfile)
 
     if (ext == '.txt'):
         fileReader = open(scalarfile, 'rU')
     else:
-        print "File format invalid / not recognized."
+        print("File format invalid / not recognized.")
         return None
 
     scalarData = fileReader.readlines()
@@ -106,7 +99,6 @@ def readScalar(scalarfile):
     for i in range(len(scalarData)):
         scalarData[i] = scalarData[i].rstrip('\n')
 
-    if VERBOSE:
-        print "Finished reading scalar data..."
+    print("Finished reading scalar data...")
 
     return scalarData, scalarType

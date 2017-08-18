@@ -8,7 +8,6 @@ parameters pertaining to clusters.
 import numpy as np
 import scipy.cluster
 from joblib import Parallel, delayed
-from sys import exit
 import fibers, distance, scalars
 import vtk
 
@@ -34,17 +33,17 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
         """
 
         if no_of_eigvec == 1:
-            print "Clustering cannot be performed with single eigenvector!"
+            print("Clustering cannot be performed with single eigenvector!")
             return
 
         noFibers = inputVTK.GetNumberOfLines()
         if noFibers == 0:
-            print "ERROR: Input data has 0 fibers!"
+            print("ERROR: Input data has 0 fibers!")
             return
         else:
-            print "Starting clustering..."
-            print "No. of fibers:", noFibers
-            print "No. of clusters:", k_clusters
+            print("Starting clustering...")
+            print("No. of fibers:", noFibers)
+            print("No. of clusters:", k_clusters)
 
         # 1. Compute similarty matrix
         W = _weightedSimilarity(inputVTK, scalarDataList, scalarTypeList, scalarWeightList,
@@ -230,7 +229,7 @@ def _weightedSimilarity(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWe
     if ((scalarWeightList == []) & (scalarDataList != [])):
         print('')
         print('No weights given for provided measurements! Exiting...')
-        exit()
+        return
     elif ((scalarDataList != []) & (scalarTypeList == [])):
         print('')
         print('Please also specify measurement(s) type. Exiting...')
