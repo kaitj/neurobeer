@@ -13,10 +13,6 @@ import vtk
 
 import sklearn.cluster, sklearn.preprocessing
 
-class Cluster:
-    """ Clustering of whole-brain tractography data from subject using normalized, random
-    walk Laplacian"""
-
 def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWeightList=[],
                                     k_clusters=4, no_of_eigvec=20, sigma=0.4, no_of_jobs=2):
         """
@@ -83,6 +79,23 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
         outputPolydata = _format_outputVTK(outputData, clusterIdx, colour, U)
 
         return outputPolydata, clusterIdx, colour, centroids
+
+def addScalarToVTK(polyData, scalarData, scalarType):
+    """ Add scalar to polydata points to be converted to .vtk file.
+
+    This function is different from scalars.addScalar, which only considers point
+    used in sampling of fiber.
+    """
+
+    data = vtk.vtkFloatArray()
+    data.SetName(scalarType.split('/', -1)[-1])
+
+    for pidx in range(0, polyData.GetNumberofPoints()):
+        data.InsertNextValue(float(scalarData[pidx]))
+
+    polyData.GetPointData().AddArray(data)
+
+    return polyData
 
 def _pairwiseDistance_matrix(inputVTK, no_of_jobs):
     """ An internal function used to compute an NxN distance matrix for all
