@@ -27,20 +27,19 @@ def corr(data1, data2):
 
     return val
 
-    def saveMatrix(dirpath, matrix, matrixType, colormap='viridis'):
-        """ Function used to save matrices.
-              Defaults to 'viridis' colormap.
-        """
+def saveMatrix(dirpath, matrix, matrixType, colormap='viridis'):
+    """ Function used to save matrices.
+    """
 
-        f = plt.figure(figsize=(10, 10))
+    f = plt.figure(figsize=(10, 10))
+    im = plt.imshow(matrix, cmap='viridis')
+    plt.title((matrixType + 'Similarity'), fontsize=16)
 
-        ax = plt.gca()
-        ax.tick_params(axis='both', labelsize=14)
-        div = make_axes_locatable(ax)
-        cax = div.append_axes('right', size='5%', pad=0.25)
-        cax.tick_params(labelsize=14)
+    ax = plt.gca()
+    ax.tick_params(axis='both', labelsize=14)
+    div = make_axes_locatable(ax)
+    cax = div.append_axes('right', size='5%', pad=0.25)
+    cax.tick_params(labelsize=14)
+    plt.colorbar(im, cax)
 
-        im = plt.imshow(matrix, cmap=colormap)
-        plt.title((matrixType + 'Similarity'), fontsize=16)
-        plt.colorbar(im, cax)
-        plt.savefig(dirpath + '/' + matrixType.lower() + 'Similarity.png')
+    plt.savefig(dirpath + '/' + matrixType.lower() + 'Similarity.png')
