@@ -6,13 +6,11 @@ parameters pertaining to clusters.
 """
 
 import numpy as np
-import scipy.cluster
+import os, scipy.cluster
 from joblib import Parallel, delayed
 from sys import exit
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-import matplotlib.pyplot as plt
 
-import fibers, distance, scalars
+import fibers, distance, scalars, misc
 import vtk
 
 import sklearn.cluster, sklearn.preprocessing
@@ -29,8 +27,6 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
                 k_clusters - number of clusters via k-means clustering
                 sigma - width of kernel; adjust to alter sensitivity
                 no_of_jobs - processes to use to perform computation
-
-        TODO: weighted quantitative clustering
         """
 
         if no_of_eigvec == 1:
@@ -53,17 +49,10 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
         if saveWSimilarity == 1:
             # Temporary solution, need to decide how to store location to save matrix
             dirpath = raw_input("Enter path to save weighted similarity matrix: ")
+            if not os.path.exists(dirpath):
+                os.makedirs(dirpath)
 
-            f = plt.figure(figsize=(10, 10))
-            im = plt.imshow(W, cmap='viridis')
-            plt.title('Weighted Similarity', fontsize=16)
-            ax = plt.gca()
-            ax.tick_params(axis='both', labelsize=14)
-            div = make_axes_locatable(ax)
-            cax = div.append_axes("right", size="5%", pad=0.25)
-            cax.tick_params(labelsize=14)
-            plt.colorbar(im, cax=cax)
-            plt.savefig(dirpath + '/weightedSimilarity.png')
+            misc.saveMatrix(dirpath, W, 'Weighted')
 
         # 2. Compute degree matrix
         D = _degreeMatrix(W)
@@ -85,7 +74,7 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
 
         # 7. Find clusters using K-means clustering
         # Sort centroids by eigenvector order
-        centroids, clusterIdx = scipy.cluster.vq.kmeans2(U, k_clusters, minit='points')
+        centroids, clusterIdx = scipy.cluster.vq.kmeans2(U, k_clusters, iter=1000, minit='points')
 
         if no_of_eigvec == 1:
             print('Not enough eigenvectors selected!')
@@ -279,41 +268,28 @@ def _weightedSimilarity(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWe
         print "\nCalculating similarity based on geometry."
         wSimilarity = _pairwiseSimilarity_matrix(inputVTK, sigma, no_of_jobs)
 
-        dirpath = raw_input("Enter path to save geometry similarity matrix: ")
+        if (saveAllSimilarity == 1):
+            dirpath = raw_input("Enter path to store similarity matrix: ")
+            if not os.path.exists(dirpath):
+                os.makedirs(dirpath)
 
-        if saveAllSimilarity == 1:
-            f = plt.figure(figsize=(10, 10))
-            im = plt.imshow(wSimilarity, cmap='viridis')
-            plt.title(('Geometry Similarity'), fontsize=16)
-            ax = plt.gca()
-            ax.tick_params(axis='both', labelsize=14)
-            div = make_axes_locatable(ax)
-            cax = div.append_axes("right", size="5%", pad=0.25)
-            cax.tick_params(labelsize=14)
-            plt.colorbar(im, cax=cax)
-            plt.savefig(dirpath + '/geometrySimilarity.png')
+            misc.saveMatrix(dirpath, wSimilarity, 'Geometry')
 
     else:   # Calculate weighted similarity
         wSimilarity = _pairwiseSimilarity_matrix(inputVTK, sigma,
                                                                             no_of_jobs) * scalarWeightList[0]
-
-        dirpath = raw_input("Enter path to save similarity matrices: ")
 
         for i in range(len(scalarDataList)):
             similarity = _pairwiseQSimilarity_matrix(inputVTK, scalarDataList[i],
                 scalarTypeList[i], sigma, no_of_jobs)
 
             if saveAllSimilarity == 1:
-                f = plt.figure(figsize=(10, 10))
-                im = plt.imshow(similarity, cmap='viridis')
-                plt.title((scalarTypeList[i].split('/', -1)[-1] + ' Similarity'), fontsize=16)
-                ax = plt.gca()
-                ax.tick_params(axis='both', labelsize=14)
-                div = make_axes_locatable(ax)
-                cax = div.append_axes("right", size="5%", pad=0.25)
-                cax.tick_params(labelsize=14)
-                plt.colorbar(im, cax=cax)
-                plt.savefig(dirpath + '/' + scalarTypeList[i].split('/', -1)[-1] + '_Similarity.png')
+                dirpath = raw_input("Enter path to store similarity matrix: ")
+                if not os.path.exists(dirpath):
+                    os.makedirs(dirpath)
+
+                matrixType = scalarTypeList[i].split('/', -1)[-1]
+                misc.saveMatrix(dirpath, similarity, matrixType, 'weighted')
 
             wSimilarity += similarity * scalarWeightList[i+1]
 
