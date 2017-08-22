@@ -234,19 +234,19 @@ def _cluster_to_rgb(data):
 def _format_outputVTK(polyData, clusterIdx, colour, data):
     """ Output polydata with colours, cluster numbers and coordinates """
 
-    dataColour = vtk.vtkUnsignedCharArray()
-    dataColour.SetNumberOfComponents(3)
-    dataColour.SetName('DataColour')
+    #dataColour = vtk.vtkUnsignedCharArray()
+    #dataColour.SetNumberOfComponents(3)
+    #dataColour.SetName('DataColour')
 
     clusterNumber = vtk.vtkIntArray()
     clusterNumber.SetName('ClusterNumber')
 
     for fidx in range(0, polyData.GetNumberOfLines()):
-        dataColour.InsertNextTuple3(
-                colour[clusterIdx[fidx], 0], colour[clusterIdx[fidx], 1], colour[clusterIdx[fidx], 2])
+        #dataColour.InsertNextTuple3(
+                #colour[clusterIdx[fidx], 0], colour[clusterIdx[fidx], 1], colour[clusterIdx[fidx], 2])
         clusterNumber.InsertNextTuple1(int(clusterIdx[fidx]))
 
-    polyData.GetCellData().AddArray(dataColour)
+    #polyData.GetCellData().AddArray(dataColour)
     polyData.GetCellData().AddArray(clusterNumber)
 
     return polyData
@@ -280,6 +280,12 @@ def _weightedSimilarity(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWe
             misc.saveMatrix(dirpath, wSimilarity, 'Geometry')
 
     else:   # Calculate weighted similarity
+
+        checksum = np.sum(scalarWeightList)
+        if checksum > 1.0:
+            print '\nWeights given sum to greater than 1. Exiting...'
+            exit()
+
         wSimilarity = _pairwiseSimilarity_matrix(inputVTK, sigma,
                                                                             no_of_jobs) * scalarWeightList[0]
 
