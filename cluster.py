@@ -70,13 +70,12 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
         eigval, eigvec = eigval[idx], eigvec[:, idx]
 
         # 6. Compute information for clustering using "N" number of smallest eigenvalues
-        # Skip first eigenvector, no information provided for clustering???
         U = eigvec[:, 0:no_of_eigvec]
         U = U.astype('float')
 
         # 7. Find clusters using K-means clustering
-        # Sort centroids by first k-number of eigenvectors
         centroids, clusterIdx = scipy.cluster.vq.kmeans2(U, k_clusters, iter=20, minit='points')
+        centroids, clusterIdx = _sortLabel(centroids, clusterIdx)
 
         if no_of_eigvec <= 1:
             print('Not enough eigenvectors selected!')
@@ -301,3 +300,20 @@ def _weightedSimilarity(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWe
         del similarity
 
     return wSimilarity
+
+def _sortLabel(centroids, clusterIdx):
+    """ Internal function used to sort the cluster label by fiber count
+    """
+
+    uniqueClusters, countClusters = np.unique(clusterIdx, return_counts=True)
+    sortedClusters = np.argsort(-countClusters)
+
+    newClusters = np.copy(clusterIdx)
+    newCentroids = np.copy(centroids)
+
+    for i in range(len(sortedClusters)):
+        newIdx = np.where(sortedClusters == i)
+        newClusters[clusterIdx == i] = newIdx[0][0]
+        newCentroids[i, :] = centroids[newIdx[0][0], :]
+
+    return newCentroids, newClusters
