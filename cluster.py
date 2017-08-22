@@ -16,7 +16,7 @@ import vtk
 import sklearn.cluster, sklearn.preprocessing
 
 def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWeightList=[],
-                                    k_clusters=4, no_of_eigvec=20, sigma=0.4, saveAllSimilarity=0,
+                                    k_clusters=10, sigma=0.4, saveAllSimilarity=0,
                                     saveWSimilarity=0, no_of_jobs=2):
         """
         Clustering of fibers based on pairwise fiber similarity
@@ -27,11 +27,11 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
                 k_clusters - number of clusters via k-means clustering
                 sigma - width of kernel; adjust to alter sensitivity
                 no_of_jobs - processes to use to perform computation
+
+        NOTE: For most consistent results, k_clusters => no_of_eigvec
         """
 
-        if no_of_eigvec == 1:
-            print "\nClustering cannot be performed with single eigenvector!"
-            return
+        no_of_eigvec = k_clusters
 
         noFibers = inputVTK.GetNumberOfLines()
         if noFibers == 0:
@@ -64,8 +64,10 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
         Lrw = np.dot(np.diag(np.divide(1, np.sum(D, 0))), L)
 
         # 5. Compute eigenvalues and eigenvectors of generalized eigenproblem
-        # vectors are columns ([:, n]) of matrix
+        # Sort by ascending eigenvalue
         eigval, eigvec = np.linalg.eig(Lrw)
+        idx = eigval.argsort()
+        eigval, eigvec = eigval[idx], eigvec[:, idx]
 
         # 6. Compute information for clustering using "N" number of smallest eigenvalues
         # Skip first eigenvector, no information provided for clustering???
@@ -73,13 +75,16 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
         U = U.astype('float')
 
         # 7. Find clusters using K-means clustering
-        # Sort centroids by eigenvector order
-        centroids, clusterIdx = scipy.cluster.vq.kmeans2(U, k_clusters, iter=1000, minit='points')
+        # Sort centroids by first k-number of eigenvectors
+        centroids, clusterIdx = scipy.cluster.vq.kmeans2(U, k_clusters, iter=20, minit='points')
 
-        if no_of_eigvec == 1:
+        if no_of_eigvec <= 1:
             print('Not enough eigenvectors selected!')
         elif no_of_eigvec == 2:
-            colour = _cluster_to_rgb(U)
+            temp = eigvec[:, 0:3]
+            temp = temp.astype('float')
+            colour = _cluster_to_rgb(temp)
+            del temp
         else:
             colour = _cluster_to_rgb(centroids)
 
