@@ -1,7 +1,7 @@
 """ misc.py
 
-Module containing functions used in the tool. These functions do not fit
-in other modules.
+Module containing miscallaneous functions used in the library. These functions do not fit
+in with other modules.
 
 """
 
@@ -10,16 +10,16 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 def corr(data1, data2):
-    """ Perform correlation coefficient calculation using numpy library.
-          Used for parallel, row-by-row correlation, returning only off-diagonal value.
+    """
+    Perform correlation coefficient calculation using numpy library.
+    Used for parallel, row-by-row correlation, returning only off-diagonal value.
 
-          INPUT:
-            data1 - First row of array data to be used in computation
-            data2 - Second row of array data to be used in computation
+    INPUT:
+        data1 - First row of array data to be used in computation
+        data2 - Second row of array data to be used in computation
 
-          OUTPUT:
-            val - Off-diagonal correlation value
-
+    OUTPUT:
+        val - Off-diagonal correlation value
    """
 
     val = np.corrcoef(data1, data2)
@@ -27,8 +27,17 @@ def corr(data1, data2):
 
     return val
 
-def saveMatrix(dirpath, matrix, matrixType, colormap='viridis'):
-    """ Function used to save matrices.
+def saveMatrix(dirpath, matrix, matrixType):
+    """
+    Function used to save similarity matrices.
+
+    INPUT:
+        dirpath - Directory path for storing matrix images
+        matrix - Similarity matrix to be saved
+        matrixType - Type of similarity matrix (ie. weighted, FA, T1)
+
+    OUTPUT:
+        none
     """
 
     f = plt.figure(figsize=(10, 10))

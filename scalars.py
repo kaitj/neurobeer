@@ -9,7 +9,8 @@ import vtk
 from collections import defaultdict
 
 def tree():
-    """ Creates tree to store quantitative information
+    """
+    Creates tree to store quantitative information.
 
     INPUT:
         none
@@ -21,8 +22,10 @@ def tree():
     return defaultdict(tree)
 
 class FiberArrayScalar:
-    """ Scalar information pertaining to a group of fibers.
-    Value returned is of class FiberScalar. """
+    """
+    Scalar information pertaining to a group of fibers.
+    Value returned is of class FiberScalar.
+    """
 
     def __init__(self):
         self.fiberTree_scalar = tree()
@@ -54,7 +57,8 @@ class FiberArrayScalar:
         return idxList
 
     def addScalar(self, inputVTK, fiberArray, scalarData, scalarType):
-        """ Add scalar information pertaining to tractography. Values are
+        """
+        Add scalar information pertaining to tractography. Values are
         stored with a tree format. This function is dynamic and can add new
         quantitative measurements as needed.
 
@@ -89,11 +93,13 @@ class FiberArrayScalar:
                 pidx += 1
 
     def getScalar(self, fiberArray, fidx, scalarType):
-        """ Extracts scalar information of a specified scalarType pertaining to
-        a single fiber
+        """
+        Extracts scalar information of a specified scalarType pertaining to
+        a single fiber.
 
         INPUT:
-            fiber - Lone fiber to get scalar information from
+            fiberArray - Array of fibers to extract scalar information from of a lone fiber
+            fidx - Index corresponding to fiber to extract scalar information from
             scalarType - Type of quantitative scalar (ie. FA, T1)
 
         OUTPUT:
@@ -111,11 +117,13 @@ class FiberArrayScalar:
         return scalarList
 
     def getScalars(self, fiberArray, fidxes, scalarType):
-        """ Extracts scalar information of a specified scalarType pertaining to
-        a group of fibers
+        """
+        Extracts scalar information of a specified scalarType pertaining to
+        a group of fibers.
 
         INPUT:
             fiberArray - Array of fibers to get scalar from
+            fidxes - Indices corresponding to fibers to extract scalar information from
             scalarType - Type of quantitative scalar (ie. FA, T1)
 
         OUTPUT:

@@ -8,7 +8,8 @@ similarity measurements.
 import numpy as np
 
 def _fiberDistance_internal(fiber, fiberArray):
-    """ Computes the distance between one fiber and individual fibers within a
+    """ *INTERNAL FUNCTION*
+    Computes the distance between one fiber and individual fibers within a
     group (array) of fibers using MeanSquared method.
 
     INPUT:
@@ -17,7 +18,7 @@ def _fiberDistance_internal(fiber, fiberArray):
 
     OUTPUT:
         distance - computed distance from single fiber to those within fiber
-        group
+                            group
     """
 
     # Calculates the distance between points of each fiber
@@ -40,14 +41,13 @@ def _fiberDistance_internal(fiber, fiberArray):
     return distance
 
 def _scalarDistance_internal(fiberScalar, fiberScalarArray):
-    """ Computes the "distance" between the scalar values between one fiber and
+    """ *INTERNAL FUNCTION*
+    Computes the "distance" between the scalar values between one fiber and
     the fibers within a group (array) of fibers using MeanSquared method.
 
     INPUT:
-        fiber - single fiber to be compared
-        fiberArray - group of fibers that lone fiber is to be compared to
-        scalarArray - array consisting ot quantitative data
-        scalarType - type of quantitative data
+        fiberScalar - lone array containing scalar information for a single fiber
+        fiberScalarArray - array of scalar information pertaining to a group of fibers
     OUTPUT:
         qDistance - computed distance between single fiber and group
     """
@@ -64,7 +64,8 @@ def _scalarDistance_internal(fiberScalar, fiberScalarArray):
     return qDistance
 
 def fiberDistance(fiber, fiberArray):
-    """ Computes the distance between one fiber and individual fibers within a
+    """
+    Computes the distance between one fiber and individual fibers within a
     group (array) of fibers. This function also handles equivalent fiber
     representations.
 
@@ -74,7 +75,7 @@ def fiberDistance(fiber, fiberArray):
 
     OUTPUT:
         distance - minimum distance between group of fiber and single fiber
-        traversed in both directions
+                            traversed in both directions
     """
 
     # Get same fiber in reverse order
@@ -90,9 +91,19 @@ def fiberDistance(fiber, fiberArray):
     return distance
 
 def scalarDistance(fiberScalar, fiberScalarArray):
-    """ Computes the distance between one fiber and individual fibers within a
+    """
+    Computes the distance between one fiber and individual fibers within a
     group (array) of fibers. This function also handles equivalent fiber
     representations.
+
+    INPUT:
+        fiberScalar - lone array containing scalar information for a single fiber
+        fiberScalarArray - array of scalar information pertaining to a group of fibers
+
+    OUTPUT:
+        distance - distance between group of fiber and single fiber
+
+    TODO: Add functionality to calculate reverse fiber if necessary?
     """
 
     # Compute distances for fiber and fiber equivalent to fiber group
@@ -101,15 +112,16 @@ def scalarDistance(fiberScalar, fiberScalarArray):
     return distance
 
 def gausKernel_similarity(distance, sigmasq):
-    """ Computes the similarity using a Gaussian kernel
+    """
+    Computes the similarity using a Gaussian (RBF) kernel.
 
     INPUT:
         distance - Euclidean distance between points
         sigma - width of the kernel; adjust to alter sensitivity
 
     OUTPUT:
-        similiarities - scalar values pertaining to the similarity of fiber to
-        group of fibers (0 is dissimilar, 1 is identical)
+        similiarities - scalar values pertaining to the similarity of fiber
+                                group of fibers (0 is dissimilar, 1 is identical)
     """
 
     # Computes similarity using a Gaussian kernel

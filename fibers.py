@@ -9,7 +9,10 @@ import numpy as np
 import vtk
 
 class Fiber:
-    """ Tractography information pertaining to a single fiber """
+    """
+    Tractography information pertaining to a single fiber.
+    Values are of class Fiber.
+    """
 
     def __init__(self):
         self.x = None
@@ -18,8 +21,9 @@ class Fiber:
         self.pts_per_fiber = None
 
     def getReverseFiber(self):
-        """ Determine the reverse order of the fiber with corresponding
-        quantitative information
+        """
+        Determine the reverse order of the fiber with corresponding
+        quantitative information.
 
         INPUT:
             none
@@ -39,7 +43,10 @@ class Fiber:
         return fiber
 
 class FiberArray:
-    """ Tractography information pertaining to a group of fibers """
+    """
+    Tractography information pertaining to a group of fibers.
+    Values are of class FiberArray.
+    """
 
     def __init__(self):
         # Parameters
@@ -80,7 +87,8 @@ class FiberArray:
         return idxList
 
     def getFiber(self, fiberIdx):
-        """ Extract a single fiber from the group with corresponding data.
+        """
+        Extract a single fiber from the group with corresponding data.
         Value returned is of class Fiber.
 
         INPUT:
@@ -103,7 +111,8 @@ class FiberArray:
         return fiber
 
     def getFibers(self, fidxes):
-        """ Extracts a subset of fibers corresponding to inputted indices.
+        """
+        Extracts a subset of fibers corresponding to inputted indices.
         Returned fibers are of class fiberArray.
 
         INPUT:
@@ -127,11 +136,13 @@ class FiberArray:
         return fibers
 
     def convertFromVTK(self, inputVTK, pts_per_fiber=None, verbose=0):
-        """ Convert input tractography VTK data to array form
+        """
+        Convert input tractography VTK data to array form
 
         INPUT:
             inputVTK - Tractography polydata
             pts_per_fiber - Number of points to sample along a fiber
+            verbose - Verbosity of function; 1 to print messages to user.
 
         OUTPUT:
             none
@@ -182,13 +193,14 @@ class FiberArray:
                 pidx += 1
 
     def convertToVTK(self, scalarArray, scalarType):
-        """ Convert fibers in array form to VTK polydata.
+        """
+        Convert fibers in array form to VTK polydata.
 
         INPUT:
             scalarArray - Variable containing scalar information pertaining
-                          to VTK polydata
+                                    to VTK polydata
             scalarType - Type of quantitative scalar (ie. FA, T1) to be
-                         included with the poyldata
+                                    included with the poyldata
 
         OUTPUT:
             outVTK - Tractography polydata in VTK form
