@@ -139,6 +139,10 @@ def _pairwiseDistance_matrix(inputVTK, no_of_jobs):
     # Normalize between 0 and 1
     distances = sklearn.preprocessing.MinMaxScaler().fit_transform(distances)
 
+    if np.diag(distances).all() != 0.0:
+        print('Diagonals in distance matrix are not equal to 0')
+        exit()
+
     return distances
 
 def _pairwiseSimilarity_matrix(inputVTK, sigma, no_of_jobs):
@@ -160,6 +164,10 @@ def _pairwiseSimilarity_matrix(inputVTK, sigma, no_of_jobs):
     similarities = distance.gausKernel_similarity(distances, sigmasq)
 
     similarities = np.array(similarities)
+
+    if np.diag(similarities).all() != 1.0:
+        print('Diagonals in similarity matrix are not equal to 1')
+        exit()
 
     return similarities
 
@@ -185,6 +193,10 @@ def _pairwiseQDistance_matrix(inputVTK, scalarData, scalarType, no_of_jobs):
     # Normalize distance measurements
     qDistances = sklearn.preprocessing.MinMaxScaler().fit_transform(qDistances)
 
+    if np.diag(qDistances).all() != 0.0:
+        print('Diagonals in distance matrix are not equal to 0')
+        exit()
+
     return qDistances
 
 def _pairwiseQSimilarity_matrix(inputVTK, scalarData, scalarType, sigma, no_of_jobs):
@@ -205,6 +217,10 @@ def _pairwiseQSimilarity_matrix(inputVTK, scalarData, scalarType, sigma, no_of_j
     qSimilarity = distance.gausKernel_similarity(qDistances, sigmasq)
 
     qSimilarity = np.array(qSimilarity)
+
+    if np.diag(qSimilarity).all() != 1.0:
+        print('Diagonals in similarity marix are not equal to 1')
+        exit()
 
     return qSimilarity
 
@@ -304,6 +320,10 @@ def _weightedSimilarity(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWe
             wSimilarity += similarity * scalarWeightList[i+1]
 
         del similarity
+
+    if np.diag(wSimilarity).all() != 1.0:
+        print('Diagonals of weighted similarity are not equal to 1')
+        exit()
 
     return wSimilarity
 
