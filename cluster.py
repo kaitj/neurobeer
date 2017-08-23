@@ -107,7 +107,7 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
 
         # 8. Return results
         outputData = inputVTK
-        outputPolydata = _format_outputVTK(outputData, clusterIdx, colour, U)
+        outputPolydata = _format_outputVTK(outputData, clusterIdx, colour)
 
         # 9. Also add measurements from those used to cluster
         for i in range(len(scalarDataList)):
@@ -389,7 +389,7 @@ def _weightedSimilarity(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWe
                     os.makedirs(dirpath)
 
                 matrixType = scalarTypeList[i].split('/', -1)[-1]
-                misc.saveMatrix(dirpath, similarity, matrixType, 'weighted')
+                misc.saveMatrix(dirpath, similarity, matrixType)
 
             wSimilarity += similarity * scalarWeightList[i+1]
 
