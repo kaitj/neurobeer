@@ -107,7 +107,11 @@ def scalarDistance(fiberScalar, fiberScalarArray):
     """
 
     # Compute distances for fiber and fiber equivalent to fiber group
-    distance = _scalarDistance_internal(fiberScalar, fiberScalarArray)
+    distance1 = _scalarDistance_internal(fiberScalar, fiberScalarArray)
+    distance2 = _scalarDistance_internal(fiberScalar[::-1], fiberScalarArray)
+
+    # Minimum distance more likely to be similar; return distance
+    distance = np.minimum(distance1, distance2)
 
     return distance
 
