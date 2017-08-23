@@ -371,9 +371,8 @@ def _weightedSimilarity(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWe
 
     else:   # Calculate weighted similarity
 
-        checksum = np.sum(scalarWeightList)
-        if checksum > 1.0:
-            print '\nWeights given sum to greater than 1. Exiting...'
+        if np.sum(scalarWeightList) != 1.0:
+            print '\nWeights given do not sum 1. Exiting...'
             exit()
 
         wSimilarity = _pairwiseSimilarity_matrix(inputVTK, sigma,
