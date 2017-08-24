@@ -56,7 +56,7 @@ class FiberArrayScalar:
 
         return idxList
 
-    def addScalar(self, inputVTK, fiberArray, scalarData, scalarType):
+    def addScalar(self, inputVTK, scalarData, scalarType, pts_per_fiber=20):
         """
         Add scalar information pertaining to tractography. Values are
         stored with a tree format. This function is dynamic and can add new
@@ -76,14 +76,13 @@ class FiberArrayScalar:
         ptIds = vtk.vtkIdList()
 
         # Loop over all fibers
-        for fidx in range(0, fiberArray.no_of_fibers):
+        for fidx in range(0, inputVTK.GetNumberOfLines()):
             inputVTK.GetLines().GetNextCell(ptIds)
             fiberLength = ptIds.GetNumberOfIds()
 
             # Loop over pts for ea. fiber
             pidx = 0
-            for lineIdx in self._calc_fiber_indices(fiberLength,
-                                                    fiberArray.pts_per_fiber):
+            for lineIdx in self._calc_fiber_indices(fiberLength, pts_per_fiber):
 
                 # Find point index
                 ptidx = ptIds.GetId(int(round(lineIdx)))
