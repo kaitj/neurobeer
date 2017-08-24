@@ -111,11 +111,12 @@ def spectralClustering(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeightL
 
         # 9. Also add measurements from those used to cluster
         for i in range(len(scalarTypeList)):
-            outputPolydata = addScalarToVTK(outputPolydata, scalarTree, scalarTypeList[i], pts_per_fiber)
+            outputPolydata = addScalarToVTK(outputPolydata, scalarTree, scalarTypeList[i],
+                                                                        pts_per_fiber=pts_per_fiber)
 
         return outputPolydata, clusterIdx, colour, centroids
 
-def addScalarToVTK(polyData, scalarTree, scalarType, pts_per_fiber):
+def addScalarToVTK(polyData, scalarTree, scalarType, fidxes=None, pts_per_fiber=20):
     """
     Add scalar to all polydata points to be converted to .vtk file.
     This function is different from scalars.addScalar, which only considers point
@@ -125,6 +126,8 @@ def addScalarToVTK(polyData, scalarTree, scalarType, pts_per_fiber):
         polyData - polydata for scalar measurements to be added to
         scalarTree - the tree containing the quantitative measurement  to be added to the polydata
         scalarType - type of quantitative measurement to be aded to polydata
+        fidxes - array with fiber indices pertaining to scalar data of extracted fibers; default none
+        pts_per_fiber - number of samples along a fiber; default 20
 
     OUTPUT:
         polydata - updated polydata with quantitative information
@@ -133,12 +136,38 @@ def addScalarToVTK(polyData, scalarTree, scalarType, pts_per_fiber):
     data = vtk.vtkFloatArray()
     data.SetName(scalarType.split('/', -1)[-1])
 
-    for fidx in range(0, polyData.GetNumberOfLines()):
-        for pidx in range(0, pts_per_fiber):
-            scalarValue = scalarTree.fiberTree_scalar[fidx][pidx][scalarType]
-            data.InsertNextValue(float(scalarValue))
+    if fidxes is None:
+        for fidx in range(0, polyData.GetNumberOfLines()):
+            for pidx in range(0, pts_per_fiber):
+                scalarValue = scalarTree.fiberTree_scalar[fidx][pidx][scalarType]
+                data.InsertNextValue(float(scalarValue))
+    else:
+        for fidx in fidxes:
+            for pidx in range(0, pts_per_fiber):
+                scalarValue = scalarTree.fiberTree_scalar[fidx][pidx][scalarType]
+                data.InsertNextValue(float(scalarValue))
 
     polyData.GetPointData().AddArray(data)
+
+    return polyData
+
+def extractCluster(inputVTK, clusterIdx, label):
+    """
+    Extracts a cluster corresponding to the label provided.
+
+    INPUT:
+        inputVTK - polydata to extract cluster from
+        clusterIdx - labels pertaining to fibers of inputVTK
+        label - label of cluster to be extracted
+
+    OUTPUT:
+        polyData - extracted cluster in polydata format; no information is retained
+    """
+    fiberArray = fibers.FiberArray()
+    fiberArray.convertFromVTK(inputVTK)
+
+    cluster = fiberArray.getFibers(np.where(clusterIdx == label)[0])
+    polyData = cluster.convertToVTK()
 
     return polyData
 
