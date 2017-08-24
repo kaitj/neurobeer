@@ -192,15 +192,15 @@ class FiberArray:
 
                 pidx += 1
 
-    def convertToVTK(self, scalarArray, scalarType):
+    def convertToVTK(self):
         """
         Convert fibers in array form to VTK polydata.
 
         INPUT:
             scalarArray - Variable containing scalar information pertaining
-                                    to VTK polydata
-            scalarType - Type of quantitative scalar (ie. FA, T1) to be
-                                    included with the poyldata
+                                    to VTK polydata; default none
+            scalarTypeList - List of quantitative scalars (ie. FA, T1) to be
+                                    included with the poyldata; default none
 
         OUTPUT:
             outVTK - Tractography polydata in VTK form
@@ -209,7 +209,6 @@ class FiberArray:
         outVTK = vtk.vtkPolyData()
         outPts = vtk.vtkPoints()
         outFibers = vtk.vtkCellArray()
-        outScalars = vtk.vtkFloatArray()
 
         outFibers.InitTraversal()
 
@@ -218,20 +217,15 @@ class FiberArray:
             ptIds = vtk.vtkIdList()
 
             for pidx in range(0, self.pts_per_fiber):
-
                 idx = outPts.InsertNextPoint(self.fiberArray_x[fidx, pidx],
-                                             self.fiberArray_y[fidx, pidx],
-                                             self.fiberArray_z[fidx, pidx])
-
+                                                                   self.fiberArray_y[fidx, pidx],
+                                                                   self.fiberArray_z[fidx, pidx])
                 ptIds.InsertNextId(idx)
-
-                outScalars.InsertNextValue(float(scalarArray.fiberTree_scalar[fidx][pidx][scalarType]))
 
             outFibers.InsertNextCell(ptIds)
 
         # Group data into VTK format
         outVTK.SetLines(outFibers)
         outVTK.SetPoints(outPts)
-        outVTK.GetPointData().SetScalars(outScalars)
 
         return outVTK
