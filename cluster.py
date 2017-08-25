@@ -395,12 +395,10 @@ def _weightedSimilarity(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeight
         print "\nCalculating similarity based on geometry."
         wSimilarity = _pairwiseSimilarity_matrix(inputVTK, sigma, pts_per_fiber, no_of_jobs)
 
-        if (saveAllSimilarity == 1):
-            dirpath = raw_input("Enter path to store similarity matrix: ")
-            if not os.path.exists(dirpath):
-                os.makedirs(dirpath)
-
-            misc.saveMatrix(dirpath, wSimilarity, 'Geometry')
+        dirpath = raw_input("Enter path to store similarity matrix: ")
+        if not os.path.exists(dirpath):
+            os.makedirs(dirpath)
+        misc.saveMatrix(dirpath, wSimilarity, 'Geometry')
 
     else:   # Calculate weighted similarity
 
@@ -410,6 +408,14 @@ def _weightedSimilarity(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeight
 
         wSimilarity = _pairwiseSimilarity_matrix(inputVTK, sigma, pts_per_fiber,
                                                                             no_of_jobs) * scalarWeightList[0]
+
+        if saveAllSimilarity == 1:
+            dirpath = raw_input("Enter path to store similarity matrix: ")
+            if not os.path.exists(dirpath):
+                os.makedirs(dirpath)
+            matrixType = scalarTypeList[0].split('/', -1)[-1]
+            matrixType = matrixType[:-2] + 'Distance'
+            misc.saveMatrix(dirpath, wSimilarity, matrixType)
 
         for i in range(len(scalarTypeList)):
             similarity = _pairwiseQSimilarity_matrix(inputVTK, scalarTree,
