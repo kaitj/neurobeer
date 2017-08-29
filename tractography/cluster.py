@@ -15,7 +15,7 @@ import vtk
 
 def spectralClustering(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeightList=[],
                                     pts_per_fiber=20, k_clusters=10, sigma=0.4, saveAllSimilarity=0,
-                                    saveWSimilarity=0, no_of_jobs=1):
+                                    saveWSimilarity=0, dirpath=None, no_of_jobs=1):
         """
         Clustering of fibers based on pairwise fiber similarity.
         See paper: "A tutorial on spectral clustering" (von Luxburg, 2007)
@@ -58,13 +58,14 @@ def spectralClustering(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeightL
 
         # 1. Compute similarty matrix
         W = _weightedSimilarity(inputVTK, scalarTree, scalarTypeList, scalarWeightList,
-                                                    sigma, saveAllSimilarity, pts_per_fiber, no_of_jobs)
+                                                    sigma, saveAllSimilarity, pts_per_fiber, dirpath, no_of_jobs)
 
         if saveWSimilarity == 1:
-            # Temporary solution, need to decide how to store location to save matrix
-            dirpath = raw_input("Enter path to save weighted similarity matrix: ")
-            if not os.path.exists(dirpath):
-                os.makedirs(dirpath)
+            if dirpath is None:
+                dirpath = os.getcwd()
+            else:
+                if not os.path.exists(dirpath):
+                    os.makedirs(dirpath)
 
             misc.saveMatrix(dirpath, W, 'Weighted')
 
@@ -266,7 +267,8 @@ def _pairwiseQDistance_matrix(inputVTK, scalarTree, scalarType, pts_per_fiber, n
 
     return qDistances
 
-def _pairwiseQSimilarity_matrix(inputVTK, scalarTree, scalarType, sigma, pts_per_fiber, no_of_jobs,):
+def _pairwiseQSimilarity_matrix(inputVTK, scalarTree, scalarType, sigma, pts_per_fiber,
+                                                      no_of_jobs,):
     """ *INTERNAL FUNCTION*
     Computes the similarity between quantitative points along a fiber.
 
@@ -364,7 +366,8 @@ def _format_outputVTK(polyData, clusterIdx, colour):
     return polyData
 
 def _weightedSimilarity(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeightList=[],
-                                        sigma=0.4, saveAllSimilarity=0, pts_per_fiber=20, no_of_jobs=1):
+                                        sigma=0.4, saveAllSimilarity=0, pts_per_fiber=20, dirpath=None,
+                                        no_of_jobs=1):
     """ *INTERNAL FUNCTION*
     Computes and returns a single weighted similarity matrix.
     Weight list should include weight for distance and sum to 1.
@@ -395,9 +398,12 @@ def _weightedSimilarity(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeight
         print "\nCalculating similarity based on geometry."
         wSimilarity = _pairwiseSimilarity_matrix(inputVTK, sigma, pts_per_fiber, no_of_jobs)
 
-        dirpath = raw_input("Enter path to store similarity matrix: ")
-        if not os.path.exists(dirpath):
-            os.makedirs(dirpath)
+        if dirpath is None:
+            dirpath = os.getcwd()
+        else:
+            if not os.path.exists(dirpath):
+                os.makedirs(dirpath)
+
         misc.saveMatrix(dirpath, wSimilarity, 'Geometry')
 
     else:   # Calculate weighted similarity
@@ -410,9 +416,12 @@ def _weightedSimilarity(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeight
                                                                             no_of_jobs) * scalarWeightList[0]
 
         if saveAllSimilarity == 1:
-            dirpath = raw_input("Enter path to store similarity matrix: ")
-            if not os.path.exists(dirpath):
-                os.makedirs(dirpath)
+            if dirpath is None:
+                dirpath = os.getcwd()
+            else:
+                if not os.path.exists(dirpath):
+                    os.makedirs(dirpath)
+
             matrixType = scalarTypeList[0].split('/', -1)[-1]
             matrixType = matrixType[:-2] + 'Distance'
             misc.saveMatrix(dirpath, wSimilarity, matrixType)
@@ -422,9 +431,11 @@ def _weightedSimilarity(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeight
                 scalarTypeList[i], sigma, pts_per_fiber, no_of_jobs)
 
             if saveAllSimilarity == 1:
-                dirpath = raw_input("Enter path to store similarity matrix: ")
-                if not os.path.exists(dirpath):
-                    os.makedirs(dirpath)
+                if dirpath is None:
+                    dirpath = os.getcwd()
+                else:
+                    if not os.path.exists(dirpath):
+                        os.makedirs(dirpath)
 
                 matrixType = scalarTypeList[i].split('/', -1)[-1]
                 misc.saveMatrix(dirpath, similarity, matrixType)

@@ -21,11 +21,13 @@ def _stddev(fiberArray, scalarTree, scalarType):
 
     return sdev
 
-def plotStats(fiberArray, scalarTree, scalarType):
+def plotStats(fiberArray, scalarTree, scalarType, dirpath=None):
 
-    dirpath = raw_input("Enter path to store plot: ")
-    if not os.path.exists(dirpath):
-        os.makedirs(dirpath)
+    if dirpath is None:
+        dirpath = os.getcwd()
+    else:
+        if not os.path.exists(dirpath):
+            os.makedirs(dirpath)
 
     # Info for plot labels
     title = scalarType.split('/', -1)[-1]
