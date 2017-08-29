@@ -1,10 +1,10 @@
-from setuptools import setup, find_packages
+from distutils.core import setup
 
 setup(
     # Project information
-    name='Tractography',
+    name='tractography',
     version='0.1.0',
-    packages=find_packages(),
+    packages=['tractography'],
 
     # Metadata
     author='Jason Kai',
