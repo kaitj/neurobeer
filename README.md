@@ -21,3 +21,8 @@ pip install {PACKAGE_NAME}
 
 VTK can be downloaded from the official [VTK website](www.vtk.org) and will need to be compiled
 via CMake prior to use.
+
+Alternatively, Python can be installed via Anaconda from [www.continuum.io/downloads]. Many packages including VTK and SciPy can be installed via Anaconda using the following command:
+```
+conda install {PACKAGE_NAME}
+```
