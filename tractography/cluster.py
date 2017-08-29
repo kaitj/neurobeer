@@ -10,12 +10,12 @@ import os, scipy.cluster, sklearn.preprocessing
 from joblib import Parallel, delayed
 from sys import exit
 
-import fibers, distance, scalars, misc
+import fibers, distance, misc
 import vtk
 
 def spectralClustering(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeightList=[],
-                                    pts_per_fiber=20, k_clusters=10, sigma=0.4, saveAllSimilarity=0,
-                                    saveWSimilarity=0, dirpath=None, no_of_jobs=1):
+                                    pts_per_fiber=20, k_clusters=10, sigma=0.4, saveAllSimilarity=False,
+                                    saveWSimilarity=False, dirpath=None, no_of_jobs=1):
         """
         Clustering of fibers based on pairwise fiber similarity.
         See paper: "A tutorial on spectral clustering" (von Luxburg, 2007)
@@ -32,8 +32,9 @@ def spectralClustering(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeightL
             scalarWeightList - list containing scalar weights for similarity measurements; defaults empty
             k_clusters - number of clusters via k-means clustering; defaults 10 clusters
             sigma - width of Gaussian kernel; adjust to alter sensitivity; defaults 0.4
-            saveAllSimilarity - flag to save all individual similarity matrices computed; defaults 0 (off)
-            saveWSimilarity - flag to save weighted similarity matrix computed; defaults 0 (off)
+            saveAllSimilarity - flag to save all individual similarity matrices computed; defaults False (off)
+            saveWSimilarity - flag to save weighted similarity matrix computed; defaults False (off)
+            dirpath - directory to store matrices
             no_of_jobs - cores to use to perform computation; defaults 1
 
         OUTPUT: outputPolydata, clusterIdx, colour, centroids
@@ -60,7 +61,7 @@ def spectralClustering(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeightL
         W = _weightedSimilarity(inputVTK, scalarTree, scalarTypeList, scalarWeightList,
                                                     sigma, saveAllSimilarity, pts_per_fiber, dirpath, no_of_jobs)
 
-        if saveWSimilarity == 1:
+        if saveWSimilarity is True:
             if dirpath is None:
                 dirpath = os.getcwd()
             else:
@@ -188,7 +189,7 @@ def _pairwiseDistance_matrix(inputVTK, pts_per_fiber, no_of_jobs):
     fiberArray = fibers.FiberArray()
     fiberArray.convertFromVTK(inputVTK, pts_per_fiber)
 
-    distances = Parallel(n_jobs=no_of_jobs, verbose=0)(
+    distances = Parallel(n_jobs=no_of_jobs)(
             delayed(distance.fiberDistance)(fiberArray.getFiber(fidx),
                     fiberArray)
             for fidx in range(0, fiberArray.no_of_fibers))
@@ -249,7 +250,7 @@ def _pairwiseQDistance_matrix(inputVTK, scalarTree, scalarType, pts_per_fiber, n
     fiberArray.convertFromVTK(inputVTK, pts_per_fiber)
     no_of_fibers = fiberArray.no_of_fibers
 
-    qDistances = Parallel(n_jobs=no_of_jobs, verbose=0)(
+    qDistances = Parallel(n_jobs=no_of_jobs)(
             delayed(distance.scalarDistance)(
                 scalarTree.getScalar(fiberArray, fidx, scalarType),
                 scalarTree.getScalars(fiberArray, range(no_of_fibers), scalarType))
@@ -327,8 +328,8 @@ def _cluster_to_rgb(data):
     colour = data[:, 0:3]
 
     # Normalize color
-    colour_len = np.sqrt(np.sum(np.power(colour, 2), 1))
-    colour = np.divide(colour.T, colour_len).T
+    colourMag = np.sqrt(np.sum(np.square(colour), 1))
+    colour = np.divide(colour.T, colourMag).T
 
     # Convert range from 0 to 255
     colour = 127.5 + (colour * 127.5)
@@ -379,6 +380,7 @@ def _weightedSimilarity(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeight
         scalarWeightList - list containing scalar weights for similarity measurements; defaults empty
         sigma - width of Gaussian kernel; adjust to alter sensitivity; defaults 0.4
         saveAllSimilarity - flag to save all individual similarity matrices computed; defaults 0 (off)
+        dirpath - directory to store similarity matrices
         no_of_jobs - cores to use to perform computation; defaults 1
 
     OUTPUT:
@@ -415,7 +417,7 @@ def _weightedSimilarity(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeight
         wSimilarity = _pairwiseSimilarity_matrix(inputVTK, sigma, pts_per_fiber,
                                                                             no_of_jobs) * scalarWeightList[0]
 
-        if saveAllSimilarity == 1:
+        if saveAllSimilarity is True:
             if dirpath is None:
                 dirpath = os.getcwd()
             else:
@@ -430,7 +432,7 @@ def _weightedSimilarity(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeight
             similarity = _pairwiseQSimilarity_matrix(inputVTK, scalarTree,
                 scalarTypeList[i], sigma, pts_per_fiber, no_of_jobs)
 
-            if saveAllSimilarity == 1:
+            if saveAllSimilarity is True:
                 if dirpath is None:
                     dirpath = os.getcwd()
                 else:
