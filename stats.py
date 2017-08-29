@@ -43,9 +43,9 @@ def plotStats(fiberArray, scalarTree, scalarType):
 
     avgline = plt.plot(x, yavg, 'b', linewidth=3, label='Mean')
     avgdot = plt.plot(x, yavg, '.r', markersize=15)
-    stdupper = plt.plot(x, yavg+ystd, 'k', linewidth=2, alpha=0.5)
-    stdlower = plt.plot(x, yavg-ystd, 'k', linewidth=2, alpha=0.5, label='Std. Dev')
-    plt.fill_between(x, yavg-ystd, yavg+ystd, facecolor='yellow', alpha=0.5)
+    stdupper = plt.plot(x, yavg+ystd, 'k', linewidth=2, alpha=0.7)
+    stdlower = plt.plot(x, yavg-ystd, 'k', linewidth=2, alpha=0.7, label='Std. Dev')
+    plt.fill_between(x, yavg-ystd, yavg+ystd, facecolor='grey', alpha=0.7)
     plt.xlim(min(x), max(x))
 
     # Plot labels
