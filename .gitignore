@@ -1,3 +1,3 @@
-# Byte-compiled files / optimized/ DLL files
+# Byte-compiled files / optimized/ DLL files / Build folder 
 *.py[cod]
 build/*
