@@ -4,8 +4,6 @@ extraction, and evaluation of white matter tractography.
 
 """
 
-print 'Importing tractography clustering package...'
-
 dependencies = ['joblib', 'numpy', 'matplotlib', 'scipy', 'sklearn', 'vtk']
 modules = ['cluster', 'distance', 'fibers', 'misc', 'scalars', 'stats', 'tractio']
 
