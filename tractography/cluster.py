@@ -387,15 +387,15 @@ def _weightedSimilarity(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeight
         wSimilarity - matrix containing the computed weighted similarity
     """
 
-    if ((scalarWeightList == []) & (scalarTree != [])):
+    if ((scalarWeightList == []) & (scalarTree.fiberTree_scalar.items() != [])):
         print "\nNo weights given for provided measurements! Exiting..."
         exit()
 
-    elif ((scalarTree != []) & (scalarTypeList == [])):
+    elif ((scalarTree.fiberTree_scalar.items() != []) & (scalarTypeList == [])):
         print "\nPlease also specify measurement(s) type. Exiting..."
         exit()
 
-    elif (scalarTree == []):
+    elif (scalarTree.fiberTree_scalar.items() == []):
         print "\nNo measurements provided!"
         print "\nCalculating similarity based on geometry."
         wSimilarity = _pairwiseSimilarity_matrix(inputVTK, sigma, pts_per_fiber, no_of_jobs)
@@ -425,7 +425,7 @@ def _weightedSimilarity(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeight
                     os.makedirs(dirpath)
 
             matrixType = scalarTypeList[0].split('/', -1)[-1]
-            matrixType = matrixType[:-2] + 'Distance'
+            matrixType = matrixType[:-2] + 'distance'
             misc.saveMatrix(dirpath, wSimilarity, matrixType)
 
         for i in range(len(scalarTypeList)):

@@ -51,4 +51,4 @@ def saveMatrix(dirpath, matrix, matrixType):
     cax.tick_params(labelsize=14)
     plt.colorbar(im, cax)
 
-    plt.savefig(dirpath + '/' + matrixType.lower() + 'Similarity.png')
+    plt.savefig(dirpath + '/' + matrixType + '_Similarity.png')
