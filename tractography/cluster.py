@@ -87,7 +87,7 @@ def spectralClustering(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeightL
 
         # 6. Compute information for clustering using "N" number of smallest eigenvalues
         U = eigvec[:, 0:no_of_eigvec]
-        U = U.astype('float')
+        U = U.real
 
         # 7. Find clusters using K-means clustering
         centroids, clusterIdx = scipy.cluster.vq.kmeans2(U, k_clusters, iter=20, minit='points')
