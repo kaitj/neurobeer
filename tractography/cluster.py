@@ -15,7 +15,7 @@ import vtk
 
 def spectralClustering(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeightList=[],
                                     pts_per_fiber=20, k_clusters=10, sigma=0.4, saveAllSimilarity=False,
-                                    saveWSimilarity=False, dirpath=None, no_of_jobs=1):
+                                    saveWSimilarity=False, dirpath=None, verbose=0, no_of_jobs=1):
         """
         Clustering of fibers based on pairwise fiber similarity.
         See paper: "A tutorial on spectral clustering" (von Luxburg, 2007)
@@ -52,7 +52,7 @@ def spectralClustering(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeightL
         if noFibers == 0:
             print "\nERROR: Input data has 0 fibers!"
             return
-        else:
+        elif verbose == 1:
             print "\nStarting clustering..."
             print "No. of fibers:", noFibers
             print "No. of clusters:", k_clusters

@@ -7,7 +7,7 @@ Module provides input and output functionality for VTK tractography files.
 import os
 import vtk
 
-def readVTK(vtkfile):
+def readVTK(vtkfile, verbose=0):
     """
     Reads tractography .vtk file (vtkPolyData).
 
@@ -17,7 +17,8 @@ def readVTK(vtkfile):
     OUTPUT:
         outData - Polydata stored within the .vtk file
     """
-    print "\nReading", vtkfile, "..."
+    if verbose == 1:
+        print "\nReading", vtkfile, "..."
 
     filename, ext = os.path.splitext(vtkfile)
 
@@ -33,12 +34,13 @@ def readVTK(vtkfile):
 
     del vtkReader
 
-    print "Finished reading tractography data..."
-    print "Number of fibers found:", outData.GetNumberOfLines()
+    if verbose == 1:
+        print "Finished reading tractography data..."
+        print "Number of fibers found:", outData.GetNumberOfLines()
 
     return outData
 
-def writeVTK(data, vtkfile):
+def writeVTK(data, vtkfile, verbose=0):
     """
     Write tractography data to .vtk file (vtkPolyData).
 
@@ -50,7 +52,8 @@ def writeVTK(data, vtkfile):
         none
     """
 
-    print"\nWriting", vtkfile, "..."
+    if verbose == 1:
+        print"\nWriting", vtkfile, "..."
 
     filename, ext = os.path.splitext(vtkfile)
 
@@ -67,9 +70,10 @@ def writeVTK(data, vtkfile):
 
     del vtkWriter
 
-    print "Finished writing data to ", filename
+    if verbose == 1:
+        print "Finished writing data to ", filename
 
-def readScalar(scalarfile):
+def readScalar(scalarfile, verbose=0):
     """
     Read input a text file (.txt) containing scalar values pertaining to
     tractography.
@@ -81,7 +85,8 @@ def readScalar(scalarfile):
         scalarData - List of scalar values from file
         scalarType - Type of scalar information (ie. FA, T1)
     """
-    print "\nReading", scalarfile, "..."
+    if verbose == 1:
+        print "\nReading", scalarfile, "..."
 
     scalarType, ext = os.path.splitext(scalarfile)
 
@@ -97,6 +102,7 @@ def readScalar(scalarfile):
     for i in range(len(scalarData)):
         scalarData[i] = scalarData[i].rstrip('\n')
 
-    print "Finished reading scalar data..."
+    if verbose == 1:
+        print "Finished reading scalar data..."
 
     return scalarData, scalarType
