@@ -24,7 +24,14 @@ def tree():
 
 def convertFromTuple(fiberTuple):
     """
-    Converts fiber data in form of type tuple (from extraction) to fiberTree
+    Converts fiber data in form of type tuple (from extraction) to fiberTree.
+    Output is of class FiberTree
+
+    INPUT:
+        fiberTuple - tuple containing fiber information to be converted
+
+    OUTPUT:
+        fiberTree - fiber information converted to a tree
     """
 
     fiberTree = FiberTree()
@@ -139,9 +146,9 @@ class FiberTree:
 
         INPUT:
             inputVTK - Tractography polydata to extract corresponding indices
-            fiberArray - Array of fibers to add scalar to
             scalarData - List of scalar values to be stored
             scalarType - Type of quantitative scalar (ie. FA, T1)
+            pts_per_fiber - Number of samples to take along fiber
 
         OUTPUT:
             none
@@ -171,7 +178,6 @@ class FiberTree:
         a single fiber.
 
         INPUT:
-            fiberArray - Array of fibers to extract scalar information from of a lone fiber
             fidx - Index corresponding to fiber to extract scalar information from
             scalarType - Type of quantitative scalar (ie. FA, T1)
 
@@ -193,7 +199,6 @@ class FiberTree:
         a group of fibers.
 
         INPUT:
-            fiberArray - Array of fibers to get scalar from
             fidxes - Indices corresponding to fibers to extract scalar information from
             scalarType - Type of quantitative scalar (ie. FA, T1)
 
@@ -262,10 +267,7 @@ class FiberTree:
         Convert fibers in array form to VTK polydata.
 
         INPUT:
-            scalarArray - Variable containing scalar information pertaining
-                                    to VTK polydata; default none
-            scalarTypeList - List of quantitative scalars (ie. FA, T1) to be
-                                    included with the poyldata; default none
+            none
 
         OUTPUT:
             outVTK - Tractography polydata in VTK form

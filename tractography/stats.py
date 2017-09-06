@@ -10,6 +10,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def _mean(fiberTree, scalarType, idxes=None):
+    """
+    Finds the average of all fibers in bundle at specific sample points
+
+    INPUT:
+        fiberTree - tree containing spatial and quantitative information of fibers
+        scalarType - type of quantitative data to find average of
+        idxes - indices to extract info from; defaults None (returns data for all fibers)
+
+    OUTPUT:
+        avg - calculated average of data
+    """
+
     if idxes is None:
         avg = np.mean(fiberTree.getScalars(range(fiberTree.no_of_fibers),
                             scalarType)[:, :], axis=0)
@@ -19,6 +31,17 @@ def _mean(fiberTree, scalarType, idxes=None):
     return avg
 
 def _stddev(fiberTree, scalarType, idxes=None):
+    """
+    Finds the standard deviation of all fibers in bundle at specific sample points
+
+    INPUT:
+        fiberTree - tree containing spatial and quantitative information of fibers
+        scalarType - type of quantitative data to find standard deviation of
+        idxes - indices to extract info from; defaults None (returns data for all fibers)
+
+    OUTPUT:
+        sdev - calculated standard deviation of data
+    """
     if idxes is None:
         sdev = np.std(fiberTree.getScalars(range(fiberTree.no_of_fibers),
                             scalarType)[:, :], axis=0)
@@ -28,6 +51,18 @@ def _stddev(fiberTree, scalarType, idxes=None):
     return sdev
 
 def plotStats(fiberTree, scalarType, idxes=None, dirpath=None):
+    """
+    Plots the calculated tract-based statistics for each fiber bundle
+
+    INPUT:
+        fiberTree - tree containing spatial and quantitative information of fibers
+        scalarType - type of quantitative data to plot
+        idxes - indices to extract info from; defaults None (returns data for all fibers)
+        dirpath - location to store plots; defaults None
+
+    OUTPUT:
+        none
+    """
 
     if dirpath is None:
         dirpath = os.getcwd()

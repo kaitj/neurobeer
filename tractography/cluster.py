@@ -20,30 +20,33 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
         Clustering of fibers based on pairwise fiber similarity.
         See paper: "A tutorial on spectral clustering" (von Luxburg, 2007)
 
-        If no scalar tree are provided, clustering performed using tract geometry.
+        If no scalar data provided, clustering performed based on geometry.
         First element of scalarWeightList should be weight placed for geometry, followed by order
         given in scalarTypeList These weights should sum to 1.0 (weights given as a decimal value).
-        ex. scalarTypeList = [FA, T1]
+        ex.  scalarDataList = [FA, T1]
+              scalarTypeList = [FA, T1]
               scalarWeightList = [Geometry, FA, T1]
 
         INPUT:
             inputVTK - input polydata file
+            scalarDataList - list containing scalar data for similarity measurements; defaults empty
             scalarTypeList - list containing scalar type for similarity measurements; defaults empty
             scalarWeightList - list containing scalar weights for similarity measurements; defaults empty
+            pts_per_fiber - number of samples to take along each fiber
             k_clusters - number of clusters via k-means clustering; defaults 10 clusters
             sigma - width of Gaussian kernel; adjust to alter sensitivity; defaults 0.4
-            saveAllSimilarity - flag to save all individual similarity matrices computed; defaults False (off)
-            saveWSimilarity - flag to save weighted similarity matrix computed; defaults False (off)
-            dirpath - directory to store matrices
+            saveAllSimilarity - flag to save all individual similarity matrices computed; defaults False
+            saveWSimilarity - flag to save weighted similarity matrix computed; defaults False
+            dirpath - directory to store matrices; defaults None
+            verbose - verbosity of function; defaults 0
             no_of_jobs - cores to use to perform computation; defaults 1
 
-        OUTPUT: outputPolydata, clusterIdx, colour, centroids
+        OUTPUT:
             outputPolydata - polydata containing information from clustering to be written into VTK
             clusterIdx - array containing cluster that each fiber belongs to
             colour - array containing the RGB value assigned to the scalar
             centroids - array containing the centroids for each cluster
-
-        NOTE: For most consistent results, k_clusters => no_of_eigvec
+            fiberData - tree containing spatial and quantitative information of fibers
         """
 
         no_of_eigvec = k_clusters
@@ -162,6 +165,7 @@ def extractCluster(inputVTK, clusterIdx, label, pts_per_fiber):
         inputVTK - polydata to extract cluster from
         clusterIdx - labels pertaining to fibers of inputVTK
         label - label of cluster to be extracted
+        pts_per_fiber - number of samples to take along fiber
 
     OUTPUT:
         polyData - extracted cluster in polydata format; no information is retained
@@ -180,7 +184,7 @@ def _pairwiseDistance_matrix(fiberTree, pts_per_fiber, no_of_jobs):
     Used to compute an NxN distance matrix for all fibers (N) in the input data.
 
     INPUT:
-        inputVTK - input polydata file
+        fiberTree - tree containing spatial and quantitative information of fibers
         pts_per_fiber - number of samples along a fiber
         no_of_jobs - cores to use to perform computation
 
@@ -208,7 +212,7 @@ def _pairwiseSimilarity_matrix(fiberTree, sigma, pts_per_fiber, no_of_jobs):
     Computes an NxN similarity matrix for all fibers (N) in the input data.
 
     INPUT:
-        inputVTK - input polydata file
+        fiberTree - tree containing spatial and quantitative information of fibers
         sigma - width of Gaussian kernel; adjust to alter
         pts_per_fiber - number of samples along a fiber
         no_of_jobs - cores to use to perform computation
@@ -235,8 +239,7 @@ def _pairwiseQDistance_matrix(fiberTree, scalarType, pts_per_fiber, no_of_jobs):
     Computes the "pairwise distance" between quantitative points along a fiber.
 
     INPUT:
-        inputVTK - input polydata file
-        scalarTree - tree containing quantitative measurements to be used for computation
+        fiberTree - tree containing spatial and quantitative information of fibers
         scalarType - type of quantitative measurements to be used for computation
         pts_per_fiber - number of sample along a fiber
         no_of_jobs - cores to use to perform computation
@@ -271,8 +274,7 @@ def _pairwiseQSimilarity_matrix(fiberTree, scalarType, sigma, pts_per_fiber,
     Computes the similarity between quantitative points along a fiber.
 
     INPUT:
-        inputVTK - input polydata file
-        scalarTree - tree containing quantitative measurements to be used for computation
+        fiberTree - tree containing spatial and quantitative information of fibers
         scalarType - type of quantitative measurements to be used for computation
         sigma - width of Gaussian kernel; adjust to alter sensitivity
         no_of_jobs - cores to use to perform computation

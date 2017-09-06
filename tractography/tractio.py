@@ -12,10 +12,11 @@ def readVTK(vtkfile, verbose=0):
     Reads tractography .vtk file (vtkPolyData).
 
     INPUT:
-        vtkfile - File of .vtk type containing tractogrpahy polydata
+        vtkfile - file of .vtk type containing tractogrpahy polydata
+        verbose - verbosity of function; defaults 0
 
     OUTPUT:
-        outData - Polydata stored within the .vtk file
+        outData - polydata stored within the .vtk file
     """
     if verbose == 1:
         print "\nReading", vtkfile, "..."
@@ -46,7 +47,8 @@ def writeVTK(data, vtkfile, verbose=0):
 
     INPUT:
         data - vtkPolydata to be written to file
-        vtkfile - Name of file to be written
+        vtkfile - name of file to be written
+        verbose - verbosity of function; defaults 0
 
     OUTPUT:
         none
@@ -79,11 +81,12 @@ def readScalar(scalarfile, verbose=0):
     tractography.
 
     INPUT:
-        scalarfile - Text file containing quantitative scalar information
+        scalarfile - text file containing quantitative scalar information
+        verbose - verbosity of function; defaults 0
 
     OUTPUT:
-        scalarData - List of scalar values from file
-        scalarType - Type of scalar information (ie. FA, T1)
+        scalarData - list of scalar values from file
+        scalarType - type of scalar information (ie. FA, T1)
     """
     if verbose == 1:
         print "\nReading", scalarfile, "..."
