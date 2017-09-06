@@ -7,58 +7,51 @@ information.
 
 import numpy as np
 import vtk
+from collections import defaultdict
 
-class Fiber:
+def tree():
     """
-    Tractography information pertaining to a single fiber.
-    Values are of class Fiber.
+    Creates tree to store quantitative information.
+
+    INPUT:
+        none
+
+    OUTPUT:
+        none
+    """
+
+    return defaultdict(tree)
+
+def convertFromTuple(fiberTuple):
+    """
+    Converts fiber data in form of type tuple (from extraction) to fiberTree
+    """
+
+    fiberTree = FiberTree()
+
+    fiberTree.no_of_fibers = len(fiberTuple[0])
+    fiberTree.pts_per_fiber = len(fiberTuple[0][0])
+
+    for fidx in range(fiberTree.no_of_fibers):
+        for pidx in range(fiberTree.pts_per_fiber):
+                fiberTree.fiberTree[fidx][pidx]['x'] = fiberTuple[0][fidx][pidx]
+                fiberTree.fiberTree[fidx][pidx]['y'] = fiberTuple[1][fidx][pidx]
+                fiberTree.fiberTree[fidx][pidx]['z'] = fiberTuple[2][fidx][pidx]
+
+    return fiberTree
+
+class FiberTree:
+    """
+    Data pertaining to a group of fibers.
+    Value returned is of class FiberTree
     """
 
     def __init__(self):
-        self.x = None
-        self.y = None
-        self.z = None
+        self.fiberTree = tree()
+
+        # Info related to fibers
+        self.no_of_fibers = None
         self.pts_per_fiber = None
-
-    def getReverseFiber(self):
-        """
-        Determine the reverse order of the fiber with corresponding
-        quantitative information.
-
-        INPUT:
-            none
-
-        OUTPUT:
-            none
-        """
-
-        fiber = Fiber()
-
-        fiber.x = self.x[::-1]
-        fiber.y = self.y[::-1]
-        fiber.z = self.z[::-1]
-
-        fiber.pts_per_fiber = self.pts_per_fiber
-
-        return fiber
-
-class FiberArray:
-    """
-    Tractography information pertaining to a group of fibers.
-    Values are of class FiberArray.
-    """
-
-    def __init__(self):
-        # Parameters
-        self.pts_per_fiber = 2  # Default fibers to end points only
-
-        # Fiber data
-        self.fiberArray_x = None
-        self.fiberArray_y = None
-        self.fiberArray_z = None
-
-        # Quantitative totals
-        self.no_of_fibers = 0
 
     def _calc_fiber_indices(self, fiberLength, pts_per_fiber):
         """ *INTERNAL FUNCTION*
@@ -98,17 +91,17 @@ class FiberArray:
             fiber - Single fiber of class Fiber
         """
 
-        fiber = Fiber()
-
-        # Fiber parmaters
-        fiber.pts_per_fiber = self.pts_per_fiber
-
         # Fiber data
-        fiber.x = self.fiberArray_x[fiberIdx, :]
-        fiber.y = self.fiberArray_y[fiberIdx, :]
-        fiber.z = self.fiberArray_z[fiberIdx, :]
+        fiber_x = np.zeros(self.pts_per_fiber)
+        fiber_y = np.zeros(self.pts_per_fiber)
+        fiber_z = np.zeros(self.pts_per_fiber)
 
-        return fiber
+        for pidx in range(0, self.pts_per_fiber):
+            fiber_x[pidx] = float(self.fiberTree[fiberIdx][pidx]['x'])
+            fiber_y[pidx] = float(self.fiberTree[fiberIdx][pidx]['y'])
+            fiber_z[pidx] = float(self.fiberTree[fiberIdx][pidx]['z'])
+
+        return fiber_x, fiber_y, fiber_z
 
     def getFibers(self, fidxes):
         """
@@ -122,20 +115,104 @@ class FiberArray:
             fibers - Subset of fibers of class fiberArray
         """
 
-        fibers = FiberArray()
-
-        # Fiber parameters
-        fibers.no_of_fibers = len(fidxes)
-        fibers.pts_per_fiber = self.pts_per_fiber
+        fiberArray_x = np.zeros((len(fidxes), self.pts_per_fiber))
+        fiberArray_y = np.zeros((len(fidxes), self.pts_per_fiber))
+        fiberArray_z = np.zeros((len(fidxes), self.pts_per_fiber))
 
         # Fiber data
-        fibers.fiberArray_x = self.fiberArray_x[fidxes]
-        fibers.fiberArray_y = self.fiberArray_y[fidxes]
-        fibers.fiberArray_z = self.fiberArray_z[fidxes]
+        idx = 0
+        for fidx in fidxes:
+            for pidx in range(0, self.pts_per_fiber):
+                fiberArray_x[idx][pidx] = float(self.fiberTree[fidx][pidx]['x'])
+                fiberArray_y[idx][pidx] = float(self.fiberTree[fidx][pidx]['y'])
+                fiberArray_z[idx][pidx] = float(self.fiberTree[fidx][pidx]['z'])
 
-        return fibers
+            idx += 1
 
-    def convertFromVTK(self, inputVTK, pts_per_fiber=None, verbose=0):
+        return fiberArray_x, fiberArray_y, fiberArray_z
+
+    def addScalar(self, inputVTK, scalarData, scalarType, pts_per_fiber=20):
+        """
+        Add scalar information pertaining to tractography. Values are
+        stored with a tree format. This function is dynamic and can add new
+        quantitative measurements as needed.
+
+        INPUT:
+            inputVTK - Tractography polydata to extract corresponding indices
+            fiberArray - Array of fibers to add scalar to
+            scalarData - List of scalar values to be stored
+            scalarType - Type of quantitative scalar (ie. FA, T1)
+
+        OUTPUT:
+            none
+        """
+        inputVTK.GetLines().InitTraversal()
+        ptIds = vtk.vtkIdList()
+
+        # Loop over all fibers
+        for fidx in range(0, self.no_of_fibers):
+            inputVTK.GetLines().GetNextCell(ptIds)
+            fiberLength = ptIds.GetNumberOfIds()
+
+            # Loop over pts for ea. fiber
+            pidx = 0
+            for lineIdx in self._calc_fiber_indices(fiberLength, pts_per_fiber):
+
+                # Find point index
+                ptidx = ptIds.GetId(int(round(lineIdx)))
+                self.fiberTree[fidx][pidx][scalarType] = \
+                    scalarData[ptidx]
+
+                pidx += 1
+
+    def getScalar(self, fidx, scalarType):
+        """
+        Extracts scalar information of a specified scalarType pertaining to
+        a single fiber.
+
+        INPUT:
+            fiberArray - Array of fibers to extract scalar information from of a lone fiber
+            fidx - Index corresponding to fiber to extract scalar information from
+            scalarType - Type of quantitative scalar (ie. FA, T1)
+
+        OUTPUT:
+            scalarList - List of scalar values indexed by point
+        """
+
+        scalarList = np.zeros(self.pts_per_fiber)
+
+        for pidx in range(0, self.pts_per_fiber):
+
+            scalarList[pidx] = float(self.fiberTree[fidx][pidx][scalarType])
+
+        return scalarList
+
+    def getScalars(self, fidxes, scalarType):
+        """
+        Extracts scalar information of a specified scalarType pertaining to
+        a group of fibers.
+
+        INPUT:
+            fiberArray - Array of fibers to get scalar from
+            fidxes - Indices corresponding to fibers to extract scalar information from
+            scalarType - Type of quantitative scalar (ie. FA, T1)
+
+        OUTPUT:
+            scalarList - List of scalar values indexed by fiber and point
+        """
+
+        scalarList = np.zeros((len(fidxes), self.pts_per_fiber))
+
+        idx = 0
+        for fidx in fidxes:
+            for pidx in range(0, self.pts_per_fiber):
+                scalarList[idx][pidx] = float(self.fiberTree[fidx][pidx][str(scalarType)])
+
+            idx += 1
+
+        return scalarList
+
+    def convertFromVTK(self, inputVTK, pts_per_fiber=20, verbose=0):
         """
         Convert input tractography VTK data to array form
 
@@ -147,26 +224,14 @@ class FiberArray:
         OUTPUT:
             none
         """
-        # Points used to discretize along fiber
 
-        if pts_per_fiber is not None:
-            self.pts_per_fiber = pts_per_fiber
-
-        # Determine number of lines (assumes all from tractogrpahy)
         self.no_of_fibers = inputVTK.GetNumberOfLines()
+        self.pts_per_fiber = pts_per_fiber
 
         if verbose == 1:
             print "\n<fibers.py> Converting polydata to array representation."
             print "Fibers:", self.no_of_fibers
-            print "Points along fiber:", self.pts_per_fiber
-
-        # Initialize fiber storage array: number of fibers, fiber length
-        self.fiberArray_x = np.zeros((self.no_of_fibers,
-                                                   self.pts_per_fiber))
-        self.fiberArray_y = np.zeros((self.no_of_fibers,
-                                                    self.pts_per_fiber))
-        self.fiberArray_z = np.zeros((self.no_of_fibers,
-                                                    self.pts_per_fiber))
+            print "Points sampled along fiber:", self.pts_per_fiber
 
         # Loop over all fibers
         inputVTK.GetLines().InitTraversal()
@@ -186,9 +251,9 @@ class FiberArray:
                 ptidx = ptIds.GetId(int(round(lineIdx)))
                 pt = inputPts.GetPoint(ptidx)
 
-                self.fiberArray_x[fidx, pidx] = pt[0]
-                self.fiberArray_y[fidx, pidx] = pt[1]
-                self.fiberArray_z[fidx, pidx] = pt[2]
+                self.fiberTree[fidx][pidx]['x'] = pt[0]
+                self.fiberTree[fidx][pidx]['y'] = pt[1]
+                self.fiberTree[fidx][pidx]['z'] = pt[2]
 
                 pidx += 1
 
@@ -217,9 +282,9 @@ class FiberArray:
             ptIds = vtk.vtkIdList()
 
             for pidx in range(0, self.pts_per_fiber):
-                idx = outPts.InsertNextPoint(self.fiberArray_x[fidx, pidx],
-                                                                   self.fiberArray_y[fidx, pidx],
-                                                                   self.fiberArray_z[fidx, pidx])
+                idx = outPts.InsertNextPoint(self.fiberTree[fidx][pidx]['x'],
+                                                               self.fiberTree[fidx][pidx]['y'],
+                                                               self.fiberTree[fidx][pidx]['z'])
                 ptIds.InsertNextId(idx)
 
             outFibers.InsertNextCell(ptIds)

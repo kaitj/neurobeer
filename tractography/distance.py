@@ -22,9 +22,9 @@ def _fiberDistance_internal(fiber, fiberArray):
     """
 
     # Calculates the distance between points of each fiber
-    dx = fiberArray.fiberArray_x - fiber.x
-    dy = fiberArray.fiberArray_y - fiber.y
-    dz = fiberArray.fiberArray_z - fiber.z
+    dx = fiberArray[0] - fiber[0]
+    dy = fiberArray[1] - fiber[1]
+    dz = fiberArray[2] - fiber[2]
 
     # Squares calculated distances
     dx_sq = np.square(dx)
@@ -36,7 +36,7 @@ def _fiberDistance_internal(fiber, fiberArray):
 
     # Sum along fiber
     distance = np.sum(distance, 1)
-    distance = distance / float(fiberArray.pts_per_fiber)
+    distance = distance / float(len(fiber[0]))
 
     return distance
 
@@ -78,12 +78,9 @@ def fiberDistance(fiber, fiberArray):
                             traversed in both directions
     """
 
-    # Get same fiber in reverse order
-    fiberEquiv = fiber.getReverseFiber()
-
     # Compute distances for fiber and fiber equivalent to fiber group
     distance1 = _fiberDistance_internal(fiber, fiberArray)
-    distance2 = _fiberDistance_internal(fiberEquiv, fiberArray)
+    distance2 = _fiberDistance_internal(np.flip(fiber, axis=1), fiberArray)
 
     # Minimum distance more likely to be part of cluster; return distance
     distance = np.minimum(distance1, distance2)

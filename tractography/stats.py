@@ -9,19 +9,25 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-def _mean(fiberArray, scalarTree, scalarType):
-    avg = np.mean(scalarTree.getScalars(fiberArray, range(fiberArray.no_of_fibers),
+def _mean(fiberTree, scalarType, idxes=None):
+    if idxes is None:
+        avg = np.mean(fiberTree.getScalars(range(fiberTree.no_of_fibers),
                             scalarType)[:, :], axis=0)
+    else:
+        avg = np.mean(fiberTree.getScalars(idxes, scalarType)[:, :], axis=0)
 
     return avg
 
-def _stddev(fiberArray, scalarTree, scalarType):
-    sdev = np.std(scalarTree.getScalars(fiberArray, range(fiberArray.no_of_fibers),
-                           scalarType)[:, :], axis=0)
+def _stddev(fiberTree, scalarType, idxes=None):
+    if idxes is None:
+        sdev = np.std(fiberTree.getScalars(range(fiberTree.no_of_fibers),
+                            scalarType)[:, :], axis=0)
+    else:
+        sdev = np.std(fiberTree.getScalars(idxes, scalarType)[:, :], axis=0)
 
     return sdev
 
-def plotStats(fiberArray, scalarTree, scalarType, dirpath=None):
+def plotStats(fiberTree, scalarType, idxes=None, dirpath=None):
 
     if dirpath is None:
         dirpath = os.getcwd()
@@ -32,12 +38,11 @@ def plotStats(fiberArray, scalarTree, scalarType, dirpath=None):
     # Info for plot labels
     title = scalarType.split('/', -1)[-1]
     ytitle = scalarType.split('_', -1)[-1]
-    pts_per_fiber = fiberArray.pts_per_fiber
 
     # Statistical calculations for plot
-    x = range(pts_per_fiber)
-    yavg = _mean(fiberArray, scalarTree, scalarType)
-    ystd = _stddev(fiberArray, scalarTree, scalarType)
+    x = range(fiberTree.pts_per_fiber)
+    yavg = _mean(fiberTree, scalarType, idxes)
+    ystd = _stddev(fiberTree, scalarType, idxes)
 
     # Plot of stats
     f = plt.figure(figsize=(10, 10))

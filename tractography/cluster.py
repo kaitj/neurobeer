@@ -13,7 +13,7 @@ from sys import exit
 import fibers, distance, misc
 import vtk
 
-def spectralClustering(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeightList=[],
+def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWeightList=[],
                                     pts_per_fiber=20, k_clusters=10, sigma=0.4, saveAllSimilarity=False,
                                     saveWSimilarity=False, dirpath=None, verbose=0, no_of_jobs=1):
         """
@@ -57,8 +57,13 @@ def spectralClustering(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeightL
             print "No. of fibers:", noFibers
             print "No. of clusters:", k_clusters
 
+        fiberData = fibers.FiberTree()
+        fiberData.convertFromVTK(inputVTK, pts_per_fiber)
+        for i in range(len(scalarTypeList)):
+            fiberData.addScalar(inputVTK, scalarDataList[i], scalarTypeList[i], pts_per_fiber)
+
         # 1. Compute similarty matrix
-        W = _weightedSimilarity(inputVTK, scalarTree, scalarTypeList, scalarWeightList,
+        W = _weightedSimilarity(fiberData, scalarTypeList, scalarWeightList,
                                                     sigma, saveAllSimilarity, pts_per_fiber, dirpath, no_of_jobs)
 
         if saveWSimilarity is True:
@@ -105,20 +110,17 @@ def spectralClustering(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeightL
 
         # 8. Return results
         # Create model with user / default number of chosen samples along fiber
-        outputData = fibers.FiberArray()
-        outputData.convertFromVTK(inputVTK, pts_per_fiber)
-        outputData = outputData.convertToVTK()
+        outputData = fiberData.convertToVTK()
 
         outputPolydata = _format_outputVTK(outputData, clusterIdx, colour)
 
         # 9. Also add measurements from those used to cluster
         for i in range(len(scalarTypeList)):
-            outputPolydata = addScalarToVTK(outputPolydata, scalarTree, scalarTypeList[i],
-                                                                        pts_per_fiber=pts_per_fiber)
+            outputPolydata = addScalarToVTK(outputPolydata, fiberData, scalarTypeList[i])
 
-        return outputPolydata, clusterIdx, colour, centroids
+        return outputPolydata, clusterIdx, colour, centroids, fiberData
 
-def addScalarToVTK(polyData, scalarTree, scalarType, fidxes=None, pts_per_fiber=20):
+def addScalarToVTK(polyData, fiberTree, scalarType, fidxes=None):
     """
     Add scalar to all polydata points to be converted to .vtk file.
     This function is different from scalars.addScalar, which only considers point
@@ -126,10 +128,9 @@ def addScalarToVTK(polyData, scalarTree, scalarType, fidxes=None, pts_per_fiber=
 
     INPUT:
         polyData - polydata for scalar measurements to be added to
-        scalarTree - the tree containing the quantitative measurement  to be added to the polydata
+        fiberTree - the tree containing polydata information
         scalarType - type of quantitative measurement to be aded to polydata
         fidxes - array with fiber indices pertaining to scalar data of extracted fibers; default none
-        pts_per_fiber - number of samples along a fiber; default 20
 
     OUTPUT:
         polydata - updated polydata with quantitative information
@@ -140,20 +141,20 @@ def addScalarToVTK(polyData, scalarTree, scalarType, fidxes=None, pts_per_fiber=
 
     if fidxes is None:
         for fidx in range(0, polyData.GetNumberOfLines()):
-            for pidx in range(0, pts_per_fiber):
-                scalarValue = scalarTree.fiberTree_scalar[fidx][pidx][scalarType]
+            for pidx in range(0, fiberTree.pts_per_fiber):
+                scalarValue = fiberTree.fiberTree[fidx][pidx][scalarType]
                 data.InsertNextValue(float(scalarValue))
     else:
         for fidx in fidxes:
-            for pidx in range(0, pts_per_fiber):
-                scalarValue = scalarTree.fiberTree_scalar[fidx][pidx][scalarType]
+            for pidx in range(0, fiberTree.pts_per_fiber):
+                scalarValue = fiberTree.fiberTree[fidx][pidx][scalarType]
                 data.InsertNextValue(float(scalarValue))
 
     polyData.GetPointData().AddArray(data)
 
     return polyData
 
-def extractCluster(inputVTK, clusterIdx, label):
+def extractCluster(inputVTK, clusterIdx, label, pts_per_fiber):
     """
     Extracts a cluster corresponding to the label provided.
 
@@ -165,15 +166,16 @@ def extractCluster(inputVTK, clusterIdx, label):
     OUTPUT:
         polyData - extracted cluster in polydata format; no information is retained
     """
-    fiberArray = fibers.FiberArray()
-    fiberArray.convertFromVTK(inputVTK)
+    fiberTree = fibers.FiberTree()
+    fiberTree.convertFromVTK(inputVTK, pts_per_fiber)
 
-    cluster = fiberArray.getFibers(np.where(clusterIdx == label)[0])
+    cluster = fiberTree.getFibers(np.where(clusterIdx == label)[0])
+    cluster = fibers.convertFromTuple(cluster)
     polyData = cluster.convertToVTK()
 
     return polyData
 
-def _pairwiseDistance_matrix(inputVTK, pts_per_fiber, no_of_jobs):
+def _pairwiseDistance_matrix(fiberTree, pts_per_fiber, no_of_jobs):
     """ *INTERNAL FUNCTION*
     Used to compute an NxN distance matrix for all fibers (N) in the input data.
 
@@ -186,13 +188,10 @@ def _pairwiseDistance_matrix(inputVTK, pts_per_fiber, no_of_jobs):
         distances - NxN matrix containing distances between fibers
     """
 
-    fiberArray = fibers.FiberArray()
-    fiberArray.convertFromVTK(inputVTK, pts_per_fiber)
-
     distances = Parallel(n_jobs=no_of_jobs)(
-            delayed(distance.fiberDistance)(fiberArray.getFiber(fidx),
-                    fiberArray)
-            for fidx in range(0, fiberArray.no_of_fibers))
+            delayed(distance.fiberDistance)(fiberTree.getFiber(fidx),
+                    fiberTree.getFibers(range(fiberTree.no_of_fibers)))
+            for fidx in range(0, fiberTree.no_of_fibers))
 
     distances = np.array(distances)
     # Normalize between 0 and 1
@@ -204,7 +203,7 @@ def _pairwiseDistance_matrix(inputVTK, pts_per_fiber, no_of_jobs):
 
     return distances
 
-def _pairwiseSimilarity_matrix(inputVTK, sigma, pts_per_fiber, no_of_jobs):
+def _pairwiseSimilarity_matrix(fiberTree, sigma, pts_per_fiber, no_of_jobs):
     """ *INTERNAL FUNCTION*
     Computes an NxN similarity matrix for all fibers (N) in the input data.
 
@@ -218,7 +217,7 @@ def _pairwiseSimilarity_matrix(inputVTK, sigma, pts_per_fiber, no_of_jobs):
         similarity - NxN matrix containing similarity between fibers based on geometry
     """
 
-    distances = _pairwiseDistance_matrix(inputVTK, pts_per_fiber, no_of_jobs)
+    distances = _pairwiseDistance_matrix(fiberTree, pts_per_fiber, no_of_jobs)
 
     sigmasq = np.square(sigma)
     similarities = distance.gausKernel_similarity(distances, sigmasq)
@@ -231,7 +230,7 @@ def _pairwiseSimilarity_matrix(inputVTK, sigma, pts_per_fiber, no_of_jobs):
 
     return similarities
 
-def _pairwiseQDistance_matrix(inputVTK, scalarTree, scalarType, pts_per_fiber, no_of_jobs):
+def _pairwiseQDistance_matrix(fiberTree, scalarType, pts_per_fiber, no_of_jobs):
     """ *INTERNAL FUNCTION*
     Computes the "pairwise distance" between quantitative points along a fiber.
 
@@ -246,14 +245,12 @@ def _pairwiseQDistance_matrix(inputVTK, scalarTree, scalarType, pts_per_fiber, n
         qDistances - NxN matrix containing pairwise distances between fibers
     """
 
-    fiberArray = fibers.FiberArray()
-    fiberArray.convertFromVTK(inputVTK, pts_per_fiber)
-    no_of_fibers = fiberArray.no_of_fibers
+    no_of_fibers = fiberTree.no_of_fibers
 
     qDistances = Parallel(n_jobs=no_of_jobs)(
             delayed(distance.scalarDistance)(
-                scalarTree.getScalar(fiberArray, fidx, scalarType),
-                scalarTree.getScalars(fiberArray, range(no_of_fibers), scalarType))
+                fiberTree.getScalar(fidx, scalarType),
+                fiberTree.getScalars(range(no_of_fibers), scalarType))
             for fidx in range(0, no_of_fibers)
     )
 
@@ -268,8 +265,8 @@ def _pairwiseQDistance_matrix(inputVTK, scalarTree, scalarType, pts_per_fiber, n
 
     return qDistances
 
-def _pairwiseQSimilarity_matrix(inputVTK, scalarTree, scalarType, sigma, pts_per_fiber,
-                                                      no_of_jobs,):
+def _pairwiseQSimilarity_matrix(fiberTree, scalarType, sigma, pts_per_fiber,
+                                                      no_of_jobs):
     """ *INTERNAL FUNCTION*
     Computes the similarity between quantitative points along a fiber.
 
@@ -285,7 +282,7 @@ def _pairwiseQSimilarity_matrix(inputVTK, scalarTree, scalarType, sigma, pts_per
         qSimilarity - NxN matrix containing similarity of quantitative measurements between fibers
     """
 
-    qDistances = _pairwiseQDistance_matrix(inputVTK, scalarTree, scalarType, pts_per_fiber, no_of_jobs)
+    qDistances = _pairwiseQDistance_matrix(fiberTree, scalarType, pts_per_fiber, no_of_jobs)
 
     sigmasq = np.square(sigma)
     qSimilarity = distance.gausKernel_similarity(qDistances, sigmasq)
@@ -366,8 +363,8 @@ def _format_outputVTK(polyData, clusterIdx, colour):
 
     return polyData
 
-def _weightedSimilarity(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeightList=[],
-                                        sigma=0.4, saveAllSimilarity=0, pts_per_fiber=20, dirpath=None,
+def _weightedSimilarity(fiberTree, scalarTypeList=[], scalarWeightList=[],
+                                        sigma=0.4, saveAllSimilarity=False, pts_per_fiber=20, dirpath=None,
                                         no_of_jobs=1):
     """ *INTERNAL FUNCTION*
     Computes and returns a single weighted similarity matrix.
@@ -387,18 +384,18 @@ def _weightedSimilarity(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeight
         wSimilarity - matrix containing the computed weighted similarity
     """
 
-    if ((scalarWeightList == []) & (scalarTree.fiberTree_scalar.items() != [])):
+    if ((scalarWeightList == []) & (scalarTypeList != [])):
         print "\nNo weights given for provided measurements! Exiting..."
         exit()
 
-    elif ((scalarTree.fiberTree_scalar.items() != []) & (scalarTypeList == [])):
+    elif ((scalarWeightList != []) & (scalarTypeList == [])):
         print "\nPlease also specify measurement(s) type. Exiting..."
         exit()
 
-    elif (scalarTree.fiberTree_scalar.items() == []):
+    elif ((scalarWeightList == [])) & ((scalarTypeList == [])):
         print "\nNo measurements provided!"
         print "\nCalculating similarity based on geometry."
-        wSimilarity = _pairwiseSimilarity_matrix(inputVTK, sigma, pts_per_fiber, no_of_jobs)
+        wSimilarity = _pairwiseSimilarity_matrix(fiberTree, sigma, pts_per_fiber, no_of_jobs)
 
         if dirpath is None:
             dirpath = os.getcwd()
@@ -414,7 +411,7 @@ def _weightedSimilarity(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeight
             print '\nWeights given do not sum 1. Exiting...'
             exit()
 
-        wSimilarity = _pairwiseSimilarity_matrix(inputVTK, sigma, pts_per_fiber,
+        wSimilarity = _pairwiseSimilarity_matrix(fiberTree, sigma, pts_per_fiber,
                                                                             no_of_jobs) * scalarWeightList[0]
 
         if saveAllSimilarity is True:
@@ -429,7 +426,7 @@ def _weightedSimilarity(inputVTK, scalarTree=[], scalarTypeList=[], scalarWeight
             misc.saveMatrix(dirpath, wSimilarity, matrixType)
 
         for i in range(len(scalarTypeList)):
-            similarity = _pairwiseQSimilarity_matrix(inputVTK, scalarTree,
+            similarity = _pairwiseQSimilarity_matrix(fiberTree,
                 scalarTypeList[i], sigma, pts_per_fiber, no_of_jobs)
 
             if saveAllSimilarity is True:
