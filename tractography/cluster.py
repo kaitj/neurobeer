@@ -23,7 +23,7 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
         If no scalar data provided, clustering performed based on geometry.
         First element of scalarWeightList should be weight placed for geometry, followed by order
         given in scalarTypeList These weights should sum to 1.0 (weights given as a decimal value).
-        ex.  scalarDataList = [FA, T1]
+        ex.  scalarDataList
               scalarTypeList = [FA, T1]
               scalarWeightList = [Geometry, FA, T1]
 
@@ -61,7 +61,7 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
             print "No. of clusters:", k_clusters
 
         fiberData = fibers.FiberTree()
-        fiberData.convertFromVTK(inputVTK, pts_per_fiber)
+        fiberData.convertFromVTK(inputVTK, pts_per_fiber, verbose)
         for i in range(len(scalarTypeList)):
             fiberData.addScalar(inputVTK, scalarDataList[i], scalarTypeList[i], pts_per_fiber)
 

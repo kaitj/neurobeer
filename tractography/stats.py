@@ -100,4 +100,5 @@ def plotStats(fiberTree, scalarType, idxes=None, dirpath=None):
                               top='off', right='off')
 
     # Save figure
-    f.savefig(dirpath + '/' + title + '_stats.png')
+    plt.savefig(dirpath + '/' + title + '_stats.png')
+    plt.close(f)

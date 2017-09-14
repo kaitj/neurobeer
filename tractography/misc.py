@@ -52,3 +52,4 @@ def saveMatrix(dirpath, matrix, matrixType):
     plt.colorbar(im, cax)
 
     plt.savefig(dirpath + '/' + matrixType + '_Similarity.png')
+    plt.close(f)
