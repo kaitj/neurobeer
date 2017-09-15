@@ -414,7 +414,7 @@ def _weightedSimilarity(fiberTree, scalarTypeList=[], scalarWeightList=[],
             exit()
 
         wSimilarity = _pairwiseSimilarity_matrix(fiberTree, sigma, pts_per_fiber,
-                                                                            no_of_jobs) * scalarWeightList[0]
+                                                                            no_of_jobs)
 
         if saveAllSimilarity is True:
             if dirpath is None:
@@ -424,8 +424,10 @@ def _weightedSimilarity(fiberTree, scalarTypeList=[], scalarWeightList=[],
                     os.makedirs(dirpath)
 
             matrixType = scalarTypeList[0].split('/', -1)[-1]
-            matrixType = matrixType[:-2] + 'distance'
+            matrixType = matrixType[:-2] + 'geometry'
             misc.saveMatrix(dirpath, wSimilarity, matrixType)
+
+        wSimilarity = wSimilarity * scalarWeightList[0]
 
         for i in range(len(scalarTypeList)):
             similarity = _pairwiseQSimilarity_matrix(fiberTree,
