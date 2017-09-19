@@ -3,8 +3,8 @@ from distutils.core import setup
 setup(
     # Project information
     name='tractography',
-    version='0.1.0',
-    packages=['tractography'],
+    version='0.1.1',
+    packages=['tractography', 'cli'],
 
     # Metadata
     author='Jason Kai',
