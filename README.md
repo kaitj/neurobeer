@@ -138,8 +138,10 @@ A number of different outputs are possible depending on the inputs given. The to
 
 <img src="./imgs/OpticRadiation_Right_clustered.png" width="900" height="400" />
 <img src="./imgs/OpticRadiation_Right_Cluster1.png" width="900" height="400" />
-<img src="./imgs/weightedSimilarity.png" width="400" height="400" />
-<img src="./imgs/OpticRadiation_Right_fa_stats.png" width="400" height="400" />
+<p float="left">
+    <img src="./imgs/weightedSimilarity.png" width="400" height="400" />
+    <img src="./imgs/OpticRadiation_Right_fa_stats.png" width="400" height="400" />
+</p>
 
 
 ## Workflow <a name="workflow"></a>
