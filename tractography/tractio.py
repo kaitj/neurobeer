@@ -92,6 +92,7 @@ def readScalar(scalarfile, verbose=0):
         print "\nReading", scalarfile, "..."
 
     scalarType, ext = os.path.splitext(scalarfile)
+    scalarType = scalarType.split('/', -1)[-1]
 
     if (ext == '.txt'):
         fileReader = open(scalarfile, 'rU')

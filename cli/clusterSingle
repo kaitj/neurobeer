@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""" cluster_run
+""" clusterSingle
 
 Python command line interface for automated tractography clustering
 and evaluation.
@@ -12,12 +12,12 @@ def get_parser():
     """
     from argparse import ArgumentParser, RawTextHelpFormatter
 
-    parser = ArgumentParser(description='Tractography: cluster extracton and evaluation',
+    parser = ArgumentParser(description='Tractography clustering of single subject',
                                              formatter_class=RawTextHelpFormatter)
 
     # Version option
     parser.add_argument('--version', action='version',
-                                      version='0.1.1')
+                                      version='0.1.2')
 
     # Required arguments
     g_req = parser.add_argument_group('required arguments')
@@ -98,7 +98,7 @@ def main():
 
     # Perform clustering on provided bundle
     matdir = os.path.join(outdir + '/matrices')
-    outputPolydata, clusterIdx, colour, centroids, fiberData = cluster.spectralClustering(
+    outputPolydata, clusterIdx, fiberData = cluster.spectralClustering(
                                     bundlePolydata, scalarDataList=scalarDataList,
                                     scalarWeightList=scalarWeightList, scalarTypeList=scalarTypeList,
                                     pts_per_fiber=opts.p, k_clusters=opts.k, sigma=opts.sig,

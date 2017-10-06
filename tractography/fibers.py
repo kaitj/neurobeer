@@ -138,6 +138,25 @@ class FiberTree:
 
         return fiberArray_x, fiberArray_y, fiberArray_z
 
+    def addClusterInfo(self, clusterLabels, centroids):
+        """
+        Add and save cluster label to fiber tree storing tractography data.
+
+        INPUT:
+            clusterLabels - Array of cluster labels sorted in fiber index order
+            centroids - Array of centroids associated with fiber clusters
+
+        OUTPUT:
+            none
+        """
+
+        uniqueLabels = np.unique(clusterLabels, return_counts=False)
+
+        for label in uniqueLabels:
+            for fidx in np.where(clusterLabels == label)[0]:
+                self.fiberTree[fidx][str(label)] = label
+                self.fiberTree[fidx]['centroid'] = centroids[label]
+
     def addScalar(self, inputVTK, scalarData, scalarType, pts_per_fiber=20):
         """
         Add scalar information pertaining to tractography. Values are

@@ -3,8 +3,9 @@ from distutils.core import setup
 setup(
     # Project information
     name='tractography',
-    version='0.1.1',
+    version='0.1.2',
     packages=['tractography', 'cli'],
+    package_data={'cli': ['clusterSingle']},
 
     # Metadata
     author='Jason Kai',

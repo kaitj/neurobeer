@@ -93,7 +93,7 @@ The Bundle Extraction and Evaluation Resource can be used via command line or as
 ### Command line interface <a name="cli"></a>
 Shown is an example of how to run the command line interface with required arguments.
 ```
-Usage: cluster_run.py --indir <in_dir> --subjid <subjid> --bundle <bundle_name> --outdir <out_dir>
+Usage: clusterSingle --indir <in_dir> --subjid <subjid> --bundle <bundle_name> --outdir <out_dir>
 ```
 
 #### Required arguments <a name="reqarg"></a>
