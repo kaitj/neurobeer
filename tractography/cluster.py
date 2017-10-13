@@ -8,9 +8,10 @@ parameters pertaining to clusters.
 import numpy as np
 import os, scipy.cluster, sklearn.preprocessing
 from joblib import Parallel, delayed
+from joblib.pool import has_shareable_memory
 from sys import exit
 
-import prior, fibers, distance, misc
+import fibers, distance, misc, prior
 import vtk
 
 def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWeightList=[],
@@ -131,9 +132,8 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
         return outputPolydata, clusterIdx, fiberData
 
 def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[],
-                                    scalarWeightList=[], pts_per_fiber=20, k_clusters=200, sigma=0.4,
-                                    saveAllSimilarity=False, saveWSimilarity=False, dirpath=None, verbose=0,
-                                    no_of_jobs=1):
+                                    scalarWeightList=[], sigma=0.4, saveAllSimilarity=False,
+                                    saveWSimilarity=False, dirpath=None, verbose=0, no_of_jobs=1):
         """
         Clustering of fibers based on pairwise fiber similarity using previously clustered fibers.
         See paper: "A tutorial on spectral clustering" (von Luxburg, 2007)
@@ -151,8 +151,6 @@ def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[
             scalarDataList - list containing scalar data for similarity measurements; defaults empty
             scalarTypeList - list containing scalar type for similarity measurements; defaults empty
             scalarWeightList - list containing scalar weights for similarity measurements; defaults empty
-            pts_per_fiber - number of samples to take along each fiber
-            k_clusters - number of clusters via k-means clustering; defaults 10 clusters
             sigma - width of Gaussian kernel; adjust to alter sensitivity; defaults 0.4
             saveAllSimilarity - flag to save all individual similarity matrices computed; defaults False
             saveWSimilarity - flag to save weighted similarity matrix computed; defaults False
@@ -166,9 +164,10 @@ def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[
             fiberData - tree containing spatial and quantitative information of fibers
         """
 
-        no_of_eigvec = k_clusters
-
         priorData, priorCentroids = prior.load(priorVTK)
+
+        no_of_eigvec = len(priorCentroids)
+        pts_per_fiber = int(priorData.pts_per_fiber)
 
         noFibers = inputVTK.GetNumberOfLines
         nopriorFibers = priorData.no_of_fibers
@@ -178,7 +177,7 @@ def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[
         elif verbose == 1:
             print "\nStarting clustering..."
             print "No. of fibers:", noFibers
-            print "No. of clusters:", k_clusters
+            print "No. of clusters:", no_of_eigvec
 
         fiberData = fibers.FiberTree()
         fiberData.convertFromVTK(inputVTK, pts_per_fiber, verbose)
@@ -186,7 +185,7 @@ def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[
             fiberData.addScalar(inputVTK, scalarDataList[i], scalarTypeList[i], pts_per_fiber)
 
         # 1. Compute similarty matrix
-        W = _pairwiseWeightedSimilarity(fiberData, scalarTypeList, scalarWeightList,
+        W = _priorWeightedSimilarity(fiberData, priorData, scalarTypeList, scalarWeightList,
                                                     sigma, saveAllSimilarity, pts_per_fiber, dirpath, no_of_jobs)
         V = np.dot(W, W.T)  # Computes low order approximation from left SVD
 
@@ -322,8 +321,8 @@ def _pairwiseDistance_matrix(fiberTree, pts_per_fiber, no_of_jobs):
         distances - NxN matrix containing distances between fibers
     """
 
-    distances = Parallel(n_jobs=no_of_jobs)(
-            delayed(distance.fiberDistance)(fiberTree.getFiber(fidx),
+    distances = Parallel(n_jobs=no_of_jobs, backend="threading")(
+            delayed(distance.fiberDistance, has_shareable_memory)(fiberTree.getFiber(fidx),
                     fiberTree.getFibers(range(fiberTree.no_of_fibers)))
             for fidx in range(0, fiberTree.no_of_fibers))
 
@@ -380,8 +379,8 @@ def _pairwiseQDistance_matrix(fiberTree, scalarType, pts_per_fiber, no_of_jobs):
 
     no_of_fibers = fiberTree.no_of_fibers
 
-    qDistances = Parallel(n_jobs=no_of_jobs)(
-            delayed(distance.scalarDistance)(
+    qDistances = Parallel(n_jobs=no_of_jobs, backend="threading")(
+            delayed(distance.scalarDistance, has_shareable_memory)(
                 fiberTree.getScalar(fidx, scalarType),
                 fiberTree.getScalars(range(no_of_fibers), scalarType))
             for fidx in range(0, no_of_fibers)
@@ -442,8 +441,8 @@ def _priorDistance_matrix(fiberTree, priorTree, pts_per_fiber, no_of_jobs):
         distances - matrix containing distances between fibers
     """
 
-    distances = Parallel(n_jobs=no_of_jobs)(
-            delayed(distance.fiberDistance)(fiberTree.getFiber(fidx),
+    distances = Parallel(n_jobs=no_of_jobs, backend="threading")(
+            delayed(distance.fiberDistance, has_shareable_memory)(fiberTree.getFiber(fidx),
                     priorTree.getFibers(range(priorTree.no_of_fibers)))
             for fidx in range(0, fiberTree.no_of_fibers))
 
@@ -494,8 +493,8 @@ def _priorQDistance_matrix(fiberTree, priorTree, scalarType, pts_per_fiber, no_o
         qDistances - matrix containing pairwise distances between fibers
     """
 
-    qDistances = Parallel(n_jobs=no_of_jobs)(
-            delayed(distance.scalarDistance)(
+    qDistances = Parallel(n_jobs=no_of_jobs, backend="threading")(
+            delayed(distance.scalarDistance, has_shareable_memory)(
                 fiberTree.getScalar(fidx, scalarType),
                 priorTree.getScalars(range(priorTree.no_of_fibers), scalarType))
             for fidx in range(0, fiberTree.no_of_fibers)
