@@ -155,7 +155,7 @@ class FiberTree:
         for label in uniqueLabels:
             for fidx in np.where(clusterLabels == label)[0]:
                 self.fiberTree[fidx][str(label)] = label
-                self.fiberTree[fidx]['centroid'] = centroids[label]
+                self.fiberTree['centroid'][label] = centroids[label]
 
     def addScalar(self, inputVTK, scalarData, scalarType, pts_per_fiber=20):
         """

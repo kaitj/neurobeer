@@ -91,6 +91,7 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
         eigval, eigvec = np.linalg.eig(Lrw)
         idx = eigval.argsort()
         eigval, eigvec = eigval[idx], eigvec[:, idx]
+        eigvec = np.divide(eigvec, np.sqrt(np.sum(np.square(eigvec), 0)))
 
         # 6. Compute information for clustering using "N" number of smallest eigenvalues
         # Skips first eigenvector, no information obtained
@@ -169,8 +170,8 @@ def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[
         no_of_eigvec = len(priorCentroids)
         pts_per_fiber = int(priorData.pts_per_fiber)
 
-        noFibers = inputVTK.GetNumberOfLines
-        nopriorFibers = priorData.no_of_fibers
+        noFibers = inputVTK.GetNumberOfLines()
+        nopriorFibers = int(priorData.no_of_fibers)
         if noFibers == 0 or nopriorFibers == 0:
             print "\nERROR: Input data(s) has 0 fibers!"
             raise ValueError
@@ -185,9 +186,11 @@ def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[
             fiberData.addScalar(inputVTK, scalarDataList[i], scalarTypeList[i], pts_per_fiber)
 
         # 1. Compute similarty matrix
-        W = _priorWeightedSimilarity(fiberData, priorData, scalarTypeList, scalarWeightList,
-                                                    sigma, saveAllSimilarity, pts_per_fiber, dirpath, no_of_jobs)
-        V = np.dot(W, W.T)  # Computes low order approximation from left SVD
+        W = _pairwiseWeightedSimilarity(fiberData, scalarTypeList, scalarWeightList, sigma,
+                                                        saveAllSimilarity, pts_per_fiber, dirpath, no_of_jobs)
+        #W = _priorWeightedSimilarity(fiberData, priorData, scalarTypeList, scalarWeightList,
+        #                                            sigma, saveAllSimilarity, pts_per_fiber, dirpath, no_of_jobs)
+        #V = np.dot(W, W.T)  # Computes low order approximation from left SVD
 
         if saveWSimilarity is True:
             if dirpath is None:
@@ -197,13 +200,13 @@ def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[
                     os.makedirs(dirpath)
 
             misc.saveMatrix(dirpath, W, 'Weighted')
-            misc.saveMatrix(dirpath, V, 'Approximation')
+            #misc.saveMatrix(dirpath, V, 'Approximation')
 
         # 2. Compute degree matrix
-        D = _degreeMatrix(V)
+        D = _degreeMatrix(W)
 
         # 3. Compute unnormalized Laplacian
-        L = D - V
+        L = D - W
 
         # 4. Compute normalized Laplacian (random-walk)
         Lrw = np.dot(np.diag(np.divide(1, np.sum(D, 0))), L)
@@ -213,6 +216,7 @@ def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[
         eigval, eigvec = np.linalg.eig(Lrw)
         idx = eigval.argsort()
         eigval, eigvec = eigval[idx], eigvec[:, idx]
+        eigvec = np.divide(eigvec, np.sqrt(np.sum(np.square(eigvec), 0)))
 
         # 6. Compute information for clustering using "N" number of smallest eigenvalues
         # Skips first eigenvector, no information obtained
@@ -811,6 +815,6 @@ def _sortLabel(centroids, clusterIdx):
     for i in range(len(sortedClusters)):
         newIdx = np.where(sortedClusters == i)
         newClusters[clusterIdx == i] = newIdx[0][0]
-        newCentroids[i, :] = centroids[newIdx[0][0], :]
+        newCentroids[i, :] = centroids[sortedClusters[i]]
 
     return newCentroids, newClusters
