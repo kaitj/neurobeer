@@ -97,13 +97,12 @@ def main():
             scalarWeightList.append(float(val))
 
     # Perform clustering on provided bundle
-    matdir = os.path.join(outdir + '/matrices')
     outputPolydata, clusterIdx, fiberData = cluster.spectralClustering(
                                     bundlePolydata, scalarDataList=scalarDataList,
                                     scalarWeightList=scalarWeightList, scalarTypeList=scalarTypeList,
                                     pts_per_fiber=opts.p, k_clusters=opts.k, sigma=opts.sig,
                                     saveWSimilarity=opts.saveWeight, saveAllSimilarity=opts.saveAll,
-                                    dirpath=matdir, verbose=opts.verbose, no_of_jobs=opts.j)
+                                    dirpath=outdir, verbose=opts.verbose, no_of_jobs=opts.j)
     del bundlePolydata, scalarWeightList, scalarDataList
 
     bundleName = opts.bundle[:-4] + '_Clustered.vtk'

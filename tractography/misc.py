@@ -9,23 +9,25 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-def corr(data1, data2):
+def saveEig(dirpath, eigvalArray, eigvecArray):
     """
-    Perform correlation coefficient calculation using numpy library.
-    Used for parallel, row-by-row correlation, returning only off-diagonal value.
+    Function used to save eigenvalues and eigenvectors to binary file):
 
     INPUT:
-        data1 - First row of array data to be used in computation
-        data2 - Second row of array data to be used in computation
+        dirpath - Directory path for storing eigenvalues & eigenvectors
+        eigvalArray - Array of eigenvalues to be saved
+        eigvecArray - Matrix of eigenvectos to be saved
 
     OUTPUT:
-        val - Off-diagonal correlation value
-   """
+        none
+    """
+    # Paths for files to be saved
+    eigvalPath = dirpath + '/eigval.npy'
+    eigvecPath = dirpath + '/eigvec.npy'
 
-    val = np.corrcoef(data1, data2)
-    val = val[0][1]
-
-    return val
+    # Save to file
+    np.save(eigvalPath, eigvalArray)
+    np.save(eigvecPath, eigvecArray)
 
 def saveMatrix(dirpath, matrix, matrixType):
     """
