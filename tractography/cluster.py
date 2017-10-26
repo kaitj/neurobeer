@@ -76,7 +76,6 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
             misc.saveMatrix(matpath, W, 'Weighted')
 
         # 2. Compute degree matrix
-        W = np.dot(W, W.T)  # Computes correlation matrix from similarity
         D = _degreeMatrix(W)
 
         # 3. Compute unnormalized Laplacian
@@ -87,28 +86,26 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
 
         # 5. Compute eigenvalues and eigenvectors of generalized eigenproblem
         # Sort by ascending eigenvalue
-        eigval, eigvec = np.linalg.eig(Lrw)
+        eigval, eigvec = np.linalg.eigh(Lrw)
         idx = eigval.argsort()
         eigval, eigvec = eigval[idx], eigvec[:, idx]
         misc.saveEig(dirpath, eigval, eigvec)
-
-        Dscale = np.divide(1, np.sqrt(np.sum(D, 0)))
-        em_vec = np.multiply(Dscale, eigvec)
 
         # 6. Compute information for clustering using "N" number of smallest eigenvalues
         # Skips first eigenvector, no information obtained
         if k_clusters > eigvec.shape[0]:
             print '\nNumber of user selected clusters greater than number of eigenvectors.'
             print 'Clustering with maximum number of available eigenvectors.'
-            U = em_vec[:, 1:em_vec.shape[0]]
+            emvec = eigvec[:, 1:eigvec.shape[0]]
         elif k_clusters == eigvec.shape[0]:
-            U = em_vec[:, 1:k_clusters]
+            emvec = eigvec[:, 1:k_clusters]
         else:
-            U = em_vec[:, 1:k_clusters + 1]
-        U = U.real
+            emvec = eigvec[:, 1:k_clusters + 1]
+        emvec = emvec.real
 
         # 7. Find clusters using K-means clustering
-        centroids, clusterIdx = scipy.cluster.vq.kmeans2(U, k_clusters, iter=20, minit='points')
+        centroids, clusterIdx = scipy.cluster.vq.kmeans2(emvec, k_clusters, iter=20,
+                                                                                        minit='points')
         centroids, clusterIdx = _sortLabel(centroids, clusterIdx)
         fiberData.addClusterInfo(clusterIdx, centroids)
 
@@ -139,8 +136,10 @@ def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[
                                     scalarWeightList=[], sigma=0.4, saveAllSimilarity=False,
                                     saveWSimilarity=False, dirpath=None, verbose=0, no_of_jobs=1):
         """
-        Clustering of fibers based on pairwise fiber similarity using previously clustered fibers.
+        Clustering of fibers based on pairwise fiber similarity using previously clustered fibers
+        via a Nystrom-like method.
         See paper: "A tutorial on spectral clustering" (von Luxburg, 2007)
+                          "Spectral grouping using the Nystrom method" (Fowles et al., 2004)
 
         If no scalar data provided, clustering performed based on geometry.
         First element of scalarWeightList should be weight placed for geometry, followed by order
@@ -167,8 +166,24 @@ def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[
             clusterIdx - array containing cluster that each fiber belongs to
             fiberData - tree containing spatial and quantitative information of fibers
         """
+        if dirpath is None:
+            dirpath = os.getcwd()
+
+        matpath = dirpath + '/matrices'
+        if not os.path.exists(matpath):
+            os.makedirs(matpath)
 
         priorData, priorCentroids = prior.load(priorVTK)
+        priorPath = os.path.split(priorVTK)[0]
+
+        if not os.path.exists(priorPath + '/eigval.npy'):
+            print "Eigenvalue binary file does not exist"
+            raise IOError
+        elif not os.path.exists(priorPath + '/eigvec.npy'):
+            print "Eigenvector binary file does not exist"
+            raise IOError
+        else:
+            eigval, eigvec = prior.loadEig(priorPath, 'eigval.npy', 'eigvec.npy')
 
         k_clusters = len(priorCentroids)
         pts_per_fiber = int(priorData.pts_per_fiber)
@@ -190,46 +205,33 @@ def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[
 
         # 1. Compute similarty matrix
         W = _priorWeightedSimilarity(fiberData, priorData, scalarTypeList, scalarWeightList,
-                                                    sigma, saveAllSimilarity, pts_per_fiber, dirpath, no_of_jobs)
-        V = np.dot(W, W.T)  # Computes low order approximation from left SVD
-
-        if dirpath is None:
-            dirpath = os.getcwd()
-            if not os.path.exists(dirpath + '/eigval.npy') or os.path.exists(dirpath + '/eigvec.npy'):
-                print "\nMissing eigenvalue or eigenvector binary file"
-                raise "I/O Error"
-
-            eigval, eigvec = prior.loadEig(dirpath, 'eigval.npy', 'eigvec.npy')
+                                                    sigma, saveAllSimilarity, pts_per_fiber, matpath, no_of_jobs)
 
         if saveWSimilarity is True:
             matpath = dirpath + '/matrices'
-            if not os.path.exists(matpath):
-                os.makedirs(matpath)
 
-            misc.saveMatrix(matpath, W, 'Weighted')
-            misc.saveMatrix(matpath, V, 'Approximation')
+        misc.saveMatrix(matpath, W, 'Weighted')
 
-        # 2. Compute degree matrix
-        D = _degreeMatrix(V)
-        Dscale = np.divide(1, np.sqrt(np.sum(D, 0)))
+        # 2. Compute inverse of eigenvalues
+        invEigval = np.diag(np.divide(1, eigval))
 
-        # 3. Compute embedding vector
-        em_vec = np.multiply(Dscale, eigvec)
+        # 3. Compute new eigenvectors vectors in feature space
+        nEigvec = np.dot(np.dot(W, eigvec), invEigval)
 
         # 6. Compute information for clustering using "N" number of smallest eigenvalues
         # Skips first eigenvector, no information obtained
-        if k_clusters > eigvec.shape[0]:
+        if k_clusters > nEigvec.shape[0]:
             print 'Number of user selected clusters greater than number of eigenvectors.'
             print 'Clustering with maximum number of available eigenvectors.'
-            U = em_vec[:, 1:em_vec.shape[0]]
+            emvec = nEigvec[:, 1:nEigvec.shape[0]]
         elif k_clusters == eigvec.shape[0]:
-            U = em_vec[:, 1:k_clusters]
+            emvec = nEigvec[:, 1:k_clusters]
         else:
-            U = em_vec[:, 1:k_clusters + 1]
-        U = U.real
+            emvec = nEigvec[:, 1:k_clusters + 1]
+        emvec = emvec.real
 
         # 7. Find clusters using K-means clustering
-        clusterIdx, dist = scipy.cluster.vq.vq(U, priorCentroids)
+        clusterIdx, dist = scipy.cluster.vq.vq(emvec, priorCentroids)
         fiberData.addClusterInfo(clusterIdx, priorCentroids)
 
         if k_clusters <= 1:
