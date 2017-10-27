@@ -5,7 +5,7 @@ setup(
     name='tractography',
     version='0.1.2',
     packages=['tractography', 'cli'],
-    package_data={'cli': ['clusterSingle']},
+    package_data={'cli': ['clusterSingle', 'clusterPrior']},
 
     # Metadata
     author='Jason Kai',
