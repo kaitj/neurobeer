@@ -80,7 +80,7 @@ def fiberDistance(fiber, fiberArray):
 
     # Compute distances for fiber and fiber equivalent to fiber group
     distance1 = _fiberDistance_internal(fiber, fiberArray)
-    distance2 = _fiberDistance_internal(np.flip(fiber, axis=1), fiberArray)
+    distance2 = _fiberDistance_internal(np.fliplr(fiber), fiberArray)
 
     # Minimum distance more likely to be part of cluster; return distance
     distance = np.minimum(distance1, distance2)
