@@ -27,8 +27,9 @@ The Bundle Extraction and Evaluation Resource, a data-driven tractography tool.
 The Bundle Extraction and Evaluation Resource was developed with the aim of clustering and evaluating white matter tractography of the brain. The tool derives from the [white matter fiber clustering tool](https://github.com/SlicerDMRI/whitematteranalysis)<sup>1,2</sup>. A spectral clustering algorithm, as described by von Luxburg<sup>3</sup> (2007), is implemented to perform clustering of user-provided white matter tractography.
 
 ### Support and communication <a name="support"></a>
-All bugs, concerns, and requests for features can be requested via the github repository found [here](https://github.com/kaitj/tractography/issues).
+This module has been tested on Ubuntu 16.04
 
+All bugs, concerns, and requests for features can be requested via the github repository found [here](https://github.com/kaitj/tractography/issues).
 
 ## Installation <a name="installation"></a>
 The latest development version of the bundle extraction and evaluation resource was developed on a Python 2 environment.
@@ -91,6 +92,12 @@ python setup.py install --user
 The Bundle Extraction and Evaluation Resource can be used via command line or as a Python library to be used in Python scripts.
 
 ### Command line interface <a name="cli"></a>
+Note: The path to the command line interface should be added to the environment path. Please make note of the installation path after running setup.py. To do so, add the following line of code to ~/.profile (or ~/.bash_profile) from the terminal:
+```
+PATH=$PATH:~/.local/lib/python2.7/site-packages/cli
+```
+Replace the path above with the installation path on your system.
+
 Shown is an example of how to run the command line interface with required arguments.
 ```
 Usage: clusterSingle --indir <in_dir> --subjid <subjid> --bundle <bundle_name> --outdir <out_dir>

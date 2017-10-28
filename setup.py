@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
     # Project information
     name='tractography',
-    version='0.1.2',
+    version='0.1.3',
     packages=['tractography', 'cli'],
     package_data={'cli': ['clusterSingle', 'clusterPrior']},
 
