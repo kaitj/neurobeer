@@ -4,6 +4,7 @@ The Bundle Extraction and Evaluation Resource, a data-driven tractography tool.
 
 ## Contents
 * [Introduction](#introduction)
+    * [Disclaimer](#disclaimer)
     * [Support and communication](#support)
 * [Installation](#installation)
     * [System dependencies](#dependencies)
@@ -25,6 +26,9 @@ The Bundle Extraction and Evaluation Resource, a data-driven tractography tool.
 
 ## Introduction <a name="introduction"></a>
 The Bundle Extraction and Evaluation Resource was developed with the aim of clustering and evaluating white matter tractography of the brain. The tool derives from the [white matter fiber clustering tool](https://github.com/SlicerDMRI/whitematteranalysis)<sup>1,2</sup>. A spectral clustering algorithm, as described by von Luxburg<sup>3</sup> (2007), is implemented to perform clustering of user-provided white matter tractography.
+
+### Disclaimer <a name="disclaimer"></a>
+This tool is still in the development stages and may undergo major changes. As such, this tool should be considered to still be in alpha stages. Results may not be correct and users should carefully check to ensure they are satisfactory.
 
 ### Support and communication <a name="support"></a>
 This module has been tested on Ubuntu 16.04
