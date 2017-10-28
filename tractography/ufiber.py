@@ -23,13 +23,11 @@ def findUFiber(fiberData):
 
     # Determine fiber length and u-shape
     for fidx in range(fiberData.no_of_fibers):
-        L, fl = _calcFiberLength(fiberData, fidx)
+        L = _calcFiberLength(fiberData, fidx)
 
         D = _calcEndPointSep(fiberData, fidx)
 
-        if fl is True:
-            continue
-        elif (L > 30) and (D <= (L / np.pi)) and (L < 80):
+        if (L > 30) and (D <= (L / np.pi)) and (L < 80):
             uArray.append(fidx)
 
     return uArray
@@ -80,17 +78,13 @@ def _calcFiberLength(fiberData, fidx):
 
         # Temporary fix for finding if fibers cross
         if x1 < 0 and x2 > 0:
-            fl = True
-            return 0, fl
+            return 0
         elif x1 > 0 and x2 < 0:
-            fl = True
-            return 0, fl
+            return 0
         else:
-            fl = False
+            L = L + np.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
 
-        L = L + np.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
-
-    return L, fl
+    return L
 
 def _calcEndPointSep(fiberData, fidx):
     """ * INTERNAL uFiberData.fiberTreeFUNCTION *
