@@ -166,11 +166,12 @@ Acquisition -> Preprocessing -> Create VTK streamlines -> Create scalar data -> 
 using a high-dimensional white matter atlas. Medical Imaging,
 IEEE Transactions on 26.11 (2007): 1562-1575.
 
-[2]
-O’Donnell LJ, Wells III WM, Golby AJ, Westin CF. Unbiased groupwise registration of white matter tractography.
+[2] O’Donnell, LJ., Wells III, WM., Golby, AJ., Westin, CF. Unbiased groupwise registration of white matter tractography.
 In International Conference on Medical Image Computing and Computer-Assisted Intervention 2012 Oct 1 (pp. 123-130).
 Springer Berlin Heidelberg.
 
-[3] Von Luxburg, U. A tutorial on spectral clustering. Statistics and computing. 2007 Dec 1;17(4):395-416.
+[3] Von Luxburg, U. A tutorial on spectral clustering. Statistics and computing. 2007 Dec 1. 17(4):395-416.
 
-[4] Cook, PA, et al. Camino: open-source diffusion-mri reconstruction and processing. 14th Scientific Meeting of the International Society for Magnetic Resonance in Medicine, Seattle, WA, USA, p. 2759, May 2006.
+[4] Fowlkes, C., Belongie, S., Chung, F., Malik, J. Spectral grouping using the Nystrom method. 2004 June 28. 26(2):214-225
+
+[5] Cook, PA, et al. Camino: open-source diffusion-mri reconstruction and processing. 14th Scientific Meeting of the International Society for Magnetic Resonance in Medicine, Seattle, WA, USA, p. 2759, May 2006.
