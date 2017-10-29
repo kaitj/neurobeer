@@ -72,6 +72,9 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
         W = _pairwiseWeightedSimilarity(fiberData, scalarTypeList, scalarWeightList,
                                                     sigma, saveAllSimilarity, pts_per_fiber, matpath, no_of_jobs)
 
+        # Outlier detection
+        W, rejIdx = _outlierDetection(W)
+
         if saveWSimilarity is True:
             misc.saveMatrix(matpath, W, 'Weighted')
 
@@ -122,7 +125,7 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
 
         # 8. Return results
         # Create model with user / default number of chosen samples along fiber
-        outputData = fiberData.convertToVTK()
+        outputData = fiberData.convertToVTK(rejIdx)
 
         outputPolydata = _format_outputVTK(outputData, clusterIdx, colour, centroids)
 
@@ -207,6 +210,8 @@ def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[
         W = _priorWeightedSimilarity(fiberData, priorData, scalarTypeList, scalarWeightList,
                                                     sigma, saveAllSimilarity, pts_per_fiber, matpath, no_of_jobs)
 
+        W, rejIdx = _outlierDetection(W)
+
         if saveWSimilarity is True:
             matpath = dirpath + '/matrices'
 
@@ -247,7 +252,7 @@ def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[
 
         # 8. Return results
         # Create model with user / default number of chosen samples along fiber
-        outputData = fiberData.convertToVTK()
+        outputData = fiberData.convertToVTK(rejIdx)
 
         outputPolydata = _format_outputVTK(outputData, clusterIdx, colour, priorCentroids)
 
@@ -257,7 +262,7 @@ def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[
 
         return outputPolydata, clusterIdx, fiberData
 
-def addScalarToVTK(polyData, fiberTree, scalarType, fidxes=None):
+def addScalarToVTK(polyData, fiberTree, scalarType, fidxes=None, rejIdx=[]):
     """
     Add scalar to all polydata points to be converted to .vtk file.
     This function is different from scalars.addScalar, which only considers point
@@ -278,6 +283,8 @@ def addScalarToVTK(polyData, fiberTree, scalarType, fidxes=None):
 
     if fidxes is None:
         for fidx in range(0, polyData.GetNumberOfLines()):
+            if fidx in rejIdx:
+                continue
             for pidx in range(0, fiberTree.pts_per_fiber):
                 scalarValue = fiberTree.fiberTree[fidx][pidx][scalarType]
                 data.InsertNextValue(float(scalarValue))
@@ -804,3 +811,27 @@ def _sortLabel(centroids, clusterIdx):
         newCentroids[i, :] = centroids[sortedClusters[i]]
 
     return newCentroids, newClusters
+
+def _outlierDetection(W):
+    """ * INTERNAL FUNCTION *
+    Look for outliers in fibers to reject
+
+        INPUT::
+        W - similarity matrix
+
+    OUTPUT:
+        W - similarity matrix with removed outliers
+        rejIdx - indices of fibers considered outliers
+
+    """
+
+    # Reject fibers that are 2 standard deviations from mean
+    W_rowsum = np.sum(W, 0)
+    W_outlierthr = np.mean(W_rowsum) - 2.0*np.std(W_rowsum)
+
+    rejIdx = np.where(W_rowsum < W_outlierthr)[0]
+    # Remove outliers from matrix
+    W = np.delete(W, rejIdx, 0)
+    W = np.delete(W, rejIdx, 1)
+
+    return W, rejIdx

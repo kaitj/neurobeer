@@ -281,7 +281,7 @@ class FiberTree:
 
                 pidx += 1
 
-    def convertToVTK(self):
+    def convertToVTK(self, rejIdx=[]):
         """
         Convert fibers in array form to VTK polydata.
 
@@ -300,6 +300,8 @@ class FiberTree:
 
         # Get fiber information to convert to VTK form
         for fidx in range(0, self.no_of_fibers):
+            if fidx in rejIdx:
+                continue
             ptIds = vtk.vtkIdList()
 
             for pidx in range(0, self.pts_per_fiber):

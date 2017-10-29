@@ -10,7 +10,8 @@
 * Added ufibre module
     * Determines if fibre is u-shaped
     * Approximates fiber length via arc length
-    * Calculates distance between end points 
+    * Calculates distance between end points
+* Added outlier detection and rejection
 
 ### Version 0.1.2 <a name=v012></a>
 * Added in functionality to handle previously clustered / atlas tractography
