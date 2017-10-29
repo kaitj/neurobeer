@@ -133,7 +133,7 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
         for i in range(len(scalarTypeList)):
             outputPolydata = addScalarToVTK(outputPolydata, fiberData, scalarTypeList[i])
 
-        return outputPolydata, clusterIdx, fiberData
+        return outputPolydata, clusterIdx, outputData, rejIdx
 
 def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[],
                                     scalarWeightList=[], sigma=0.4, saveAllSimilarity=False,
@@ -260,7 +260,7 @@ def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[
         for i in range(len(scalarTypeList)):
             outputPolydata = addScalarToVTK(outputPolydata, fiberData, scalarTypeList[i])
 
-        return outputPolydata, clusterIdx, fiberData
+        return outputPolydata, clusterIdx, fiberData, rejIdx
 
 def addScalarToVTK(polyData, fiberTree, scalarType, fidxes=None, rejIdx=[]):
     """
