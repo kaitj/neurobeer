@@ -97,7 +97,7 @@ def main():
             scalarWeightList.append(float(val))
 
     # Perform clustering on provided bundle
-    outputPolydata, clusterIdx, fiberData, rejIdx = cluster.spectralClustering(
+    outputPolydata, clusterIdx, fiberData = cluster.spectralClustering(
                                     bundlePolydata, scalarDataList=scalarDataList,
                                     scalarWeightList=scalarWeightList, scalarTypeList=scalarTypeList,
                                     pts_per_fiber=opts.p, k_clusters=opts.k, sigma=opts.sig,
@@ -115,7 +115,7 @@ def main():
     # Extract individual clusters
     for label in np.unique(clusterIdx):
         idxes = np.where(clusterIdx == label)[0]
-        bundle = fiberData.getFibers(idxes, rejIdx)
+        bundle = fiberData.getFibers(idxes)
         bundle = fibers.convertFromTuple(bundle)
         polyData = bundle.convertToVTK()
         statsSuffix = 'stats/stats_%i' % label
