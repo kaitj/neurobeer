@@ -72,6 +72,12 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
         W = _pairwiseWeightedSimilarity(fiberData, scalarTypeList, scalarWeightList,
                                                     sigma, saveAllSimilarity, pts_per_fiber, matpath, no_of_jobs)
 
+        # Outlier detection
+        W, rejIdx = _outlierDetection(W)
+
+        if saveWSimilarity is True:
+            misc.saveMatrix(matpath, W, 'Weighted')
+
         # 2. Compute degree matrix
         D = _degreeMatrix(W)
 
@@ -88,9 +94,6 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
         eigval, eigvec = eigval[idx], eigvec[:, idx]
         misc.saveEig(dirpath, eigval, eigvec)
 
-        if saveWSimilarity is True:
-            misc.saveMatrix(matpath, W, 'Weighted')
-            
         # 6. Compute information for clustering using "N" number of smallest eigenvalues
         # Skips first eigenvector, no information obtained
         if k_clusters > eigvec.shape[0]:
@@ -122,13 +125,8 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
 
         # 8. Return results
         # Create model with user / default number of chosen samples along fiber
-        # Outlier detection
-        W, rejIdx = _outlierDetection(W)
-
-        if saveWSimilarity is True:
-            misc.saveMatrix(matpath, W, 'Weighted')
-
-        outputPolydata = _format_outputVTK(fiberData, clusterIdx, colour, centroids, rejIdx)
+        outputData = fiberData.convertToVTK(rejIdx)
+        outputPolydata = _format_outputVTK(outputData, clusterIdx, colour, centroids)
 
         # 9. Also add measurements from those used to cluster
         for i in range(len(scalarTypeList)):
@@ -611,7 +609,7 @@ def _format_outputVTK(polyData, clusterIdx, colour, centroids, rejIdx=[]):
     centroid.SetNumberOfComponents(centroids.shape[1])
     centroid.SetName('Centroid')
 
-    for fidx in range(0, polyData.no_of_fibers):
+    for fidx in range(0, polyData.GetNumberOfLines()):
         if fidx in rejIdx:
             continue
         dataColour.InsertNextTuple3(
@@ -619,7 +617,6 @@ def _format_outputVTK(polyData, clusterIdx, colour, centroids, rejIdx=[]):
         clusterLabel.InsertNextTuple1(int(clusterIdx[fidx]))
         centroid.InsertNextTuple(centroids[clusterIdx[fidx], :])
 
-    polyData = polyData.convertToVTK(rejIdx)
     polyData.GetCellData().AddArray(dataColour)
     polyData.GetCellData().AddArray(clusterLabel)
     polyData.GetCellData().AddArray(centroid)

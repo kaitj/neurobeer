@@ -209,7 +209,6 @@ class FiberTree:
         scalarList = np.zeros(self.pts_per_fiber)
 
         for pidx in range(0, self.pts_per_fiber):
-
             scalarList[pidx] = float(self.fiberTree[fidx][pidx][scalarType])
 
         return scalarList
