@@ -67,7 +67,7 @@ class FiberTree:
         Indices include both end points of the fiber plus evenly spaced points
         along the line. Module determines which indices are wanted based on
         fiber length and desired number of points along the length.
-
+            print idxes
         INPUT:
             fiberLength - Number of points along a fiber
             pts_per_length - Number of desired points along fiber
@@ -110,7 +110,7 @@ class FiberTree:
 
         return fiber_x, fiber_y, fiber_z
 
-    def getFibers(self, fidxes):
+    def getFibers(self, fidxes, rejIdx=[]):
         """
         Extracts a subset of fibers corresponding to inputted indices.
         Returned fibers are of class fiberArray.
@@ -129,6 +129,8 @@ class FiberTree:
         # Fiber data
         idx = 0
         for fidx in fidxes:
+            if fidx in rejIdx:
+                continue
             for pidx in range(0, self.pts_per_fiber):
                 fiberArray_x[idx][pidx] = float(self.fiberTree[fidx][pidx]['x'])
                 fiberArray_y[idx][pidx] = float(self.fiberTree[fidx][pidx]['y'])
@@ -286,7 +288,7 @@ class FiberTree:
         Convert fibers in array form to VTK polydata.
 
         INPUT:
-            none
+            rejIdx - Indices of fibers considered outliers; defaults to []
 
         OUTPUT:
             outVTK - Tractography polydata in VTK form

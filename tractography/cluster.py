@@ -72,12 +72,6 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
         W = _pairwiseWeightedSimilarity(fiberData, scalarTypeList, scalarWeightList,
                                                     sigma, saveAllSimilarity, pts_per_fiber, matpath, no_of_jobs)
 
-        # Outlier detection
-        W, rejIdx = _outlierDetection(W)
-
-        if saveWSimilarity is True:
-            misc.saveMatrix(matpath, W, 'Weighted')
-
         # 2. Compute degree matrix
         D = _degreeMatrix(W)
 
@@ -94,6 +88,9 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
         eigval, eigvec = eigval[idx], eigvec[:, idx]
         misc.saveEig(dirpath, eigval, eigvec)
 
+        if saveWSimilarity is True:
+            misc.saveMatrix(matpath, W, 'Weighted')
+            
         # 6. Compute information for clustering using "N" number of smallest eigenvalues
         # Skips first eigenvector, no information obtained
         if k_clusters > eigvec.shape[0]:
@@ -125,15 +122,19 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
 
         # 8. Return results
         # Create model with user / default number of chosen samples along fiber
-        outputData = fiberData.convertToVTK(rejIdx)
+        # Outlier detection
+        W, rejIdx = _outlierDetection(W)
 
-        outputPolydata = _format_outputVTK(outputData, clusterIdx, colour, centroids)
+        if saveWSimilarity is True:
+            misc.saveMatrix(matpath, W, 'Weighted')
+
+        outputPolydata = _format_outputVTK(fiberData, clusterIdx, colour, centroids, rejIdx)
 
         # 9. Also add measurements from those used to cluster
         for i in range(len(scalarTypeList)):
             outputPolydata = addScalarToVTK(outputPolydata, fiberData, scalarTypeList[i])
 
-        return outputPolydata, clusterIdx, fiberData
+        return outputPolydata, clusterIdx, fiberData, rejIdx
 
 def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[],
                                     scalarWeightList=[], sigma=0.4, saveAllSimilarity=False,
@@ -150,7 +151,8 @@ def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[
         ex. scalarDataList
               scalarTypeList = [FA, T1]
               scalarWeightList = [Geometry, FA, T1]
-
+if saveWSimilarity is True:
+            misc.saveMatrix(matpath, W, 'Weighted')
         INPUT:
             inputVTK - input polydata file
             priorVTK - prior polydata file
@@ -210,13 +212,6 @@ def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[
         W = _priorWeightedSimilarity(fiberData, priorData, scalarTypeList, scalarWeightList,
                                                     sigma, saveAllSimilarity, pts_per_fiber, matpath, no_of_jobs)
 
-        W, rejIdx = _outlierDetection(W)
-
-        if saveWSimilarity is True:
-            matpath = dirpath + '/matrices'
-
-        misc.saveMatrix(matpath, W, 'Weighted')
-
         # 2. Compute inverse of eigenvalues
         invEigval = np.diag(np.divide(1, eigval))
 
@@ -252,9 +247,11 @@ def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[
 
         # 8. Return results
         # Create model with user / default number of chosen samples along fiber
-        outputData = fiberData.convertToVTK(rejIdx)
+        W, rejIdx = _outlierDetection(W)
+        if saveWSimilarity is True:
+            misc.saveMatrix(matpath, W, 'Weighted')
 
-        outputPolydata = _format_outputVTK(outputData, clusterIdx, colour, priorCentroids)
+        outputPolydata = _format_outputVTK(fiberData, clusterIdx, colour, priorCentroids)
 
         # 9. Also add measurements from those used to cluster
         for i in range(len(scalarTypeList)):
@@ -588,7 +585,7 @@ def _cluster_to_rgb(data):
 
     return colour.astype('int')
 
-def _format_outputVTK(polyData, clusterIdx, colour, centroids):
+def _format_outputVTK(polyData, clusterIdx, colour, centroids, rejIdx=[]):
     """ *INTERNAL FUNCTION*
     Formats polydata with cluster index and colour.
 
@@ -614,12 +611,15 @@ def _format_outputVTK(polyData, clusterIdx, colour, centroids):
     centroid.SetNumberOfComponents(centroids.shape[1])
     centroid.SetName('Centroid')
 
-    for fidx in range(0, polyData.GetNumberOfLines()):
+    for fidx in range(0, polyData.no_of_fibers):
+        if fidx in rejIdx:
+            continue
         dataColour.InsertNextTuple3(
                 colour[clusterIdx[fidx], 0], colour[clusterIdx[fidx], 1], colour[clusterIdx[fidx], 2])
         clusterLabel.InsertNextTuple1(int(clusterIdx[fidx]))
         centroid.InsertNextTuple(centroids[clusterIdx[fidx], :])
 
+    polyData = polyData.convertToVTK(rejIdx)
     polyData.GetCellData().AddArray(dataColour)
     polyData.GetCellData().AddArray(clusterLabel)
     polyData.GetCellData().AddArray(centroid)
@@ -827,7 +827,7 @@ def _outlierDetection(W):
 
     # Reject fibers that are 2 standard deviations from mean
     W_rowsum = np.sum(W, 0)
-    W_outlierthr = np.mean(W_rowsum) - 2.0*np.std(W_rowsum)
+    W_outlierthr = np.mean(W_rowsum) - 2.0 * np.std(W_rowsum)
 
     rejIdx = np.where(W_rowsum < W_outlierthr)[0]
     # Remove outliers from matrix
