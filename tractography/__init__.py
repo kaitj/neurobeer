@@ -7,14 +7,14 @@ Import of modules for tool
 """
 
 dependencies = ['joblib', 'numpy', 'matplotlib', 'scipy', 'sklearn', 'vtk']
-modules = ['cluster', 'distance', 'fibers', 'misc', 'stats', 'tractio']
+modules = ['cluster', 'distance', 'fibers', 'misc', 'stats', 'tractio', 'ufibre']
 
 for dep in dependencies:
     try:
         exec('import %s' % dep)
     except ImportError:
         print '%s is not installed. Functionality of this package will be unavailable..' % dep
-        print 'Please installl %s to use this package.' % dep
+        print 'Please install %s to use this package.' % dep
 
 for module in modules:
     exec('import %s' % module)
