@@ -27,7 +27,7 @@ def findUFiber(fiberData):
 
         D = _calcEndPointSep(fiberData, fidx)
 
-        if (L > 30) and (D <= (L / np.pi)) and (L < 80):
+        if (L > 30) and (D <= (L / np.pi)):
             uArray.append(fidx)
 
     return uArray
