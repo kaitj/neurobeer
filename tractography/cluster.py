@@ -46,6 +46,7 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
             outputPolydata - polydata containing information from clustering to be written into VTK
             clusterIdx - array containing cluster that each fiber belongs to
             fiberData - tree containing spatial and quantitative information of fibers
+            rejIdx - indices of fibers considered to be outliers
         """
         if dirpath is None:
             dirpath = os.getcwd()
@@ -145,12 +146,11 @@ def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[
 
         If no scalar data provided, clustering performed based on geometry.
         First element of scalarWeightList should be weight placed for geometry, followed by order
-        given in scalarTypeList These weights should sum to 1.0 (weights given as a decimal value).
+        given in scalarTypeList. These weights should sum to 1.0 (weights given as a decimal value).
         ex. scalarDataList
               scalarTypeList = [FA, T1]
               scalarWeightList = [Geometry, FA, T1]
-if saveWSimilarity is True:
-            misc.saveMatrix(matpath, W, 'Weighted')
+
         INPUT:
             inputVTK - input polydata file
             priorVTK - prior polydata file
@@ -168,6 +168,7 @@ if saveWSimilarity is True:
             outputPolydata - polydata containing information from clustering to be written into VTK
             clusterIdx - array containing cluster that each fiber belongs to
             fiberData - tree containing spatial and quantitative information of fibers
+            rejIdx - indices of fibers considered to be outliers
         """
         if dirpath is None:
             dirpath = os.getcwd()
@@ -210,6 +211,11 @@ if saveWSimilarity is True:
         W = _priorWeightedSimilarity(fiberData, priorData, scalarTypeList, scalarWeightList,
                                                     sigma, saveAllSimilarity, pts_per_fiber, matpath, no_of_jobs)
 
+        W, rejIdx = _outlierDetection(W)
+
+        if saveWSimilarity is True:
+            misc.saveMatrix(matpath, W, 'Weighted')
+
         # 2. Compute inverse of eigenvalues
         invEigval = np.diag(np.divide(1, eigval))
 
@@ -245,17 +251,13 @@ if saveWSimilarity is True:
 
         # 8. Return results
         # Create model with user / default number of chosen samples along fiber
-        W, rejIdx = _outlierDetection(W)
-        if saveWSimilarity is True:
-            misc.saveMatrix(matpath, W, 'Weighted')
-
         outputPolydata = _format_outputVTK(fiberData, clusterIdx, colour, priorCentroids)
 
         # 9. Also add measurements from those used to cluster
         for i in range(len(scalarTypeList)):
             outputPolydata = addScalarToVTK(outputPolydata, fiberData, scalarTypeList[i])
 
-        return outputPolydata, clusterIdx, fiberData
+        return outputPolydata, clusterIdx, fiberData, rejIdx
 
 def addScalarToVTK(polyData, fiberTree, scalarType, fidxes=None, rejIdx=[]):
     """
@@ -384,13 +386,11 @@ def _pairwiseQDistance_matrix(fiberTree, scalarType, pts_per_fiber, no_of_jobs):
         qDistances - NxN matrix containing pairwise distances between fibers
     """
 
-    no_of_fibers = fiberTree.no_of_fibers
-
     qDistances = Parallel(n_jobs=no_of_jobs, backend="threading")(
             delayed(distance.scalarDistance, has_shareable_memory)(
                 fiberTree.getScalar(fidx, scalarType),
-                fiberTree.getScalars(range(no_of_fibers), scalarType))
-            for fidx in range(0, no_of_fibers)
+                fiberTree.getScalars(range(fiberTree.no_of_fibers), scalarType))
+            for fidx in range(fiberTree.no_of_fibers)
     )
 
     qDistances = np.array(qDistances)
@@ -624,7 +624,7 @@ def _format_outputVTK(polyData, clusterIdx, colour, centroids, rejIdx=[]):
     return polyData
 
 def _pairwiseWeightedSimilarity(fiberTree, scalarTypeList=[], scalarWeightList=[],
-                                        sigma=0.4, saveAllSimilarity=False, pts_per_fiber=20, dirpath=None,
+                                        sigma=0.2, saveAllSimilarity=False, pts_per_fiber=20, dirpath=None,
                                         no_of_jobs=1):
     """ *INTERNAL FUNCTION*
     Computes and returns a single weighted similarity matrix.

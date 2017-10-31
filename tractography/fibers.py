@@ -159,6 +159,32 @@ class FiberTree:
                 self.fiberTree[fidx][str(label)] = label
                 self.fiberTree['centroid'][label] = centroids[label]
 
+    def copyScalar(self, fiberData, scalarTypeArray, rejIdx=[]):
+        """ * INTERNAL FUNCTION *
+        Copies the scalar information from a different fiber tree. To be used for
+        removing outliers while retaining information.
+
+        INPUT:
+            fiberData - fiberTree to copy data from
+            scalarTypeArray - Array of scalar types to copy
+            rejIdx - Array of outlier indices to be exclused
+
+        OUTPUT:
+            none
+        """
+
+        for Type in scalarTypeArray:
+            idx = 0
+
+            for fidx in range(fiberData.no_of_fibers):
+                if fidx in rejIdx:
+                    continue
+
+                for pidx in range(fiberData.pts_per_fiber):
+                    self.fiberTree[idx][pidx][Type] = float(fiberData.fiberTree[fidx][pidx][Type])
+
+                idx += 1
+
     def addScalar(self, inputVTK, scalarData, scalarType, pts_per_fiber=20):
         """
         Add scalar information pertaining to tractography. Values are
@@ -188,8 +214,7 @@ class FiberTree:
 
                 # Find point index
                 ptidx = ptIds.GetId(int(round(lineIdx)))
-                self.fiberTree[fidx][pidx][scalarType] = \
-                    scalarData[ptidx]
+                self.fiberTree[fidx][pidx][scalarType] = float(scalarData[ptidx])
 
                 pidx += 1
 
@@ -208,7 +233,7 @@ class FiberTree:
 
         scalarList = np.zeros(self.pts_per_fiber)
 
-        for pidx in range(0, self.pts_per_fiber):
+        for pidx in range(self.pts_per_fiber):
             scalarList[pidx] = float(self.fiberTree[fidx][pidx][scalarType])
 
         return scalarList

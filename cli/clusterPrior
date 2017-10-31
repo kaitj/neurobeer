@@ -56,7 +56,7 @@ def get_parser():
 
 def main():
     """
-    Entry point of code
+    Entry point of codedel x
     """
     import os, sys, imp
     sys.path.append(imp.find_module('tractography')[1])
@@ -95,7 +95,7 @@ def main():
             scalarWeightList.append(float(val))
 
     # Perform clustering on provided bundle
-    outputPolydata, clusterIdx, fiberData = cluster.spectralPriorCluster(
+    outputPolydata, clusterIdx, fiberData, rejIdx = cluster.spectralPriorCluster(
                                     bundlePolydata, opts.prior, scalarDataList=scalarDataList,
                                     scalarWeightList=scalarWeightList, scalarTypeList=scalarTypeList,
                                     sigma=opts.sig, saveWSimilarity=opts.saveWeight,
@@ -106,14 +106,19 @@ def main():
     bundleName = opts.bundle[:-4] + '_Clustered.vtk'
     bundledir = os.path.join(outdir, bundleName)
     tractio.writeVTK(outputPolydata, bundledir, opts.verbose)
+    clusterData = fiberData.getFibers(range(fiberData.no_of_fibers), rejIdx)
+    clusterData = fibers.convertFromTuple(clusterData)
+    clusterData.copyScalar(fiberData, scalarTypeList, rejIdx)
 
-    for Type in scalarTypeList:
-        stats.plotStats(fiberData, Type, dirpath=os.path.join(outdir + '/stats/stats_Clustered'))
+    # NOT USED - SUPPOSE TO EXTRACT STATS FOR COMBINED
+    # NEEDS TO BE FIXED FOR USE (IF WANTED/NEEDED)
+    # for Type in scalarTypeList:
+    #    stats.plotStats(fiberData, Type, dirpath=os.path.join(outdir + '/stats/stats_Clustered'))
 
     # Extract individual clusters
     for label in np.unique(clusterIdx):
         idxes = np.where(clusterIdx == label)[0]
-        bundle = fiberData.getFibers(idxes)
+        bundle = clusterData.getFibers(idxes)
         bundle = fibers.convertFromTuple(bundle)
         polyData = bundle.convertToVTK()
         statsSuffix = 'stats/stats_%i' % label
@@ -121,7 +126,7 @@ def main():
 
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, fiberData, Type, idxes)
-            stats.plotStats(fiberData, Type, idxes, dirpath=statsdir)
+            stats.plotStats(clusterData, Type, idxes, dirpath=statsdir)
 
         bundleSuffix = '_Cluster%i.vtk' % label
         bundleName = opts.bundle[:-4] + bundleSuffix
