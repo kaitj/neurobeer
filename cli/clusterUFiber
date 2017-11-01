@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-""" clusterPrior
+""" clusterSingle
 
 Python command line interface for automated tractography clustering
-and evaluation from previously clustered data
+and evaluation.
 
 """
 
@@ -12,7 +12,7 @@ def get_parser():
     """
     from argparse import ArgumentParser, RawTextHelpFormatter
 
-    parser = ArgumentParser(description='Tractography clustering based on clustered data',
+    parser = ArgumentParser(description='Tractography extraction and clustering of U-fibers',
                                              formatter_class=RawTextHelpFormatter)
 
     # Version option
@@ -28,9 +28,7 @@ def get_parser():
     g_req.add_argument('--subjid', action='store', required=True,
                                       help='subject id to compute')
     g_req.add_argument('--bundle', action='store', required=True,
-                                      help='tractography bundle to perform clustering on')
-    g_req.add_argument('--prior', action='store', required=True,
-                                     help='directory where prior data is stored')
+                                      help='tractography bundle to process')
 
     # Optional arguments
     g_opt = parser.add_argument_group('control arguments')
@@ -38,6 +36,10 @@ def get_parser():
                                       default=[], help='add scalar data to be used')
     g_opt.add_argument('-w', action='store', nargs='+', metavar='wgt',
                                       default=[], help='provide weighting on data for clustering, ')
+    g_opt.add_argument('-p', action='store', type=int, metavar='no_samples',
+                                      default=2, help='number of samples to take along each fiber')
+    g_opt.add_argument('-k', action='store', type=int, metavar='k_clusters',
+                                      default=2, help='number of clusters to use in algorithm')
     g_opt.add_argument('-sig', action='store', type=float, metavar='sigma',
                                       default=1.0, help='sigma to be used in clustering algorithm')
     g_opt.add_argument('-sall', '--saveAll', action='store_true',
@@ -60,7 +62,7 @@ def main():
     """
     import os, sys, imp
     sys.path.append(imp.find_module('tractography')[1])
-    import cluster, fibers, stats, tractio
+    import cluster, fibers, stats, tractio, ufiber
     import numpy as np
 
     # Run parser
@@ -98,18 +100,24 @@ def main():
 
     for i in range(len(scalarTypeList)):
         fiberData.addScalar(bundlePolydata, scalarDataList[i], scalarTypeList[i],
-                                         fiberData.pts_per_fiber)
+                                        fiberData.pts_per_fiber)
+
+    # Extract u-fibers
+    uArray = ufiber.findUFiber(fiberData)
+    uFiberTree = ufiber.extractUFiber(fiberData, uArray)
+    for Type in scalarTypeList:
+        uFiberTree.copyScalar(fiberData, Type, uArray)
 
     # Perform clustering on provided bundle
-    outputPolydata, clusterIdx, fiberData, rejIdx = cluster.spectralPriorCluster(
-                                    fiberData, opts.prior, scalarDataList=scalarDataList,
+    outputPolydata, clusterIdx, fiberData, rejIdx = cluster.spectralClustering(
+                                    uFiberTree, scalarDataList=scalarDataList,
                                     scalarWeightList=scalarWeightList, scalarTypeList=scalarTypeList,
-                                    sigma=opts.sig, saveWSimilarity=opts.saveWeight,
-                                    saveAllSimilarity=opts.saveAll, dirpath=outdir, verbose=opts.verbose,
-                                    no_of_jobs=opts.j)
-    del bundlePolydata, opts.prior, scalarWeightList, scalarDataList
+                                    pts_per_fiber=opts.p, k_clusters=opts.k, sigma=opts.sig,
+                                    saveWSimilarity=opts.saveWeight, saveAllSimilarity=opts.saveAll,
+                                    dirpath=outdir, verbose=opts.verbose, no_of_jobs=opts.j)
+    del bundlePolydata, scalarWeightList, scalarDataList
 
-    bundleName = opts.bundle[:-4] + '_Clustered.vtk'
+    bundleName = opts.bundle[:-4] + 'uFibers_Clustered.vtk'
     bundledir = os.path.join(outdir, bundleName)
     tractio.writeVTK(outputPolydata, bundledir, opts.verbose)
     clusterData = fiberData.getFibers(range(fiberData.no_of_fibers), rejIdx)
@@ -119,7 +127,7 @@ def main():
     # NOT USED - SUPPOSE TO EXTRACT STATS FOR COMBINED
     # NEEDS TO BE FIXED FOR USE (IF WANTED/NEEDED)
     # for Type in scalarTypeList:
-    #    stats.plotStats(fiberData, Type, dirpath=os.path.join(outdir + '/stats/stats_Clustered'))
+    #    stats.plotStats(clusterData, Type, dirpath=os.path.join(outdir + '/stats/stats_Clustered'))
 
     # Extract individual clusters
     for label in np.unique(clusterIdx):
@@ -131,10 +139,10 @@ def main():
         statsdir = os.path.join(outdir + '/' + statsSuffix)
 
         for Type in scalarTypeList:
-            polyData = cluster.addScalarToVTK(polyData, fiberData, Type, idxes)
+            polyData = cluster.addScalarToVTK(polyData, fiberData, Type, idxes, rejIdx)
             stats.plotStats(clusterData, Type, idxes, dirpath=statsdir)
 
-        bundleSuffix = '_Cluster%i.vtk' % label
+        bundleSuffix = 'uFibers_Cluster%i.vtk' % label
         bundleName = opts.bundle[:-4] + bundleSuffix
         bundledir = os.path.join(outdir + '/' + bundleName)
         tractio.writeVTK(polyData, bundledir, opts.verbose)

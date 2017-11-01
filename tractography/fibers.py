@@ -159,7 +159,7 @@ class FiberTree:
                 self.fiberTree[fidx][str(label)] = label
                 self.fiberTree['centroid'][label] = centroids[label]
 
-    def copyScalar(self, fiberData, scalarTypeArray, rejIdx=[]):
+    def copyScalar(self, fiberData, scalarTypeArray, fidxes=[], rejIdx=[]):
         """ * INTERNAL FUNCTION *
         Copies the scalar information from a different fiber tree. To be used for
         removing outliers while retaining information.
@@ -167,7 +167,8 @@ class FiberTree:
         INPUT:
             fiberData - fiberTree to copy data from
             scalarTypeArray - Array of scalar types to copy
-            rejIdx - Array of outlier indices to be exclused
+            fidxes - Array of fiber indices to copy
+            rejIdx - Array of outlier indices to be exclused; defaults to []
 
         OUTPUT:
             none
@@ -176,14 +177,21 @@ class FiberTree:
         for Type in scalarTypeArray:
             idx = 0
 
-            for fidx in range(fiberData.no_of_fibers):
-                if fidx in rejIdx:
-                    continue
-
-                for pidx in range(fiberData.pts_per_fiber):
-                    self.fiberTree[idx][pidx][Type] = float(fiberData.fiberTree[fidx][pidx][Type])
-
-                idx += 1
+            if fidxes != []:
+                for fidx in fidxes:
+                    if fidx in rejIdx:
+                        continue
+                    for pidx in range(fiberData.pts_per_fiber):
+                        self.fiberTree[idx][pidx][Type] = float(fiberData.fiberTree[fidx][pidx][Type])
+                    idx += 1
+                    
+            else:
+                for fidx in range(fiberData.no_of_fibers):
+                    if fidx in rejIdx:
+                        continue
+                    for pidx in range(fiberData.pts_per_fiber):
+                        self.fiberTree[idx][pidx][Type] = float(fiberData.fiberTree[fidx][pidx][Type])
+                    idx += 1
 
     def addScalar(self, inputVTK, scalarData, scalarType, pts_per_fiber=20):
         """

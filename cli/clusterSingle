@@ -17,7 +17,7 @@ def get_parser():
 
     # Version option
     parser.add_argument('--version', action='version',
-                                      version='0.1.2')
+                                      version='0.1.3')
 
     # Required arguments
     g_req = parser.add_argument_group('required arguments')
@@ -31,7 +31,8 @@ def get_parser():
                                       help='tractography bundle to perform clustering on')
 
     # Optional arguments
-    g_opt = parser.add_argument_group('control arguments')
+    g_opt =
+     parser.add_argument_group('control arguments')
     g_opt.add_argument('-a', action='store', nargs='+', metavar='data',
                                       default=[], help='add scalar data to be used')
     g_opt.add_argument('-w', action='store', nargs='+', metavar='wgt',
@@ -74,6 +75,8 @@ def main():
 
     bundleVTK = os.path.join(indir + '/' + opts.bundle)
     bundlePolydata = tractio.readVTK(bundleVTK, opts.verbose)
+    fiberData = fibers.fiberTree()
+    fiberData.convertFromVTK(bundlePolydata, opts.p, opts.verbose)
     del bundleVTK
 
     # Handling scalar data
@@ -96,9 +99,13 @@ def main():
         for val in opts.w:
             scalarWeightList.append(float(val))
 
+    for i in range(len(scalarTypeList)):
+        fiberData.addScalar(bundlePolydata, scalarDataList[i], scalarTypeList[i],
+                                        fiberData.pts_per_fiber)
+
     # Perform clustering on provided bundle
     outputPolydata, clusterIdx, fiberData, rejIdx = cluster.spectralClustering(
-                                    bundlePolydata, scalarDataList=scalarDataList,
+                                    fiberData, scalarDataList=scalarDataList,
                                     scalarWeightList=scalarWeightList, scalarTypeList=scalarTypeList,
                                     pts_per_fiber=opts.p, k_clusters=opts.k, sigma=opts.sig,
                                     saveWSimilarity=opts.saveWeight, saveAllSimilarity=opts.saveAll,
@@ -110,7 +117,7 @@ def main():
     tractio.writeVTK(outputPolydata, bundledir, opts.verbose)
     clusterData = fiberData.getFibers(range(fiberData.no_of_fibers), rejIdx)
     clusterData = fibers.convertFromTuple(clusterData)
-    clusterData.copyScalar(fiberData, scalarTypeList, rejIdx)
+    clusterData.copyScalar(fiberData, scalarTypeList, fidxes=[], rejIdx=rejIdx)
 
     # NOT USED - SUPPOSE TO EXTRACT STATS FOR COMBINED
     # NEEDS TO BE FIXED FOR USE (IF WANTED/NEEDED)

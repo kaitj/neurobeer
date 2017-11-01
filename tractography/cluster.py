@@ -14,7 +14,7 @@ from sys import exit
 import fibers, distance, misc, prior
 import vtk
 
-def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWeightList=[],
+def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[], scalarWeightList=[],
                                     pts_per_fiber=20, k_clusters=200, sigma=0.4, saveAllSimilarity=False,
                                     saveWSimilarity=False, dirpath=None, verbose=0, no_of_jobs=1):
         """
@@ -24,12 +24,12 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
         If no scalar data provided, clustering performed based on geometry.
         First element of scalarWeightList should be weight placed for geometry, followed by order
         given in scalarTypeList These weights should sum to 1.0 (weights given as a decimal value).
-        ex.  scalarDataList
+        ex.  scalarDataListiberData
               scalarTypeList = [FA, T1]
               scalarWeightList = [Geometry, FA, T1]
 
         INPUT:
-            inputVTK - input polydata file
+            fiberData - fiber tree of tractography data to be clustered
             scalarDataList - list containing scalar data for similarity measurements; defaults empty
             scalarTypeList - list containing scalar type for similarity measurements; defaults empty
             scalarWeightList - list containing scalar weights for similarity measurements; defaults empty
@@ -37,13 +37,13 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
             k_clusters - number of clusters via k-means clustering; defaults 10 clusters
             sigma - width of Gaussian kernel; adjust to alter sensitivity; defaults 0.4
             saveAllSimilarity - flag to save all individual similarity matrices computed; defaults False
-            saveWSimilarity - flag to save weighted similarity matrix computed; defaults False
+            saveWSimilarity - flag to save weighted similarity matrix
             dirpath - directory to store files; defaults None
             verbose - verbosity of function; defaults 0
             no_of_jobs - cores to use to perform computation; defaults 1
 
         OUTPUT:
-            outputPolydata - polydata containing information from clustering to be written into VTK
+            outputPolydata - polydata containing information from clustering
             clusterIdx - array containing cluster that each fiber belongs to
             fiberData - tree containing spatial and quantitative information of fibers
             rejIdx - indices of fibers considered to be outliers
@@ -55,7 +55,7 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
         if not os.path.exists(matpath):
             os.makedirs(matpath)
 
-        noFibers = inputVTK.GetNumberOfLines()
+        noFibers = fiberData.no_of_fibers
         if noFibers == 0:
             print "\nERROR: Input data has 0 fibers!"
             raise ValueError
@@ -63,11 +63,6 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
             print "\nStarting clustering..."
             print "No. of fibers:", noFibers
             print "No. of clusters:", k_clusters
-
-        fiberData = fibers.FiberTree()
-        fiberData.convertFromVTK(inputVTK, pts_per_fiber, verbose)
-        for i in range(len(scalarTypeList)):
-            fiberData.addScalar(inputVTK, scalarDataList[i], scalarTypeList[i], pts_per_fiber)
 
         # 1. Compute similarty matrix
         W = _pairwiseWeightedSimilarity(fiberData, scalarTypeList, scalarWeightList,
@@ -124,6 +119,7 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
         else:
             colour = _cluster_to_rgb(centroids)
 
+
         # 8. Return results
         # Create model with user / default number of chosen samples along fiber
         outputData = fiberData.convertToVTK(rejIdx)
@@ -135,7 +131,7 @@ def spectralClustering(inputVTK, scalarDataList=[], scalarTypeList=[], scalarWei
 
         return outputPolydata, clusterIdx, fiberData, rejIdx
 
-def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[],
+def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[], scalarTypeList=[],
                                     scalarWeightList=[], sigma=0.4, saveAllSimilarity=False,
                                     saveWSimilarity=False, dirpath=None, verbose=0, no_of_jobs=1):
         """
@@ -152,7 +148,7 @@ def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[
               scalarWeightList = [Geometry, FA, T1]
 
         INPUT:
-            inputVTK - input polydata file
+            fiberData - fiber tree containing tractography data to be clustered
             priorVTK - prior polydata file
             scalarDataList - list containing scalar data for similarity measurements; defaults empty
             scalarTypeList - list containing scalar type for similarity measurements; defaults empty
@@ -192,7 +188,7 @@ def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[
         k_clusters = len(priorCentroids)
         pts_per_fiber = int(priorData.pts_per_fiber)
 
-        noFibers = inputVTK.GetNumberOfLines()
+        noFibers = fiberData.no_of_fibers
         nopriorFibers = int(priorData.no_of_fibers)
         if noFibers == 0 or nopriorFibers == 0:
             print "\nERROR: Input data(s) has 0 fibers!"
@@ -201,11 +197,6 @@ def spectralPriorCluster(inputVTK, priorVTK, scalarDataList=[], scalarTypeList=[
             print "\nStarting clustering..."
             print "No. of fibers:", noFibers
             print "No. of clusters:", k_clusters
-
-        fiberData = fibers.FiberTree()
-        fiberData.convertFromVTK(inputVTK, pts_per_fiber, verbose)
-        for i in range(len(scalarTypeList)):
-            fiberData.addScalar(inputVTK, scalarDataList[i], scalarTypeList[i], pts_per_fiber)
 
         # 1. Compute similarty matrix
         W = _priorWeightedSimilarity(fiberData, priorData, scalarTypeList, scalarWeightList,
