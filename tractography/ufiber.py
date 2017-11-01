@@ -27,10 +27,11 @@ def findUFiber(fiberData):
 
         D = _calcEndPointSep(fiberData, fidx)
 
-        if (L > 30) and (D <= (L / np.pi)):
+        # Temporary max length constraint
+        if (L > 30) and (D <= (L / np.pi)) and (L < 90):
             uArray.append(fidx)
 
-    return uArray
+    return uArray, L, D
 
 def extractUFiber(fiberData, uArray):
     """

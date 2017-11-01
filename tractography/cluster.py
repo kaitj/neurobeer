@@ -118,8 +118,7 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[], scalarWe
             del temp
         else:
             colour = _cluster_to_rgb(centroids)
-
-
+            
         # 8. Return results
         # Create model with user / default number of chosen samples along fiber
         outputData = fiberData.convertToVTK(rejIdx)

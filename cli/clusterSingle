@@ -31,8 +31,7 @@ def get_parser():
                                       help='tractography bundle to perform clustering on')
 
     # Optional arguments
-    g_opt =
-     parser.add_argument_group('control arguments')
+    g_opt = parser.add_argument_group('control arguments')
     g_opt.add_argument('-a', action='store', nargs='+', metavar='data',
                                       default=[], help='add scalar data to be used')
     g_opt.add_argument('-w', action='store', nargs='+', metavar='wgt',

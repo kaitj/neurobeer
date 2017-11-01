@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""" clusterPrior
+""" clusterUFiberPrior
 
 Python command line interface for automated tractography clustering
 and evaluation from previously clustered data
@@ -22,17 +22,17 @@ def get_parser():
     # Required arguments
     g_req = parser.add_argument_group('required arguments')
     g_req.add_argument('--indir', action='store', required=True,
-                                          help='the directory with input data')
+                                      help='the directory with input data')
     g_req.add_argument('--outdir', action='store', required=True,
-                                          help='the directory where output files should be stored')
+                                      help='the directory where output files should be stored')
     g_req.add_argument('--subjid', action='store', required=True,
                                       help='subject id to compute')
     g_req.add_argument('--bundle', action='store', required=True,
                                       help='tractography bundle to perform clustering on')
     g_req.add_argument('--prior', action='store', required=True,
-                                     help='directory where prior U-fiber data is stored')
+                                      help='directory where prior U-fiber data is stored')
 
-    # Optional arguments
+    # Optional arguments        print "Average fiber length: %.2f" % np.mean(L)
     g_opt = parser.add_argument_group('control arguments')
     g_opt.add_argument('-a', action='store', nargs='+', metavar='data',
                                       default=[], help='add scalar data to be used')
@@ -72,7 +72,7 @@ def main():
 
     bundleVTK = os.path.join(indir + '/' + opts.bundle)
     bundlePolydata = tractio.readVTK(bundleVTK, opts.verbose)
-    fiberData = fibers.fiberTree()
+    fiberData = fibers.FiberTree()
     fiberData.convertFromVTK(bundlePolydata, opts.p, opts.verbose)
     del bundleVTK
 
@@ -101,7 +101,7 @@ def main():
                                          fiberData.pts_per_fiber)
 
     # Extract u-fibers
-    uArray = ufiber.findUFiber(fiberData)
+    uArray, L, D = ufiber.findUFiber(fiberData)
     uFiberTree = ufiber.extractUFiber(fiberData, uArray)
     for Type in scalarTypeList:
         uFiberTree.copyScalar(fiberData, Type, uArray)
@@ -115,7 +115,7 @@ def main():
                                     no_of_jobs=opts.j)
     del bundlePolydata, opts.prior, scalarWeightList, scalarDataList
 
-    bundleName = opts.bundle[:-4] + 'uFibers_Clustered.vtk'
+    bundleName = opts.bundle[:-4] + '_uFibers_Clustered.vtk'
     bundledir = os.path.join(outdir, bundleName)
     tractio.writeVTK(outputPolydata, bundledir, opts.verbose)
     clusterData = fiberData.getFibers(range(fiberData.no_of_fibers), rejIdx)
@@ -135,12 +135,14 @@ def main():
         polyData = bundle.convertToVTK()
         statsSuffix = 'stats/stats_%i' % label
         statsdir = os.path.join(outdir + '/' + statsSuffix)
+        print "Average fiber length for cluster %i: %.2f" % (label, np.mean(L))
+        print "Average distance between end points for cluster %i: %.2f" % (label, np.mean(D))
 
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, fiberData, Type, idxes)
             stats.plotStats(clusterData, Type, idxes, dirpath=statsdir)
 
-        bundleSuffix = 'uFibers_Cluster%i.vtk' % label
+        bundleSuffix = '_uFibers_Cluster%i.vtk' % label
         bundleName = opts.bundle[:-4] + bundleSuffix
         bundledir = os.path.join(outdir + '/' + bundleName)
         tractio.writeVTK(polyData, bundledir, opts.verbose)

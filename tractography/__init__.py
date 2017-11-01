@@ -7,7 +7,7 @@ Import of modules for tool
 """
 
 dependencies = ['joblib', 'numpy', 'matplotlib', 'scipy', 'sklearn', 'vtk']
-modules = ['cluster', 'distance', 'fibers', 'misc', 'stats', 'tractio', 'ufibre']
+modules = ['cluster', 'distance', 'fibers', 'misc', 'stats', 'tractio', 'ufiber']
 
 for dep in dependencies:
     try:

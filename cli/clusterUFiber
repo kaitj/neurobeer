@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""" clusterSingle
+""" clusterUFiber
 
 Python command line interface for automated tractography clustering
 and evaluation.
@@ -74,7 +74,7 @@ def main():
 
     bundleVTK = os.path.join(indir + '/' + opts.bundle)
     bundlePolydata = tractio.readVTK(bundleVTK, opts.verbose)
-    fiberData = fibers.fiberTree()
+    fiberData = fibers.FiberTree()
     fiberData.convertFromVTK(bundlePolydata, opts.p, opts.verbose)
     del bundleVTK
 
@@ -103,7 +103,7 @@ def main():
                                         fiberData.pts_per_fiber)
 
     # Extract u-fibers
-    uArray = ufiber.findUFiber(fiberData)
+    uArray, L, D = ufiber.findUFiber(fiberData)
     uFiberTree = ufiber.extractUFiber(fiberData, uArray)
     for Type in scalarTypeList:
         uFiberTree.copyScalar(fiberData, Type, uArray)
@@ -117,7 +117,7 @@ def main():
                                     dirpath=outdir, verbose=opts.verbose, no_of_jobs=opts.j)
     del bundlePolydata, scalarWeightList, scalarDataList
 
-    bundleName = opts.bundle[:-4] + 'uFibers_Clustered.vtk'
+    bundleName = opts.bundle[:-4] + '_uFibers_Clustered.vtk'
     bundledir = os.path.join(outdir, bundleName)
     tractio.writeVTK(outputPolydata, bundledir, opts.verbose)
     clusterData = fiberData.getFibers(range(fiberData.no_of_fibers), rejIdx)
@@ -137,12 +137,14 @@ def main():
         polyData = bundle.convertToVTK()
         statsSuffix = 'stats/stats_%i' % label
         statsdir = os.path.join(outdir + '/' + statsSuffix)
+        print "Average fiber length for cluster %i: %.2f" % (label, np.mean(L))
+        print "Average distance between end points for cluster %i: %.2f" % (label, np.mean(D))
 
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, fiberData, Type, idxes, rejIdx)
             stats.plotStats(clusterData, Type, idxes, dirpath=statsdir)
 
-        bundleSuffix = 'uFibers_Cluster%i.vtk' % label
+        bundleSuffix = '_uFibers_Cluster%i.vtk' % label
         bundleName = opts.bundle[:-4] + bundleSuffix
         bundledir = os.path.join(outdir + '/' + bundleName)
         tractio.writeVTK(polyData, bundledir, opts.verbose)

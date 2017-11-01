@@ -47,7 +47,6 @@ def _stddev(fiberTree, scalarType, idxes=None):
                             scalarType)[:, :], axis=0)
     else:
         sdev = np.std(fiberTree.getScalars(idxes, scalarType)[:, :], axis=0)
-
     return sdev
 
 def plotStats(fiberTree, scalarType, idxes=None, dirpath=None):
@@ -58,7 +57,7 @@ def plotStats(fiberTree, scalarType, idxes=None, dirpath=None):
         fiberTree - tree containing spatial and quantitative information of fibers
         scalarType - type of quantitative data to plot
         idxes - indices to extract info from; defaults None (returns data for all fibers)
-        dirpath - location to store plots; defaults None
+        dirpath - location to st#a = np.array([1, 1, 1], [2, 2, 2])ore plots; defaults None
 
     OUTPUT:
         none
@@ -72,6 +71,7 @@ def plotStats(fiberTree, scalarType, idxes=None, dirpath=None):
 
     # Info for plot labels
     title = scalarType.split('/', -1)[-1]
+    title = title + '(%.2f +/- %.2f)' % np.mean(_mean, axis=1), np.mean(_stddev, axis=1)
     ytitle = scalarType.split('_', -1)[-1]
 
     # Statistical calculations for plot
