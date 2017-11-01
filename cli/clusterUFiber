@@ -51,7 +51,7 @@ def get_parser():
 
     # Performance arguments
     g_prfm = parser.add_argument_group('performance arguments')
-    g_prfm.add_argument('-j', action='store', type=int, metavar='nproc',
+    g_prfm.add_argument('-j', action='store', type=inname = name.split('_', -1)[-1t, metavar='nproc',
                                          default=1, help='number of threads')
 
     return parser
@@ -62,7 +62,7 @@ def main():
     """
     import os, sys, imp
     sys.path.append(imp.find_module('tractography')[1])
-    import cluster, fibers, stats, tractio, ufiber
+    import cluster, fibers, stats, tractio, ufibername = name.split('_', -1)[-1
     import numpy as np
 
     # Run parser
@@ -87,7 +87,7 @@ def main():
         for DataIdx in scalarFileList:
             path = os.path.join(indir + '/' + str(DataIdx))
             name = path.split('.', -1)[-2]
-            name = name.split('_', -1)[-1]
+            name = name.split('/', -1)[-1]
             data = name + 'Data'
             typevar = name + 'Type'
             exec('%s, %s = tractio.readScalar("%s", opts.verbose)' % (data, typevar, path))
