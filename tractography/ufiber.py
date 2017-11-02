@@ -5,6 +5,7 @@ ufibers
 
 """
 
+import os, csv
 import numpy as np
 import fibers
 
@@ -53,6 +54,52 @@ def extractUFiber(fiberData, uArray):
     uFiberTree = fibers.convertFromTuple(uFiberTree)
 
     return uFiberTree
+
+def writeCSV(LMean, LStd, DMean, DStd, dirpath=None):
+    """
+    Writes the length and distance of each cluster for a group of fibers.
+
+    INPUT:
+        LMean - mean of length for a cluster
+        LStd - standard deviation of length of a cluster
+        DMean - mean of distance between end points for a cluster
+        DStd - standard deviation of distance between end points for a cluster
+
+    OUTPUT:
+        none
+    """
+
+    if dirpath is None:
+        dirpath = os.getcwd()
+    else:
+        if not os.path.exists(dirpath):
+            os.makedirs(dirpath)
+
+    lengthName = 'clusterLengths'
+    lengthPath = dirpath + '/stats/' + lengthName + '.csv'
+    lengthExists = os.path.isfile(lengthPath)
+    distanceName = 'clusterDistances'
+    distancePath = dirpath + '/stats/' + distanceName + '.csv'
+    distanceExists = os.path.isfile(distancePath)
+
+    with open(lengthPath, 'a') as f1:
+        header = ['Length Mean', 'Length S.D.']
+        writer = csv.DictWriter(f1, delimiter=',', lineterminator='\n', fieldnames=header)
+        if not lengthExists:
+            writer.writeheader()
+        writer = csv.writer(f1)
+        writer.writerow([LMean, LStd])
+
+    with open(distancePath, 'a') as f2:
+        header = ['Distance Mean', 'Distance S.D.']
+        writer = csv.DictWriter(f2, delimiter=',', lineterminator='\n', fieldnames=header)
+        if not distanceExists:
+            writer.writeheader()
+        writer = csv.writer(f2)
+        writer.writerow([DMean, DStd])
+
+    f1.close()
+    f2.close()
 
 def uFiberStats(LArray, DArray, fidxes, no_of_fibers=20):
     """

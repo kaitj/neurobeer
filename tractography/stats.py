@@ -85,9 +85,18 @@ def writeCSV(fiberTree, scalarType, idxes=None, dirpath=None):
     fileName = scalarType.split('/', -1)[-1]
     filePath = dirpath + '/stats/' + fileName + '.csv'
 
+    fileExists = os.path.isfile(filePath)
+
     with open(filePath, 'a') as f:
+        headers = range(1, fiberTree.pts_per_fiber+1)
+        writer = csv.DictWriter(f, delimiter=',', lineterminator='\n', fieldnames=headers)
+        if not fileExists:
+            writer.writeheader()
+
         writer = csv.writer(f)
         writer.writerow(scalarArray)
+
+    f.close()
 
 def plotStats(fiberTree, scalarType, idxes=None, dirpath=None):
     """

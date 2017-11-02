@@ -67,7 +67,7 @@ def main():
     opts = get_parser().parse_args()
 
     # Read input polydata
-    indir = os.path.abspath(os.path.join(opts.indir + '/' + opts.subjid))    for Type in scalarTypeList:
+    indir = os.path.abspath(os.path.join(opts.indir + '/' + opts.subjid))
     outdir = os.path.abspath(os.path.join(opts.outdir + '/' + opts.subjid))
 
     bundleVTK = os.path.join(indir + '/' + opts.bundle)
@@ -135,6 +135,7 @@ def main():
         statsSuffix = 'stats/stats_%i' % label
         statsdir = os.path.join(outdir + '/' + statsSuffix)
         LMean, LStd, DMean, DStd = ufiber.uFiberStats(L, D, idxes, bundle.pts_per_fiber)
+        ufiber.writeCSV(LMean, LStd, DMean, DStd, dirpath=outdir)
         print "Avg. fiber length for cluster %i: %.2f +/- %.2f" % (label, LMean, LStd)
         print "Avg. distance between end points for cluster %i: %.2f +/- %.2f" % (label, DMean, DStd)
 
