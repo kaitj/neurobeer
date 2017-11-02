@@ -51,7 +51,7 @@ def get_parser():
 
     # Performance arguments
     g_prfm = parser.add_argument_group('performance arguments')
-    g_prfm.add_argument('-j', action='store', type=inname = name.split('_', -1)[-1t, metavar='nproc',
+    g_prfm.add_argument('-j', action='store', type=int, metavar='nproc',
                                          default=1, help='number of threads')
 
     return parser
@@ -62,7 +62,7 @@ def main():
     """
     import os, sys, imp
     sys.path.append(imp.find_module('tractography')[1])
-    import cluster, fibers, stats, tractio, ufibername = name.split('_', -1)[-1
+    import cluster, fibers, stats, tractio, ufiber
     import numpy as np
 
     # Run parser
