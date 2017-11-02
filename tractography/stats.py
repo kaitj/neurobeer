@@ -94,7 +94,7 @@ def plotStats(fiberTree, scalarType, idxes=None, dirpath=None):
     # Plot labels
     fileName = scalarType.split('/', -1)[-1]
     title = fileName + ' (%.2f +/- %.2f)' % (avg, stdev)
-    ytitle = scalarType.split('_', -1)[-1]
+    ytitle = fileName
 
     plt.title(title, fontsize=16)
     plt.ylabel(ytitle.upper(), fontsize=14)
