@@ -137,8 +137,9 @@ def main():
         polyData = bundle.convertToVTK()
         statsSuffix = 'stats/stats_%i' % label
         statsdir = os.path.join(outdir + '/' + statsSuffix)
-        print "Average fiber length for cluster %i: %.2f" % (label, np.mean(L))
-        print "Average distance between end points for cluster %i: %.2f" % (label, np.mean(D))
+        LMean, LStd, DMean, DStd = ufiber.uFiberStats(L, D, idxes, bundle.pts_per_fiber)
+        print "Avg. fiber length for cluster %i: %.2f +/- %.2f" % (label, LMean, LStd)
+        print "Avg. distance between end points for cluster %i: %.2f +/- %.2f" % (label, DMean, DStd)
 
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, fiberData, Type, idxes, rejIdx)

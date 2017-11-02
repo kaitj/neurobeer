@@ -20,6 +20,8 @@ def findUFiber(fiberData):
     """
     # Array storing indices of u-shaped fibers
     uArray = []
+    LArray = []
+    DArray = []
 
     # Determine fiber length and u-shape
     for fidx in range(fiberData.no_of_fibers):
@@ -30,8 +32,10 @@ def findUFiber(fiberData):
         # Temporary max length constraint
         if (L > 30) and (D <= (L / np.pi)) and (L < 90):
             uArray.append(fidx)
+            LArray.append(L)
+            DArray.append(D)
 
-    return uArray, L, D
+    return uArray, LArray, DArray
 
 def extractUFiber(fiberData, uArray):
     """
@@ -50,6 +54,39 @@ def extractUFiber(fiberData, uArray):
 
     return uFiberTree
 
+def uFiberStats(LArray, DArray, fidxes, no_of_fibers=20):
+    """
+    Calculates the mean and standard deviation for fiber length and distance between
+    end points for a group of fibers.
+
+    INPUT:
+        LArray - array of fiber lengths
+        DArray - array of distances between end points for fibers
+        fidxes - array of indices of fibers to calculate
+        no_of_fibers - number of fibers in tractography; defaults 20
+
+    OUTPUT:
+        LMean - mean fiber length
+        LSD - standard deviation of fiber length
+        DMean - mean distance between end points
+        DSD - standard deviation between end points
+    """
+
+    Ltemp = []
+    Dtemp = []
+
+    for fidx in range(no_of_fibers):
+        if fidx in fidxes:
+            Ltemp.append(LArray[fidx])
+            Dtemp.append(DArray[fidx])
+
+    LMean = np.mean(Ltemp)
+    LSD = np.std(Ltemp)
+    DMean = np.mean(Dtemp)
+    DSD = np.std(Dtemp)
+
+    return LMean, LSD, DMean, DSD
+
 def _calcFiberLength(fiberData, fidx):
     """ * INTERNAL FUNCTION *
     Calculates the fiber length via arc length
@@ -59,7 +96,7 @@ def _calcFiberLength(fiberData, fidx):
         fidx - Fiber index
 
     OUTPUT:
-        L - Length of fiberlen(uArray)
+        L - Length of fiber
     """
     no_of_pts = fiberData.pts_per_fiber
 
