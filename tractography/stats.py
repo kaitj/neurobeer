@@ -5,12 +5,12 @@ tract-based statistics.
 
 """
 
-import os
+import os, csv
 import numpy as np
 import matplotlib.pyplot as plt
 
 def _mean(fiberTree, scalarType, idxes=None):
-    """
+    """ *INTERNAL FUNCTION*
     Finds the average of all fibers in bundle at specific sample points
 
     INPUT:
@@ -34,7 +34,7 @@ def _mean(fiberTree, scalarType, idxes=None):
     return clusterAvg, avg
 
 def _stddev(fiberTree, scalarType, idxes=None):
-    """
+    """ *INTERNAL FUNCTION*
     Finds the standard deviation of all fibers in bundle at specific sample points
 
     INPUT:
@@ -55,18 +55,52 @@ def _stddev(fiberTree, scalarType, idxes=None):
         stdev = np.std(fiberTree.getScalars(idxes, scalarType)[:, :])
     return clusterSdev, stdev
 
-def plotStats(fiberTree, scalarType, idxes=None, dirpath=None):
+def writeCSV(fiberTree, scalarType, idxes=None, dirpath=None):
     """
-    Plots the calculated tract-based statistics for each fiber bundle
+    Writes stats to a csv file. Outputs one file per scalar type
+    Each row of the csv is the average value at each sampled point
 
     INPUT:
         fiberTree - tree containing spatial and quantitative information of fibers
         scalarType - type of quantitative data to plot
         idxes - indices to extract info from; defaults None (returns data for all fibers)
-        dirpath - location to st#a = np.array([1, 1, 1], [2, 2, 2])ore plots; defaults None
+        dirpath - location to store plots; defaults None
 
     OUTPUT:
         none
+    """
+
+    if dirpath is None:
+        dirpath = os.getcwd()
+    else:
+        if not os.path.exists(dirpath):
+            os.makedirs(dirpath)
+
+    if idxes is None:
+        scalarArray = np.mean(fiberTree.getScalars(range(fiberTree.no_of_fibers),
+                            scalarType)[:, :], axis=0)
+    else:
+        scalarArray = np.mean(fiberTree.getScalars(idxes, scalarType)[:, :], axis=0)
+
+    fileName = scalarType.split('/', -1)[-1]
+    filePath = dirpath + '/stats/' + fileName + '.csv'
+
+    with open(filePath, 'a') as f:
+        writer = csv.writer(f)
+        writer.writerow(scalarArray)
+
+def plotStats(fiberTree, scalarType, idxes=None, dirpath=None):
+    """
+    Plots the calculated tract-based statistics for each fiber bundle
+
+    INPUT:np.mean(fiberTree.getScalars(range(fiberTree.no_of_fibers), scalarType)[:, :])
+        fiberTree - tree containing spatial and quantitative information of fibers
+        scalarType - type of quantitative data to plot
+        idxes - indices to extract info from; defaults None (returns data for all fibers)
+        dirpath - location to store plots; defaults None
+
+    OUTPUT:
+        nonenp.mean(fiberTree.getScalars(range(fiberTree.no_of_fibers), scalarType)[:, :])
     """
 
     if dirpath is None:

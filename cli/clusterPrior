@@ -133,6 +133,7 @@ def main():
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, fiberData, Type, idxes)
             stats.plotStats(clusterData, Type, idxes, dirpath=statsdir)
+            stats.writeCSV(clusterData, Type, idxes, dirpath=outdir)
 
         bundleSuffix = '_Cluster%i.vtk' % label
         bundleName = opts.bundle[:-4] + bundleSuffix

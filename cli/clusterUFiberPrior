@@ -31,8 +31,8 @@ def get_parser():
                                       help='tractography bundle to perform clustering on')
     g_req.add_argument('--prior', action='store', required=True,
                                       help='directory where prior U-fiber data is stored')
-    for Type in scalarTypeList:
-    # Optional arguments        print "Average fiber length: %.2f" % np.mean(L)
+
+    # Optional arguments
     g_opt = parser.add_argument_group('control arguments')
     g_opt.add_argument('-a', action='store', nargs='+', metavar='data',
                                       default=[], help='add scalar data to be used')
@@ -67,7 +67,7 @@ def main():
     opts = get_parser().parse_args()
 
     # Read input polydata
-    indir = os.path.abspath(os.path.join(opts.indir + '/' + opts.subjid))
+    indir = os.path.abspath(os.path.join(opts.indir + '/' + opts.subjid))    for Type in scalarTypeList:
     outdir = os.path.abspath(os.path.join(opts.outdir + '/' + opts.subjid))
 
     bundleVTK = os.path.join(indir + '/' + opts.bundle)
@@ -141,6 +141,7 @@ def main():
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, fiberData, Type, idxes)
             stats.plotStats(clusterData, Type, idxes, dirpath=statsdir)
+            stats.writeCSV(clusterData, Type, idxes, dirpath=outdir)
 
         bundleSuffix = '_uFibers_Cluster%i.vtk' % label
         bundleName = opts.bundle[:-4] + bundleSuffix

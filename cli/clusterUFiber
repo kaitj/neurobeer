@@ -105,7 +105,7 @@ def main():
     # Extract u-fibers
     uArray, L, D = ufiber.findUFiber(fiberData)
     uFiberTree = ufiber.extractUFiber(fiberData, uArray)
-   uFiberTree.copyScalar(fiberData, scalarTypeList, fidxes=uArray, rejIdx=[])
+    uFiberTree.copyScalar(fiberData, scalarTypeList, fidxes=uArray, rejIdx=[])
 
     # Perform clustering on provided bundle
     outputPolydata, clusterIdx, fiberData, rejIdx = cluster.spectralClustering(
@@ -143,6 +143,7 @@ def main():
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, fiberData, Type, idxes, rejIdx)
             stats.plotStats(clusterData, Type, idxes, dirpath=statsdir)
+            stats.writeCSV(clusterData. Type, idxes, dirpath=outdir)
 
         bundleSuffix = '_uFibers_Cluster%i.vtk' % label
         bundleName = opts.bundle[:-4] + bundleSuffix
