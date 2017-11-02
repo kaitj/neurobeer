@@ -31,7 +31,7 @@ def get_parser():
                                       help='tractography bundle to perform clustering on')
     g_req.add_argument('--prior', action='store', required=True,
                                       help='directory where prior U-fiber data is stored')
-
+    for Type in scalarTypeList:
     # Optional arguments        print "Average fiber length: %.2f" % np.mean(L)
     g_opt = parser.add_argument_group('control arguments')
     g_opt.add_argument('-a', action='store', nargs='+', metavar='data',
@@ -103,8 +103,7 @@ def main():
     # Extract u-fibers
     uArray, L, D = ufiber.findUFiber(fiberData)
     uFiberTree = ufiber.extractUFiber(fiberData, uArray)
-    for Type in scalarTypeList:
-        uFiberTree.copyScalar(fiberData, Type, uArray)
+    uFiberTree.copyScalar(fiberData, scalarTypeList, fidxes=uArray, rejIdx=[])
 
     # Perform clustering on provided bundle
     outputPolydata, clusterIdx, fiberData, rejIdx = cluster.spectralPriorCluster(

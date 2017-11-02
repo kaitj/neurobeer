@@ -67,7 +67,7 @@ class FiberTree:
         Indices include both end points of the fiber plus evenly spaced points
         along the line. Module determines which indices are wanted based on
         fiber length and desired number of points along the length.
-            print idxes
+
         INPUT:
             fiberLength - Number of points along a fiber
             pts_per_length - Number of desired points along fiber
@@ -83,7 +83,6 @@ class FiberTree:
         idxList = []
         for idx in range(0, pts_per_fiber):
             idxList.append(idx * stepLength)
-
         return idxList
 
     def getFiber(self, fiberIdx):
@@ -177,6 +176,7 @@ class FiberTree:
         for Type in scalarTypeArray:
             idx = 0
 
+            # Copy scalars of provided fiber indices
             if fidxes != []:
                 for fidx in fidxes:
                     if fidx in rejIdx:
@@ -184,7 +184,7 @@ class FiberTree:
                     for pidx in range(fiberData.pts_per_fiber):
                         self.fiberTree[idx][pidx][Type] = float(fiberData.fiberTree[fidx][pidx][Type])
                     idx += 1
-                    
+            # Copy scalars of all fibers
             else:
                 for fidx in range(fiberData.no_of_fibers):
                     if fidx in rejIdx:

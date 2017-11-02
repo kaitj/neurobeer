@@ -105,8 +105,7 @@ def main():
     # Extract u-fibers
     uArray, L, D = ufiber.findUFiber(fiberData)
     uFiberTree = ufiber.extractUFiber(fiberData, uArray)
-    for Type in scalarTypeList:
-        uFiberTree.copyScalar(fiberData, Type, uArray)
+   uFiberTree.copyScalar(fiberData, scalarTypeList, fidxes=uArray, rejIdx=[])
 
     # Perform clustering on provided bundle
     outputPolydata, clusterIdx, fiberData, rejIdx = cluster.spectralClustering(

@@ -19,16 +19,19 @@ def _mean(fiberTree, scalarType, idxes=None):
         idxes - indices to extract info from; defaults None (returns data for all fibers)
 
     OUTPUT:
-        avg - calculated average of data
+        clusterAvg - calculated tract-based average
+        avg - calculated average of data for group
     """
 
     if idxes is None:
-        avg = np.mean(fiberTree.getScalars(range(fiberTree.no_of_fibers),
+        clusterAvg = np.mean(fiberTree.getScalars(range(fiberTree.no_of_fibers),
                             scalarType)[:, :], axis=0)
+        avg = np.mean(fiberTree.getScalars(range(fiberTree.no_of_fibers), scalarType)[:, :])
     else:
-        avg = np.mean(fiberTree.getScalars(idxes, scalarType)[:, :], axis=0)
+        clusterAvg = np.mean(fiberTree.getScalars(idxes, scalarType)[:, :], axis=0)
+        avg = np.mean(fiberTree.getScalars(idxes, scalarType)[:, :])
 
-    return avg
+    return clusterAvg, avg
 
 def _stddev(fiberTree, scalarType, idxes=None):
     """
@@ -40,14 +43,17 @@ def _stddev(fiberTree, scalarType, idxes=None):
         idxes - indices to extract info from; defaults None (returns data for all fibers)
 
     OUTPUT:
-        sdev - calculated standard deviation of data
+        clusterSdev - calculated tract-based standard deviation
+        stdev - standard deviation of fiber group
     """
     if idxes is None:
-        sdev = np.std(fiberTree.getScalars(range(fiberTree.no_of_fibers),
+        clusterSdev = np.std(fiberTree.getScalars(range(fiberTree.no_of_fibers),
                             scalarType)[:, :], axis=0)
+        stdev = np.std(fiberTree.getScalars(range(fiberTree.no_of_fibers), scalarType)[:, :])
     else:
-        sdev = np.std(fiberTree.getScalars(idxes, scalarType)[:, :], axis=0)
-    return sdev
+        clusterSdev = np.std(fiberTree.getScalars(idxes, scalarType)[:, :], axis=0)
+        stdev = np.std(fiberTree.getScalars(idxes, scalarType)[:, :])
+    return clusterSdev, stdev
 
 def plotStats(fiberTree, scalarType, idxes=None, dirpath=None):
     """
@@ -69,15 +75,10 @@ def plotStats(fiberTree, scalarType, idxes=None, dirpath=None):
         if not os.path.exists(dirpath):
             os.makedirs(dirpath)
 
-    # Info for plot labels
-    title = scalarType.split('/', -1)[-1]
-    title = title + '(%.2f +/- %.2f)' % np.mean(_mean, axis=1), np.mean(_stddev, axis=1)
-    ytitle = scalarType.split('_', -1)[-1]
-
     # Statistical calculations for plot
     x = range(fiberTree.pts_per_fiber)
-    yavg = _mean(fiberTree, scalarType, idxes)
-    ystd = _stddev(fiberTree, scalarType, idxes)
+    yavg, avg = _mean(fiberTree, scalarType, idxes)
+    ystd, stdev = _stddev(fiberTree, scalarType, idxes)
 
     # Plot of stats
     f = plt.figure(figsize=(10, 10))
@@ -91,6 +92,10 @@ def plotStats(fiberTree, scalarType, idxes=None, dirpath=None):
     plt.xlim(min(x), max(x))
 
     # Plot labels
+    fileName = scalarType.split('/', -1)[-1]
+    title = fileName + ' (%.2f +/- %.2f)' % (avg, stdev)
+    ytitle = scalarType.split('_', -1)[-1]
+
     plt.title(title, fontsize=16)
     plt.ylabel(ytitle.upper(), fontsize=14)
     plt.xlabel('Fiber Samples', fontsize=14)
@@ -100,5 +105,5 @@ def plotStats(fiberTree, scalarType, idxes=None, dirpath=None):
                               top='off', right='off')
 
     # Save figure
-    plt.savefig(dirpath + '/' + title + '_stats.png')
+    plt.savefig(dirpath + '/' + fileName+ '_stats.png')
     plt.close(f)
