@@ -118,7 +118,7 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[], scalarWe
             del temp
         else:
             colour = _cluster_to_rgb(centroids)
-            
+
         # 8. Return results
         # Create model with user / default number of chosen samples along fiber
         outputData = fiberData.convertToVTK(rejIdx)
@@ -241,7 +241,8 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[], scalarTypeList=
 
         # 8. Return results
         # Create model with user / default number of chosen samples along fiber
-        outputPolydata = _format_outputVTK(fiberData, clusterIdx, colour, priorCentroids)
+        outputData = fiberData.convertToVTK(rejIdx)
+        outputPolydata = _format_outputVTK(outputData, clusterIdx, colour, priorCentroids)
 
         # 9. Also add measurements from those used to cluster
         for i in range(len(scalarTypeList)):
@@ -712,16 +713,15 @@ def _priorWeightedSimilarity(fiberTree, priorTree, scalarTypeList=[], scalarWeig
         wSimilarity - matrix containing the computed weighted similarity
     """
 
-    if ((scalarWeightList == []) & (scalarTypeList != [])):
+    if ((scalarWeightList == []) and (scalarTypeList != [])):
         print "\nNo weights given for provided measurements! Exiting..."
         exit()
 
-    elif ((scalarWeightList != []) & (scalarTypeList == [])):
+    elif ((scalarWeightList != []) and (scalarTypeList == [])):
         print "\nPlease also specify measurement(s) type. Exiting..."
         exit()
 
-    elif ((scalarWeightList == [])) & ((scalarTypeList == [])):
-        print "\nNo measurements provided!"
+    elif ((scalarWeightList == []) and (scalarTypeList == [])) or (scalarWeightList[0] == 1):
         print "\nCalculating similarity based on geometry."
         wSimilarity = _priorSimilarity_matrix(fiberTree, priorTree, sigma, pts_per_fiber, no_of_jobs)
 
