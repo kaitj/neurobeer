@@ -530,10 +530,6 @@ def _priorQSimilarity_matrix(fiberTree, priorTree, scalarType, sigma, pts_per_fi
 
     qSimilarity = np.array(qSimilarity)
 
-    if np.diag(qSimilarity).all() != 1.0:
-        print "Diagonals in similarity marix are not equal to 1"
-        exit()
-
     return qSimilarity
 
 def _degreeMatrix(inputMatrix):
@@ -766,10 +762,6 @@ def _priorWeightedSimilarity(fiberTree, priorTree, scalarTypeList=[], scalarWeig
             wSimilarity += similarity * scalarWeightList[i+1]
 
         del similarity
-
-    if np.diag(wSimilarity).all() != 1.0:
-        print "\nDiagonals of weighted similarity are not equal to 1"
-        exit()
 
     return wSimilarity
 
