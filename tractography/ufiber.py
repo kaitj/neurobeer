@@ -75,6 +75,10 @@ def writeCSV(LMean, LStd, DMean, DStd, dirpath=None):
         if not os.path.exists(dirpath):
             os.makedirs(dirpath)
 
+    statspath = dirpath + '/stats/'
+    if not os.path.exists(statspath):
+        os.makedirs(statspath)
+
     lengthName = 'clusterLengths'
     lengthPath = dirpath + '/stats/' + lengthName + '.csv'
     lengthExists = os.path.isfile(lengthPath)

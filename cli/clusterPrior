@@ -70,10 +70,14 @@ def main():
     indir = os.path.abspath(os.path.join(opts.indir + '/' + opts.subjid))
     outdir = os.path.abspath(os.path.join(opts.outdir + '/' + opts.subjid))
 
+    ptree, ptemp = prior.load(opts.prior)
+    pts_per_fiber = ptree.pts_per_fiber
+    del ptree, ptemp
+
     bundleVTK = os.path.join(indir + '/' + opts.bundle)
     bundlePolydata = tractio.readVTK(bundleVTK, opts.verbose)
     fiberData = fibers.FiberTree()
-    fiberData.convertFromVTK(bundlePolydata, opts.p, opts.verbose)
+    fiberData.convertFromVTK(bundlePolydata, pts_per_fiber, opts.verbose)
     del bundleVTK
 
     # Handling scalar data

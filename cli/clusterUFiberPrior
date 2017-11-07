@@ -60,7 +60,7 @@ def main():
     """
     import os, sys, imp
     sys.path.append(imp.find_module('tractography')[1])
-    import cluster, fibers, stats, tractio, ufiber
+    import cluster, fibers, prior, stats, tractio, ufiber
     import numpy as np
 
     # Run parser
@@ -70,10 +70,14 @@ def main():
     indir = os.path.abspath(os.path.join(opts.indir + '/' + opts.subjid))
     outdir = os.path.abspath(os.path.join(opts.outdir + '/' + opts.subjid))
 
+    ptree, ptemp = prior.load(opts.prior)
+    pts_per_fiber = ptree.pts_per_fiber
+    del ptree, ptemp
+
     bundleVTK = os.path.join(indir + '/' + opts.bundle)
     bundlePolydata = tractio.readVTK(bundleVTK, opts.verbose)
     fiberData = fibers.FiberTree()
-    fiberData.convertFromVTK(bundlePolydata, opts.p, opts.verbose)
+    fiberData.convertFromVTK(bundlePolydata, pts_per_fiber, opts.verbose)
     del bundleVTK
 
     # Handling scalar data
@@ -88,7 +92,7 @@ def main():
             name = name.split('/', -1)[-1]
             data = name + 'Data'
             typevar = name + 'Type'
-            exec('%s, %s = tractio.readScalar("%", opts.verbose)' % (data, typevar, path))
+            exec('%s, %s = tractio.readScalar("%s", opts.verbose)' % (data, typevar, path))
             exec('scalarDataList.append(%s)' % (data))
             exec('scalarTypeList.append(%s)' % (typevar))
 
