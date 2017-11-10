@@ -100,7 +100,6 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[], scalarWe
             emvec = eigvec[:, 1:k_clusters]
         else:
             emvec = eigvec[:, 1:k_clusters + 1]
-        emvec = emvec.real
 
         # 7. Find clusters using K-means clustering
         centroids, clusterIdx = scipy.cluster.vq.kmeans2(emvec, k_clusters, iter=20,
@@ -321,12 +320,21 @@ def _pairwiseDistance_matrix(fiberTree, pts_per_fiber, no_of_jobs):
         distances - NxN matrix containing distances between fibers
     """
 
-    distances = Parallel(n_jobs=no_of_jobs, backend="threading")(
+    temp = Parallel(n_jobs=no_of_jobs, backend="threading")(
             delayed(distance.fiberDistance, has_shareable_memory)(fiberTree.getFiber(fidx),
-                    fiberTree.getFibers(range(fiberTree.no_of_fibers)))
+                        fiberTree.getFibers(range(fidx, fiberTree.no_of_fibers)))
             for fidx in range(0, fiberTree.no_of_fibers))
+    temp = np.array(temp)
 
-    distances = np.array(distances)
+    distances = np.zeros((fiberTree.no_of_fibers, fiberTree.no_of_fibers))
+    for i in range(0, fiberTree.no_of_fibers):
+        idx = 0
+        for j in range(i, fiberTree.no_of_fibers):
+            distances[i][j] = temp[i][idx]
+            distances[j][i] = temp[i][idx]
+            idx += 1
+    del temp
+
     # Normalize between 0 and 1
     distances = sklearn.preprocessing.MinMaxScaler().fit_transform(distances)
 
@@ -377,14 +385,22 @@ def _pairwiseQDistance_matrix(fiberTree, scalarType, pts_per_fiber, no_of_jobs):
         qDistances - NxN matrix containing pairwise distances between fibers
     """
 
-    qDistances = Parallel(n_jobs=no_of_jobs, backend="threading")(
+    temp = Parallel(n_jobs=no_of_jobs, backend="threading")(
             delayed(distance.scalarDistance, has_shareable_memory)(
                 fiberTree.getScalar(fidx, scalarType),
-                fiberTree.getScalars(range(fiberTree.no_of_fibers), scalarType))
-            for fidx in range(fiberTree.no_of_fibers)
+                fiberTree.getScalars(range(fidx, fiberTree.no_of_fibers), scalarType))
+            for fidx in range(0, fiberTree.no_of_fibers)
     )
+    temp = np.array(temp)
 
-    qDistances = np.array(qDistances)
+    qDistances = np.zeros((fiberTree.no_of_fibers, fiberTree.no_of_fibers))
+    for i in range(0, fiberTree.no_of_fibers):
+        idx = 0
+        for j in range(i, fiberTree.no_of_fibers):
+            qDistances[i][j] = temp[i][j]
+            qDistances[j][i] = temp[i][j]
+            idx += 1
+    del temp
 
     # Normalize distance measurements
     qDistances = sklearn.preprocessing.MinMaxScaler().fit_transform(qDistances)
@@ -630,16 +646,15 @@ def _pairwiseWeightedSimilarity(fiberTree, scalarTypeList=[], scalarWeightList=[
         wSimilarity - matrix containing the computed weighted similarity
     """
 
-    if ((scalarWeightList == []) & (scalarTypeList != [])):
+    if ((scalarWeightList == []) and (scalarTypeList != [])):
         print "\nNo weights given for provided measurements! Exiting..."
         exit()
 
-    elif ((scalarWeightList != []) & (scalarTypeList == [])):
+    elif ((scalarWeightList != []) and (scalarTypeList == [])):
         print "\nPlease also specify measurement(s) type. Exiting..."
         exit()
 
-    elif ((scalarWeightList == [])) & ((scalarTypeList == [])):
-        print "\nNo measurements provided!"
+    elif (((scalarWeightList == [])) and ((scalarTypeList == []))) or (scalarWeightList[0] == 1):
         print "\nCalculating similarity based on geometry."
         wSimilarity = _pairwiseSimilarity_matrix(fiberTree, sigma, pts_per_fiber, no_of_jobs)
 
