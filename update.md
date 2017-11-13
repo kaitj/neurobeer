@@ -6,7 +6,11 @@
 * [v0.1.1](#v011)
 * [v0.1.0](#v010)
 
-### Version 0.1.3 <a name =v013></a>
+### Version 0.14 <a name=v014></a>
+* Restructured hierarchy; consolidated files under one folder
+* Moved CLI commands under scripts in setup.py
+
+### Version 0.1.3 <a name=v013></a>
 * Added ufibre module
     * Determines if fibre is u-shaped
     * Approximates fiber length via arc length

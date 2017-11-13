@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""" clusterSingle
+""" clusterUFiber
 
 Python command line interface for automated tractography clustering
 and evaluation.
@@ -12,7 +12,7 @@ def get_parser():
     """
     from argparse import ArgumentParser, RawTextHelpFormatter
 
-    parser = ArgumentParser(description='Tractography clustering of single subject',
+    parser = ArgumentParser(description='Tractography extraction and clustering of U-fibers',
                                              formatter_class=RawTextHelpFormatter)
 
     # Version option
@@ -28,7 +28,7 @@ def get_parser():
     g_req.add_argument('--subjid', action='store', required=True,
                                       help='subject id to compute')
     g_req.add_argument('--bundle', action='store', required=True,
-                                      help='tractography bundle to perform clustering on')
+                                      help='tractography bundle to process')
 
     # Optional arguments
     g_opt = parser.add_argument_group('control arguments')
@@ -60,10 +60,9 @@ def main():
     """
     Entry point of code
     """
-    import os, sys, imp
-    sys.path.append(imp.find_module('tractography')[1])
-    import cluster, fibers, stats, tractio
+    import os
     import numpy as np
+    from beer.tractography import cluster, fibers, stats, tractio, ufiber
 
     # Run parser
     opts = get_parser().parse_args()
@@ -102,16 +101,21 @@ def main():
         fiberData.addScalar(bundlePolydata, scalarDataList[i], scalarTypeList[i],
                                         fiberData.pts_per_fiber)
 
+    # Extract u-fibers
+    uArray, L, D = ufiber.findUFiber(fiberData)
+    uFiberTree = ufiber.extractUFiber(fiberData, uArray)
+    uFiberTree.copyScalar(fiberData, scalarTypeList, fidxes=uArray, rejIdx=[])
+
     # Perform clustering on provided bundle
     outputPolydata, clusterIdx, fiberData, rejIdx = cluster.spectralClustering(
-                                    fiberData, scalarDataList=scalarDataList,
+                                    uFiberTree, scalarDataList=scalarDataList,
                                     scalarWeightList=scalarWeightList, scalarTypeList=scalarTypeList,
                                     pts_per_fiber=opts.p, k_clusters=opts.k, sigma=opts.sig,
                                     saveWSimilarity=opts.saveWeight, saveAllSimilarity=opts.saveAll,
                                     dirpath=outdir, verbose=opts.verbose, no_of_jobs=opts.j)
     del bundlePolydata, scalarWeightList, scalarDataList
 
-    bundleName = opts.bundle[:-4] + '_Clustered.vtk'
+    bundleName = opts.bundle[:-4] + '_uFibers_Clustered.vtk'
     bundledir = os.path.join(outdir, bundleName)
     tractio.writeVTK(outputPolydata, bundledir, opts.verbose)
     clusterData = fiberData.getFibers(range(fiberData.no_of_fibers), rejIdx)
@@ -131,13 +135,17 @@ def main():
         polyData = bundle.convertToVTK()
         statsSuffix = 'stats/stats_%i' % label
         statsdir = os.path.join(outdir + '/' + statsSuffix)
+        LMean, LStd, DMean, DStd = ufiber.uFiberStats(L, D, idxes, bundle.pts_per_fiber)
+        ufiber.writeCSV(LMean, LStd, DMean, DStd, dirpath=outdir)
+        print "Avg. fiber length for cluster %i: %.2f +/- %.2f" % (label, LMean, LStd)
+        print "Avg. distance between end points for cluster %i: %.2f +/- %.2f" % (label, DMean, DStd)
 
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, fiberData, Type, idxes, rejIdx)
             stats.plotStats(clusterData, Type, idxes, dirpath=statsdir)
-            stats.writeCSV(clusterData, Type, idxes, dirpath=outdir)
+            stats.writeCSV(clusterData. Type, idxes, dirpath=outdir)
 
-        bundleSuffix = '_Cluster%i.vtk' % label
+        bundleSuffix = '_uFibers_Cluster%i.vtk' % label
         bundleName = opts.bundle[:-4] + bundleSuffix
         bundledir = os.path.join(outdir + '/' + bundleName)
         tractio.writeVTK(polyData, bundledir, opts.verbose)

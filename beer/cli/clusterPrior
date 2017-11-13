@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""" clusterUFiberPrior
+""" clusterPrior
 
 Python command line interface for automated tractography clustering
 and evaluation from previously clustered data
@@ -12,7 +12,7 @@ def get_parser():
     """
     from argparse import ArgumentParser, RawTextHelpFormatter
 
-    parser = ArgumentParser(description='U-fiber extraction and lustering based on clustered data',
+    parser = ArgumentParser(description='Tractography clustering based on clustered data',
                                              formatter_class=RawTextHelpFormatter)
 
     # Version option
@@ -22,15 +22,15 @@ def get_parser():
     # Required arguments
     g_req = parser.add_argument_group('required arguments')
     g_req.add_argument('--indir', action='store', required=True,
-                                      help='the directory with input data')
+                                          help='the directory with input data')
     g_req.add_argument('--outdir', action='store', required=True,
-                                      help='the directory where output files should be stored')
+                                          help='the directory where output files should be stored')
     g_req.add_argument('--subjid', action='store', required=True,
                                       help='subject id to compute')
     g_req.add_argument('--bundle', action='store', required=True,
                                       help='tractography bundle to perform clustering on')
     g_req.add_argument('--prior', action='store', required=True,
-                                      help='directory where prior U-fiber data is stored')
+                                     help='directory where prior data is stored')
 
     # Optional arguments
     g_opt = parser.add_argument_group('control arguments')
@@ -58,10 +58,9 @@ def main():
     """
     Entry point of code
     """
-    import os, sys, imp
-    sys.path.append(imp.find_module('tractography')[1])
-    import cluster, fibers, prior, stats, tractio, ufiber
+    import os
     import numpy as np
+    from beer.tractography import cluster, fibers, prior, stats, tractio
 
     # Run parser
     opts = get_parser().parse_args()
@@ -104,21 +103,16 @@ def main():
         fiberData.addScalar(bundlePolydata, scalarDataList[i], scalarTypeList[i],
                                          fiberData.pts_per_fiber)
 
-    # Extract u-fibers
-    uArray, L, D = ufiber.findUFiber(fiberData)
-    uFiberTree = ufiber.extractUFiber(fiberData, uArray)
-    uFiberTree.copyScalar(fiberData, scalarTypeList, fidxes=uArray, rejIdx=[])
-
     # Perform clustering on provided bundle
     outputPolydata, clusterIdx, fiberData, rejIdx = cluster.spectralPriorCluster(
-                                    uFiberTree, opts.prior, scalarDataList=scalarDataList,
+                                    fiberData, opts.prior, scalarDataList=scalarDataList,
                                     scalarWeightList=scalarWeightList, scalarTypeList=scalarTypeList,
                                     sigma=opts.sig, saveWSimilarity=opts.saveWeight,
                                     saveAllSimilarity=opts.saveAll, dirpath=outdir, verbose=opts.verbose,
                                     no_of_jobs=opts.j)
     del bundlePolydata, opts.prior, scalarWeightList, scalarDataList
 
-    bundleName = opts.bundle[:-4] + '_uFibers_Clustered.vtk'
+    bundleName = opts.bundle[:-4] + '_Clustered.vtk'
     bundledir = os.path.join(outdir, bundleName)
     tractio.writeVTK(outputPolydata, bundledir, opts.verbose)
     clusterData = fiberData.getFibers(range(fiberData.no_of_fibers), rejIdx)
@@ -138,17 +132,13 @@ def main():
         polyData = bundle.convertToVTK()
         statsSuffix = 'stats/stats_%i' % label
         statsdir = os.path.join(outdir + '/' + statsSuffix)
-        LMean, LStd, DMean, DStd = ufiber.uFiberStats(L, D, idxes, bundle.pts_per_fiber)
-        ufiber.writeCSV(LMean, LStd, DMean, DStd, dirpath=outdir)
-        print "Avg. fiber length for cluster %i: %.2f +/- %.2f" % (label, LMean, LStd)
-        print "Avg. distance between end points for cluster %i: %.2f +/- %.2f" % (label, DMean, DStd)
 
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, fiberData, Type, idxes)
             stats.plotStats(clusterData, Type, idxes, dirpath=statsdir)
             stats.writeCSV(clusterData, Type, idxes, dirpath=outdir)
 
-        bundleSuffix = '_uFibers_Cluster%i.vtk' % label
+        bundleSuffix = '_Cluster%i.vtk' % label
         bundleName = opts.bundle[:-4] + bundleSuffix
         bundledir = os.path.join(outdir + '/' + bundleName)
         tractio.writeVTK(polyData, bundledir, opts.verbose)
