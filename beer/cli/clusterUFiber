@@ -30,7 +30,7 @@ def get_parser():
     g_req.add_argument('--bundle', action='store', required=True,
                                       help='tractography bundle to process')
 
-    # Optional arguments
+    # Optional argumentstractograph
     g_opt = parser.add_argument_group('control arguments')
     g_opt.add_argument('-a', action='store', nargs='+', metavar='data',
                                       default=[], help='add scalar data to be used')
@@ -39,7 +39,7 @@ def get_parser():
     g_opt.add_argument('-p', action='store', type=int, metavar='no_samples',
                                       default=2, help='number of samples to take along each fiber')
     g_opt.add_argument('-k', action='store', type=int, metavar='k_clusters',
-                                      default=2, help='number of clusters to use in algorithm')
+                                      default=2, helptractograph='number of clusters to use in algorithm')
     g_opt.add_argument('-sig', action='store', type=float, metavar='sigma',
                                       default=1.0, help='sigma to be used in clustering algorithm')
     g_opt.add_argument('-sall', '--saveAll', action='store_true',
@@ -60,9 +60,10 @@ def main():
     """
     Entry point of code
     """
-    import os
+    import os, sys, imp
+    sys.path.append(imp.find_module('beer/tractography')[1])
     import numpy as np
-    from beer.tractography import cluster, fibers, stats, tractio, ufiber
+    import cluster, fibers, stats, tractio, ufiber
 
     # Run parser
     opts = get_parser().parse_args()

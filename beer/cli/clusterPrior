@@ -58,9 +58,10 @@ def main():
     """
     Entry point of code
     """
-    import os
+    import os, sys, imp
+    sys.path.append(imp.find_module('beer/tractography')[1])
+    import cluster, fibers, prior, stats, tractio
     import numpy as np
-    from beer.tractography import cluster, fibers, prior, stats, tractio
 
     # Run parser
     opts = get_parser().parse_args()
