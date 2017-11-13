@@ -96,12 +96,6 @@ python setup.py install --user
 The Bundle Extraction and Evaluation Resource can be used via command line or as a Python library to be used in Python scripts.
 
 ### Command line interface <a name="cli"></a>
-Note: The path to the command line interface should be added to the environment path. Please make note of the installation path after running setup.py. To do so, add the following line of code to ~/.profile (or ~/.bash_profile) from the terminal:
-```
-PATH=$PATH:~/.local/lib/python2.7/site-packages/cli
-```
-Replace the path above with the installation path on your system.
-
 Shown is an example of how to run the command line interface with required arguments.
 ```
 Usage: clusterSingle --indir <in_dir> --subjid <subjid> --bundle <bundle_name> --outdir <out_dir>
