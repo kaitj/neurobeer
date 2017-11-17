@@ -15,7 +15,7 @@ import fibers, distance, misc, prior
 import vtk
 
 def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[], scalarWeightList=[],
-                                    pts_per_fiber=20, k_clusters=200, sigma=0.4, saveAllSimilarity=False,
+                                    pts_per_fiber=20, k_clusters=50, sigma=0.2, saveAllSimilarity=False,
                                     saveWSimilarity=False, dirpath=None, verbose=0, no_of_jobs=1):
         """
         Clustering of fibers based on pairwise fiber similarity.

@@ -55,7 +55,7 @@ def writeVTK(data, vtkfile, verbose=0):
     """
 
     if verbose == 1:
-        print"\nWriting", vtkfile, "..."
+        print"Writing", vtkfile, "..."
 
     filename, ext = os.path.splitext(vtkfile)
 
@@ -73,7 +73,7 @@ def writeVTK(data, vtkfile, verbose=0):
     del vtkWriter
 
     if verbose == 1:
-        print "Finished writing data to ", filename
+        print "Finished writing data to ", filename, "/n"
 
 def readScalar(scalarfile, verbose=0):
     """
