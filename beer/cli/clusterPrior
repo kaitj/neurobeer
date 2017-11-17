@@ -37,7 +37,7 @@ def get_parser():
     g_opt.add_argument('-a', action='store', nargs='+', metavar='data',
                                       default=[], help='add scalar data to be used')
     g_opt.add_argument('-w', action='store', nargs='+', metavar='wgt',
-                                      default=[], help='provide weighting on data for clustering, ')
+                                      default=[], help='provide weighting on data f"""or clustering, ')
     g_opt.add_argument('-sig', action='store', type=float, metavar='sigma',
                                       default=1.0, help='sigma to be used in clustering algorithm')
     g_opt.add_argument('-sall', '--saveAll', action='store_true',
@@ -105,7 +105,7 @@ def main():
                                          fiberData.pts_per_fiber)
 
     # Perform clustering on provided bundle
-    outputPolydata, clusterIdx, fiberData = cluster.spectralPriorCluster(
+    outputPolydata, clusterIdx, fiberData, rejIdx = cluster.spectralPriorCluster(
                                     fiberData, opts.prior, scalarDataList=scalarDataList,
                                     scalarWeightList=scalarWeightList, scalarTypeList=scalarTypeList,
                                     sigma=opts.sig, saveWSimilarity=opts.saveWeight,
@@ -116,9 +116,9 @@ def main():
     bundleName = opts.bundle[:-4] + '_Clustered.vtk'
     bundledir = os.path.join(outdir, bundleName)
     tractio.writeVTK(outputPolydata, bundledir, opts.verbose)
-    clusterData = fiberData.getFibers(range(fiberData.no_of_fibers))
+    clusterData = fiberData.getFibers(range(fiberData.no_of_fibers), rejIdx)
     clusterData = fibers.convertFromTuple(clusterData)
-    clusterData.copyScalar(fiberData, scalarTypeList, fidxes=[])
+    clusterData.copyScalar(fiberData, scalarTypeList, fidxes=[], rejIdx=rejIdx)
 
     # NOT USED - SUPPOSE TO EXTRACT STATS FOR COMBINED
     # NEEDS TO BE FIXED FOR USE (IF WANTED/NEEDED)

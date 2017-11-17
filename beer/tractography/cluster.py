@@ -69,7 +69,7 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[], scalarWe
                                                     sigma, saveAllSimilarity, pts_per_fiber, matpath, no_of_jobs)
 
         # Outlier detection
-        W, rejIdx = _outlierDetection(W)
+        W, rejIdx = _outlierSimDetection(W)
 
         if saveWSimilarity is True:
             misc.saveMatrix(matpath, W, 'Weighted')
@@ -199,16 +199,13 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[], scalarTypeList=
         W = _priorWeightedSimilarity(fiberData, priorData, scalarTypeList, scalarWeightList,
                                                     sigma, saveAllSimilarity, pts_per_fiber, matpath, no_of_jobs)
 
-        if saveWSimilarity is True:
-            misc.saveMatrix(matpath, W, 'Weighted')
-
         # 2. Compute inverse of eigenvalues
         invEigval = np.diag(np.divide(1, eigval))
 
         # 3. Compute new eigenvectors vectors in feature space
         nEigvec = np.dot(np.dot(W, eigvec), invEigval)
 
-        # 6. Compute information for clustering using "N" number of smallest eigenvalues
+        # 4. Compute information for clustering using "N" number of smallest eigenvalues
         # Skips first eigenvector, no information obtained
         if k_clusters > nEigvec.shape[0]:
             print 'Number of user selected clusters greater than number of eigenvectors.'
@@ -220,9 +217,9 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[], scalarTypeList=
             emvec = nEigvec[:, 1:k_clusters + 1]
         emvec = emvec.real
 
-        # 7. Find clusters using K-means clustering
+        # 5. Find clusters using K-means clustering
         clusterIdx, dist = scipy.cluster.vq.vq(emvec, priorCentroids)
-        print dist
+
         fiberData.addClusterInfo(clusterIdx, priorCentroids)
 
         if k_clusters <= 1:
@@ -238,14 +235,20 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[], scalarTypeList=
 
         # 8. Return results
         # Create model with user / default number of chosen samples along fiber
-        outputData = fiberData.convertToVTK()
+        # Outlier rejection based on distance from centroid
+        W, rejIdx, clusterIdx = _distOutlierDetection(W, dist, clusterIdx)
+
+        if saveWSimilarity is True:
+            misc.saveMatrix(matpath, W, 'Weighted')
+
+        outputData = fiberData.convertToVTK(rejIdx)
         outputPolydata = _format_outputVTK(outputData, clusterIdx, colour, priorCentroids)
 
         # 9. Also add measurements from those used to cluster
         for i in range(len(scalarTypeList)):
             outputPolydata = addScalarToVTK(outputPolydata, fiberData, scalarTypeList[i])
 
-        return outputPolydata, clusterIdx, fiberData
+        return outputPolydata, clusterIdx, fiberData, rejIdx
 
 def addScalarToVTK(polyData, fiberTree, scalarType, fidxes=None, rejIdx=[]):
     """
@@ -804,11 +807,11 @@ def _sortLabel(centroids, clusterIdx):
 
     return newCentroids, newClusters
 
-def _outlierDetection(W):
+def _outlierSimDetection(W):
     """ * INTERNAL FUNCTION *
     Look for outliers in fibers to reject
 
-        INPUT::
+    INPUT::
         W - similarity matrix
 
     OUTPUT:
@@ -827,3 +830,27 @@ def _outlierDetection(W):
     W = np.delete(W, rejIdx, 1)
 
     return W, rejIdx
+
+def _distOutlierDetection(W, dist, clusterIdx):
+    """ * INTERNAL FUNCTION *
+    Look for outlifers in fibers to reject based on distance
+    from centroid
+
+    INPUT:
+        W - similarity matrix between two different datasets
+        dist - array of distance of each fiber to centroid
+        clusterIdx - array of cluster labels for each fiber
+
+    OUTPUT:
+        W - similarity matrix with removed outliers
+        rejIdx - indices of fibers considered outliers
+        clusterIdx - array of clusterLabels with removed outliers
+
+    """
+
+    rejIdx = np.where(dist > (np.mean(dist) + 2.0 * np.std(dist)))[0]
+
+    W = np.delete(W, rejIdx, 0)
+    clusterIdx = np.delete(clusterIdx, rejIdx)
+
+    return W, rejIdx, clusterIdx
