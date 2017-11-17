@@ -162,7 +162,6 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[], scalarTypeList=
             outputPolydata - polydata containing information from clustering to be written into VTK
             clusterIdx - array containing cluster that each fiber belongs to
             fiberData - tree containing spatial and quantitative information of fibers
-            rejIdx - indices of fibers considered to be outliers
         """
         if dirpath is None:
             dirpath = os.getcwd()
@@ -200,8 +199,6 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[], scalarTypeList=
         W = _priorWeightedSimilarity(fiberData, priorData, scalarTypeList, scalarWeightList,
                                                     sigma, saveAllSimilarity, pts_per_fiber, matpath, no_of_jobs)
 
-        W, rejIdx = _outlierDetection(W)
-
         if saveWSimilarity is True:
             misc.saveMatrix(matpath, W, 'Weighted')
 
@@ -225,6 +222,7 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[], scalarTypeList=
 
         # 7. Find clusters using K-means clustering
         clusterIdx, dist = scipy.cluster.vq.vq(emvec, priorCentroids)
+        print dist
         fiberData.addClusterInfo(clusterIdx, priorCentroids)
 
         if k_clusters <= 1:
@@ -240,14 +238,14 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[], scalarTypeList=
 
         # 8. Return results
         # Create model with user / default number of chosen samples along fiber
-        outputData = fiberData.convertToVTK(rejIdx)
+        outputData = fiberData.convertToVTK()
         outputPolydata = _format_outputVTK(outputData, clusterIdx, colour, priorCentroids)
 
         # 9. Also add measurements from those used to cluster
         for i in range(len(scalarTypeList)):
             outputPolydata = addScalarToVTK(outputPolydata, fiberData, scalarTypeList[i])
 
-        return outputPolydata, clusterIdx, fiberData, rejIdx
+        return outputPolydata, clusterIdx, fiberData
 
 def addScalarToVTK(polyData, fiberTree, scalarType, fidxes=None, rejIdx=[]):
     """

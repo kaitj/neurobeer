@@ -107,10 +107,10 @@ def main():
     # Extract u-fibers
     uArray, L, D = ufiber.findUFiber(fiberData)
     uFiberTree = ufiber.extractUFiber(fiberData, uArray)
-    uFiberTree.copyScalar(fiberData, scalarTypeList, fidxes=uArray, rejIdx=[])
+    uFiberTree.copyScalar(fiberData, scalarTypeList, fidxes=uArray)
 
     # Perform clustering on provided bundle
-    outputPolydata, clusterIdx, fiberData, rejIdx = cluster.spectralPriorCluster(
+    outputPolydata, clusterIdx, fiberData = cluster.spectralPriorCluster(
                                     uFiberTree, opts.prior, scalarDataList=scalarDataList,
                                     scalarWeightList=scalarWeightList, scalarTypeList=scalarTypeList,
                                     sigma=opts.sig, saveWSimilarity=opts.saveWeight,
@@ -121,9 +121,9 @@ def main():
     bundleName = opts.bundle[:-4] + '_uFibers_Clustered.vtk'
     bundledir = os.path.join(outdir, bundleName)
     tractio.writeVTK(outputPolydata, bundledir, opts.verbose)
-    clusterData = fiberData.getFibers(range(fiberData.no_of_fibers), rejIdx)
+    clusterData = fiberData.getFibers(range(fiberData.no_of_fibers))
     clusterData = fibers.convertFromTuple(clusterData)
-    clusterData.copyScalar(fiberData, scalarTypeList, fidxes=[], rejIdx=rejIdx)
+    clusterData.copyScalar(fiberData, scalarTypeList, fidxes=[])
 
     # NOT USED - SUPPOSE TO EXTRACT STATS FOR COMBINED
     # NEEDS TO BE FIXED FOR USE (IF WANTED/NEEDED)

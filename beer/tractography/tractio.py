@@ -73,7 +73,7 @@ def writeVTK(data, vtkfile, verbose=0):
     del vtkWriter
 
     if verbose == 1:
-        print "Finished writing data to ", filename, "/n"
+        print "Finished writing data to ", filename, "\n"
 
 def readScalar(scalarfile, verbose=0):
     """
