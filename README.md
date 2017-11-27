@@ -1,6 +1,6 @@
-# Bundle Extraction and Evaluation Resource Documentation
+# NeuroBundle Extraction and Evaluation Resource Documentation
 
-The Bundle Extraction and Evaluation Resource, a data-driven tractography tool.
+The NeuroBundle Extraction and Evaluation Resource, a data-driven tractography tool.
 
 ## Contents
 * [Introduction](#introduction)
@@ -25,7 +25,7 @@ The Bundle Extraction and Evaluation Resource, a data-driven tractography tool.
 
 
 ## Introduction <a name="introduction"></a>
-The Bundle Extraction and Evaluation Resource was developed with the aim of clustering and evaluating white matter tractography of the brain. The tool derives from the [white matter fiber clustering tool](https://github.com/SlicerDMRI/whitematteranalysis)<sup>1,2</sup>. A spectral clustering algorithm, as described by von Luxburg<sup>3</sup> (2007), is implemented to perform clustering of user-provided white matter tractography.
+The NeuroBundle Extraction and Evaluation Resource was developed with the aim of clustering and evaluating white matter tractography of the brain. The tool derives from the [white matter fiber clustering tool](https://github.com/SlicerDMRI/whitematteranalysis)<sup>1,2</sup>. A spectral clustering algorithm, as described by von Luxburg<sup>3</sup> (2007), is implemented to perform clustering of user-provided white matter tractography.
 
 ### Disclaimer <a name="disclaimer"></a>
 This tool is still in the development stages and may undergo major changes. As such, this tool should be considered to still be in alpha stages. Results may not be correct and users should carefully check to ensure they are satisfactory.
@@ -36,10 +36,10 @@ This module has been tested on Ubuntu 16.04
 All bugs, concerns, and requests for features can be requested via the github repository found [here](https://github.com/kaitj/tractography/issues).
 
 ## Installation <a name="installation"></a>
-The latest development version of the bundle extraction and evaluation resource was developed on a Python 2 environment.
+The latest development version is coded in Python2.
 
 ### System dependencies <a name="dependencies"></a>
-The Bundle Extraction and Evaluation Resource requires the following dependencies:
+The NeuroBundle Extraction and Evaluation Resource requires the following dependencies:
 * Joblib >= 0.10.4.dev0
 * Matplotlib >= 1.5.1
 * NumPy >= 1.13.1
@@ -93,7 +93,7 @@ python setup.py install --user
 
 
 ## Running tractography tool <a name="runmain"></a>
-The Bundle Extraction and Evaluation Resource can be used via command line or as a Python library to be used in Python scripts.
+The NeuroBundle Extraction and Evaluation Resource can be used via command line or as a Python library to be used in Python scripts.
 
 ### Command line interface <a name="cli"></a>
 Shown is an example of how to run the command line interface with required arguments.
@@ -134,7 +134,7 @@ Usage: clusterSingle --indir <in_dir> --subjid <subjid> --bundle <bundle_name> -
 ```
 
 ### Python library <a name="pylib"></a>
-The Bundle Extraction and Evaluation Resource can also be imported in python and used as a python library.
+The NeuroBundle Extraction and Evaluation Resource can also be imported in python and used as a python library.
 To enable the use of the library in python, use the following command as part of the Python script: `import tractography`.
 
 
