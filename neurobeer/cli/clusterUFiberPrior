@@ -59,7 +59,7 @@ def main():
     Entry point of code
     """
     import os, sys, imp
-    sys.path.append(imp.find_module('beer/tractography')[1])
+    sys.path.append(imp.find_module('neurobeer/tractography')[1])
     import numpy as np
     import cluster, fibers, prior, stats, tractio, ufiber
 
