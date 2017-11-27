@@ -7,7 +7,7 @@
 * [v0.1.1](#v011)
 * [v0.1.0](#v010)
 
-### Version 0.14 <a name=v014></a>
+### Version 0.1.4 <a name=v014></a>
 * Restructured hierarchy; consolidated files under one folder
 * Moved CLI commands under scripts in setup.py
 * Changed outlier detection using <i>a priori</i> information to make use of distance from centroid

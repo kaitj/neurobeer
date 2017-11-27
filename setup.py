@@ -2,9 +2,9 @@ from distutils.core import setup
 
 setup(
     # Project information
-    name='beer',
+    name='neurobeer',
     version='0.1.4',
-    description='Bundle Extraction and Evaluation Resource',
+    description='NeuroBundle Extraction and Evaluation Resource',
     packages=['beer/tractography'],
     scripts=['beer/cli/clusterSingle',
                   'beer/cli/clusterPrior',

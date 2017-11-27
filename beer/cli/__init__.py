@@ -1,3 +1,0 @@
-"""
-Tractography command line interface
-""" 
