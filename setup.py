@@ -5,14 +5,14 @@ setup(
     name='neurobeer',
     version='0.1.4',
     description='NeuroBundle Extraction and Evaluation Resource',
-    packages=['beer/tractography'],
-    scripts=['beer/cli/clusterSingle',
-                  'beer/cli/clusterPrior',
-                  'beer/cli/clusterUFiber',
-                  'beer/cli/clusterUFiberPrior'],
+    packages=['neurobeer/tractography'],
+    scripts=['neurobeer/cli/clusterSingle',
+                  'neurobeer/cli/clusterPrior',
+                  'neurobeer/cli/clusterUFiber',
+                  'neurobeer/cli/clusterUFiberPrior'],
 
     # Metadata
     author='Jason Kai',
     author_email='tkai@uwo.ca',
-    url='https://github.com/kaitj/tractography',
+    url='https://github.com/kaitj/neurobeer',
 )
