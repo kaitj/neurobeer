@@ -102,7 +102,7 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[], scalarWe
             emvec = eigvec[:, 1:k_clusters + 1]
 
         # 7. Find clusters using K-means clustering
-        centroids, clusterIdx = scipy.cluster.vq.kmeans2(emvec, k_clusters, iter=20,
+        centroids, clusterIdx = scipy.cluster.vq.kmeans2(emvec, k_clusters, iter=50,
                                                                                         minit='points')
         centroids, clusterIdx = _sortLabel(centroids, clusterIdx)
         fiberData.addClusterInfo(clusterIdx, centroids)
