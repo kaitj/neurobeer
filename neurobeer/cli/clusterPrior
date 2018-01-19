@@ -135,7 +135,7 @@ def main():
         statsdir = os.path.join(outdir + '/' + statsSuffix)
 
         for Type in scalarTypeList:
-            polyData = cluster.addScalarToVTK(polyData, fiberData, Type, idxes)
+            polyData = cluster.addScalarToVTK(polyData, clusterData, Type, idxes)
             stats.plotStats(clusterData, Type, idxes, dirpath=statsdir)
             stats.writeCSV(clusterData, Type, idxes, dirpath=outdir)
 

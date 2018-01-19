@@ -144,7 +144,7 @@ def main():
         print "Avg. distance between end points for cluster %i: %.2f +/- %.2f" % (label, DMean, DStd)
 
         for Type in scalarTypeList:
-            polyData = cluster.addScalarToVTK(polyData, fiberData, Type, idxes)
+            polyData = cluster.addScalarToVTK(polyData, clusterData, Type, idxes)
             stats.plotStats(clusterData, Type, idxes, dirpath=statsdir)
             stats.writeCSV(clusterData, Type, idxes, dirpath=outdir)
 
