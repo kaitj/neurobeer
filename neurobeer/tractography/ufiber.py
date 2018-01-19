@@ -9,7 +9,7 @@ import os, csv
 import numpy as np
 import fibers
 
-def findUFiber(fiberData):
+def findUfiber(fiberData):
     """
     Identifies U-fibers from tractography
 
@@ -105,7 +105,7 @@ def writeCSV(LMean, LStd, DMean, DStd, dirpath=None):
     f1.close()
     f2.close()
 
-def uFiberStats(LArray, DArray, fidxes, no_of_fibers=20):
+def uFiberStats(LArray, DArray, fidxes):
     """
     Calculates the mean and standard deviation for fiber length and distance between
     end points for a group of fibers.
@@ -114,7 +114,7 @@ def uFiberStats(LArray, DArray, fidxes, no_of_fibers=20):
         LArray - array of fiber lengths
         DArray - array of distances between end points for fibers
         fidxes - array of indices of fibers to calculate
-        no_of_fibers - number of fibers in tractography; defaults 20
+        no_of_fibers - number of fibers in tractography
 
     OUTPUT:
         LMean - mean fiber length
@@ -126,7 +126,7 @@ def uFiberStats(LArray, DArray, fidxes, no_of_fibers=20):
     Ltemp = []
     Dtemp = []
 
-    for fidx in range(no_of_fibers):
+    for fidx in range(len(LArray)):
         if fidx in fidxes:
             Ltemp.append(LArray[fidx])
             Dtemp.append(DArray[fidx])
