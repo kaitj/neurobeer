@@ -125,7 +125,8 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[], scalarWe
 
         # 9. Also add measurements from those used to cluster
         for i in range(len(scalarTypeList)):
-            outputPolydata = addScalarToVTK(outputPolydata, fiberData, scalarTypeList[i])
+            outputPolydata = addScalarToVTK(outputPolydata, fiberData, scalarTypeList[i],
+                                            rejIdx=rejIdx)
 
         return outputPolydata, clusterIdx, fiberData, rejIdx
 
@@ -270,7 +271,7 @@ def addScalarToVTK(polyData, fiberTree, scalarType, fidxes=None, rejIdx=[]):
     data.SetName(scalarType.split('/', -1)[-1])
 
     if fidxes is None:
-        for fidx in range(0, polyData.GetNumberOfLines()):
+        for fidx in range(0, fiberTree.no_of_fibers):
             if fidx in rejIdx:
                 continue
             for pidx in range(0, fiberTree.pts_per_fiber):

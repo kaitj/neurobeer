@@ -39,7 +39,7 @@ def get_parser():
     g_opt.add_argument('-p', action='store', type=int, metavar='no_samples',
                                       default=2, help='number of samples to take along each fiber')
     g_opt.add_argument('-k', action='store', type=int, metavar='k_clusters',
-                                      default=2, helptractograph='number of clusters to use in algorithm')
+                                      default=2, help='number of clusters to use in algorithm')
     g_opt.add_argument('-sig', action='store', type=float, metavar='sigma',
                                       default=1.0, help='sigma to be used in clustering algorithm')
     g_opt.add_argument('-sall', '--saveAll', action='store_true',
