@@ -9,7 +9,8 @@ setup(
     scripts=['neurobeer/cli/clusterSingle',
                   'neurobeer/cli/clusterPrior',
                   'neurobeer/cli/clusterUFiber',
-                  'neurobeer/cli/clusterUFiberPrior'],
+                  'neurobeer/cli/clusterUFiberPrior',
+                  'neurobeer/cli/createTemplateTract'],
 
     # Metadata
     author='Jason Kai',
