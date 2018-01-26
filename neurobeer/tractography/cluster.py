@@ -81,7 +81,8 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[], scalarWe
         L = D - W
 
         # 4. Compute normalized Laplacian (random-walk)
-        Lrw = np.dot(np.diag(np.divide(1, np.sum(D, 0))), L)
+        #Lrw = np.dot(np.diag(np.divide(1, np.sum(D, 0))), L)
+        Lrw = np.dot(np.linalg.inv(D), L)
 
         # 5. Compute eigenvalues and eigenvectors of generalized eigenproblem
         # Sort by ascending eigenvalue
@@ -322,23 +323,14 @@ def _pairwiseDistance_matrix(fiberTree, pts_per_fiber, no_of_jobs):
         distances - NxN matrix containing distances between fibers
     """
 
-    temp = Parallel(n_jobs=no_of_jobs, backend="threading")(
+    distances = Parallel(n_jobs=no_of_jobs, backend="threading")(
             delayed(distance.fiberDistance, has_shareable_memory)(fiberTree.getFiber(fidx),
-                        fiberTree.getFibers(range(fidx, fiberTree.no_of_fibers)))
+                        fiberTree.getFibers(range(fiberTree.no_of_fibers)))
             for fidx in range(0, fiberTree.no_of_fibers))
-    temp = np.array(temp)
-
-    distances = np.zeros((fiberTree.no_of_fibers, fiberTree.no_of_fibers))
-    for i in range(0, fiberTree.no_of_fibers):
-        idx = 0
-        for j in range(i, fiberTree.no_of_fibers):
-            distances[i][j] = temp[i][idx]
-            distances[j][i] = temp[i][idx]
-            idx += 1
-    del temp
+    distances = np.array(distances)
 
     # Normalize between 0 and 1
-    distances = sklearn.preprocessing.MinMaxScaler().fit_transform(distances)
+    #distances = sklearn.preprocessing.MinMaxScaler().fit_transform(distances)
 
     if np.diag(distances).all() != 0.0:
         print('Diagonals in distance matrix are not equal to 0')
@@ -387,25 +379,16 @@ def _pairwiseQDistance_matrix(fiberTree, scalarType, pts_per_fiber, no_of_jobs):
         qDistances - NxN matrix containing pairwise distances between fibers
     """
 
-    temp = Parallel(n_jobs=no_of_jobs, backend="threading")(
+    qDistances = Parallel(n_jobs=no_of_jobs, backend="threading")(
             delayed(distance.scalarDistance, has_shareable_memory)(
                 fiberTree.getScalar(fidx, scalarType),
-                fiberTree.getScalars(range(fidx, fiberTree.no_of_fibers), scalarType))
+                fiberTree.getScalars(range(fiberTree.no_of_fibers), scalarType))
             for fidx in range(0, fiberTree.no_of_fibers)
     )
-    temp = np.array(temp)
-
-    qDistances = np.zeros((fiberTree.no_of_fibers, fiberTree.no_of_fibers))
-    for i in range(0, fiberTree.no_of_fibers):
-        idx = 0
-        for j in range(i, fiberTree.no_of_fibers):
-            qDistances[i][j] = temp[i][j]
-            qDistances[j][i] = temp[i][j]
-            idx += 1
-    del temp
+    qDistances = np.array(qDistances)
 
     # Normalize distance measurements
-    qDistances = sklearn.preprocessing.MinMaxScaler().fit_transform(qDistances)
+    # qDistances = sklearn.preprocessing.MinMaxScaler().fit_transform(qDistances)
 
     if np.diag(qDistances).all() != 0.0:
         print "Diagonals in distance matrix are not equal to 0"
@@ -465,7 +448,7 @@ def _priorDistance_matrix(fiberTree, priorTree, pts_per_fiber, no_of_jobs):
     distances = np.array(distances)
 
     # Normalize between 0 and 1
-    distances = sklearn.preprocessing.MinMaxScaler().fit_transform(distances)
+    # distances = sklearn.preprocessing.MinMaxScaler().fit_transform(distances)
 
     return distances
 
@@ -519,7 +502,7 @@ def _priorQDistance_matrix(fiberTree, priorTree, scalarType, pts_per_fiber, no_o
     qDistances = np.array(qDistances)
 
     # Normalize distance measurements
-    qDistances = sklearn.preprocessing.MinMaxScaler().fit_transform(qDistances)
+    # qDistances = sklearn.preprocessing.MinMaxScaler().fit_transform(qDistances)
 
     return qDistances
 
