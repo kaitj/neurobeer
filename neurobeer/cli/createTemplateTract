@@ -36,16 +36,16 @@ def main():
     opts = get_parser().parse_args()
 
     # Output directory and file name
-    templatedir = os.path.abspath('./sandbox/template/tractography')
-    #templatedir = os.path.abspath('./derivatives/mrtrix/template/tractography')
+    #templatedir = os.path.abspath('./sandbox/template/tractography')
+    templatedir = os.path.abspath('./derivatives/mrtrix/template/tractography')
     outTract = os.path.join(templatedir + '/template_tracks.vtk')
 
     # Inputs to add
     appender = vtk.vtkAppendPolyData()
 
     for subj in opts.subjlist:
-        #subjdir = os.path.abspath(os.path.join('./derivatives/mrtrix/' + subj + '/tractography'))
-        subjdir = os.path.abspath(os.path.join('./sandbox/' + subj + '/tractography'))
+        subjdir = os.path.abspath(os.path.join('./derivatives/mrtrix/' + subj + '/tractography'))
+        #subjdir = os.path.abspath(os.path.join('./sandbox/' + subj + '/tractography'))
         inTract = os.path.join(subjdir + '/' + subj + '_TemplateTracks.vtk')
 
         # VTK reader
