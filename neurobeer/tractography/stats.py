@@ -55,6 +55,63 @@ def _stddev(fiberTree, scalarType, idxes=None):
         stdev = np.std(fiberTree.getScalars(idxes, scalarType)[:, :])
     return clusterSdev, stdev
 
+def calcGeoStats(LArray):
+    """
+    Calculates the mean and standard deviation fiber length for an identified group of fibers
+
+    INPUT:
+        LArray - array of fiber lengths
+
+    OUTPUT:
+        LMean - mean fiber length
+        LSD - standard deviation of fiber length
+        fiberCount - number of fibers
+    """
+
+    LMean = np.mean(LArray)
+    LSD = np.std(LArray)
+    fiberCount= len(LArray)
+
+    return LMean, LSD, fiberCount
+
+def writeGeoCSV(LMean, LStd, fiberCount, dirpath=None):
+    """
+    Writes the length and distance of each cluster for an identified group of fibers
+
+    INPUT:
+        LMean - mean length of cluster
+        LStd - standard deviation of cluster
+        fiberCount - number of fibers in cluster
+        dirpath - directory to store CSV file; default None
+
+    OUTPUT:
+        none
+    """
+
+    if dirpath is None:
+        dirpath = os.getcwd()
+    else:
+        if not os.path.exists(dirpath):
+            os.makedirs(dirpath)
+
+    statspath = dirpath + '/stats/'
+    if not os.path.exists(statspath):
+        os.makedirs(statspath)
+
+    infoName = 'clusterInfo'
+    infoPath = statspath + infoName + '.csv'
+    infoExists = os.path.isfile(infoPath)
+
+    with open(infoPath, 'a') as f:
+        header = ['Length Mean', 'Length S.D.', 'Fiber Count']
+        writer = csv.DictWriter(f, delimiter=',', lineterminator='\n', fieldnames=header)
+        if not infoExists:
+            writer.writeheader()
+        writer = csv.writer(f)
+        writer.writerow([LMean, LStd, fiberCount])
+
+    f.close()
+
 def writeCSV(fiberTree, scalarType, idxes=None, dirpath=None):
     """
     Writes stats to a csv file. Outputs one file per scalar type

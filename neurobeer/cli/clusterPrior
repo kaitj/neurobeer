@@ -131,6 +131,9 @@ def main():
         bundle = clusterData.getFibers(idxes)
         bundle = fibers.convertFromTuple(bundle)
         polyData = bundle.convertToVTK()
+        LArray = fibers.calcFiberLength(clusterData, idxes)
+        LMean, LStd, fiberCount = stats.calcGeoStats(LArray)
+        stats.writeGeoCSV(LMean, LStd, fiberCount, dirpath=outdir)
         statsSuffix = 'stats/stats_%i' % label
         statsdir = os.path.join(outdir + '/' + statsSuffix)
 
