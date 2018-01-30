@@ -21,7 +21,7 @@ def get_parser():
 
     # Required arguments
     g_req = parser.add_argument_group('required arguments')
-    g_req.add_argument('--subjlist', action='store', nargs='+', default=[], metavar='data',
+    g_req.add_argument('--subjlist', action='store', nargs='+', default=[], metavar='subjList',
                                       required=True, help='subject ID to add to template tractogprahy')
     return parser
 
@@ -35,42 +35,49 @@ def main():
     # Run parser
     opts = get_parser().parse_args()
 
+    # Read file
+    f = open(opts.subjlist, 'r')
+    subjList = f.readlines()
+    f.close()
+
     # Output directory and file name
-    #templatedir = os.path.abspath('./sandbox/template/tractography')
     templatedir = os.path.abspath('./derivatives/mrtrix/template/tractography')
     outTract = os.path.join(templatedir + '/template_tracks.vtk')
 
     # Inputs to add
     appender = vtk.vtkAppendPolyData()
 
-    for subj in opts.subjlist:
+    for subj in subjList:
+        subj = subj.rstrip()
         subjdir = os.path.abspath(os.path.join('./derivatives/mrtrix/' + subj + '/tractography'))
-        #subjdir = os.path.abspath(os.path.join('./sandbox/' + subj + '/tractography'))
         inTract = os.path.join(subjdir + '/' + subj + '_TemplateTracks.vtk')
 
-        # VTK reader
-        outReader = vtk.vtkPolyDataReader()
-        outReader.SetFileName(outTract)
-        reader = vtk.vtkPolyDataReader()
-        reader.SetFileName(inTract)
-        reader.Update()
+        if os.path.isfile(inTract) is True:
+            # VTK reader
+            outReader = vtk.vtkPolyDataReader()
+            outReader.SetFileName(outTract)
+            reader = vtk.vtkPolyDataReader()
+            reader.SetFileName(inTract)
+            reader.Update()
 
-        # VTK appender
-        appender = vtk.vtkAppendPolyData()
-        if os.path.isfile(outTract) is True:
-            appender.AddInputConnection(outReader.GetOutputPort())
-            appender.AddInputConnection(reader.GetOutputPort())
-            appender.Update()
+            # VTK appender
+            appender = vtk.vtkAppendPolyData()
+            if os.path.isfile(outTract) is True:
+                appender.AddInputConnection(outReader.GetOutputPort())
+                appender.AddInputConnection(reader.GetOutputPort())
+                appender.Update()
+            else:
+                appender.AddInputConnection(reader.GetOutputPort())
+                appender.Update()
+
+                # VTK writer
+                writer = vtk.vtkPolyDataWriter()
+                writer.SetFileTypeToBinary()
+                writer.SetFileName(outTract)
+                writer.SetInputConnection(appender.GetOutputPort())
+                writer.Write()
         else:
-            appender.AddInputConnection(reader.GetOutputPort())
-            appender.Update()
-
-        # VTK writer
-        writer = vtk.vtkPolyDataWriter()
-        writer.SetFileTypeToBinary()
-        writer.SetFileName(outTract)
-        writer.SetInputConnection(appender.GetOutputPort())
-        writer.Write()
+            continue
 
 
 if __name__ == '__main__':
