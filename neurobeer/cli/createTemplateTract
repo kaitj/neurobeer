@@ -42,6 +42,9 @@ def main():
 
     # Output directory and file name
     templatedir = os.path.abspath('./derivatives/mrtrix/template/tractography')
+    if not os.path.exists(templatedir):
+        os.makedirs(templatedir)
+        
     outTract = os.path.join(templatedir + '/template_tracks.vtk')
 
     # Inputs to add
