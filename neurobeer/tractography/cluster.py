@@ -6,7 +6,7 @@ parameters pertaining to clusters.
 """
 
 import numpy as np
-import os, scipy.cluster, sklearn.preprocessing
+import os, scipy.cluster
 from joblib import Parallel, delayed
 from joblib.pool import has_shareable_memory
 from sys import exit
@@ -81,7 +81,6 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[], scalarWe
         L = D - W
 
         # 4. Compute normalized Laplacian (random-walk)
-        #Lrw = np.dot(np.diag(np.divide(1, np.sum(D, 0))), L)
         Lrw = np.dot(np.linalg.inv(D), L)
 
         # 5. Compute eigenvalues and eigenvectors of generalized eigenproblem
@@ -328,9 +327,6 @@ def _pairwiseDistance_matrix(fiberTree, pts_per_fiber, no_of_jobs):
                         fiberTree.getFibers(range(fiberTree.no_of_fibers)))
             for fidx in range(0, fiberTree.no_of_fibers))
     distances = np.array(distances)
-
-    # Normalize between 0 and 1
-    #distances = sklearn.preprocessing.MinMaxScaler().fit_transform(distances)
 
     if np.diag(distances).all() != 0.0:
         print('Diagonals in distance matrix are not equal to 0')

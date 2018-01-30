@@ -47,6 +47,42 @@ def convertFromTuple(fiberTuple):
 
     return fiberTree
 
+def calcFiberLength(fiberData, fidxes):
+    """
+    Calculates the fiber length via arc length
+    NOTE: same function as ufiber module without removing any fibers
+
+    INPUT:
+        fiberData - Fiber tree containing tractography information
+        fidxes - Fiber indices to include
+
+    OUTPUT:
+        L - length of fiberData
+    """
+    no_of_pts = fiberData.pts_per_fiber
+
+    if no_of_pts < 2:
+        print "Not enough samples to determine length of fiber"
+        raise ValueError
+
+    LArray = []
+
+    for fidx in fidxes:
+        L = 0
+        for idx in range(1, no_of_pts):
+            x1 = fiberData.fiberTree[fidx][idx]['x']
+            x2 = fiberData.fiberTree[fidx][idx - 1]['x']
+            y1 = fiberData.fiberTree[fidx][idx]['y']
+            y2 = fiberData.fiberTree[fidx][idx - 1]['y']
+            z1 = fiberData.fiberTree[fidx][idx]['z']
+            z2 = fiberData.fiberTree[fidx][idx - 1]['z']
+
+            L = L + np.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
+
+        LArray.append(L)
+
+    return LArray
+
 class FiberTree:
     """
     Data pertaining to a group of fibers.

@@ -114,8 +114,7 @@ def uFiberStats(LArray, DArray, fidxes):
         LArray - array of fiber lengths
         DArray - array of distances between end points for fibers
         fidxes - array of indices of fibers to calculate
-        no_of_fibers - number of fibers in tractography
-
+        
     OUTPUT:
         LMean - mean fiber length
         LSD - standard deviation of fiber length
@@ -143,7 +142,7 @@ def _calcFiberLength(fiberData, fidx):
     Calculates the fiber length via arc length
 
     INPUT:
-        fiberData - Fiber tree copython popntaining tractography information
+        fiberData - Fiber tree containing tractography information
         fidx - Fiber index
 
     OUTPUT:
@@ -152,7 +151,7 @@ def _calcFiberLength(fiberData, fidx):
     no_of_pts = fiberData.pts_per_fiber
 
     if no_of_pts < 2:
-        print "Not enouguFiberData.fiberTreeh samples to determine length of fiber"
+        print "Not enough samples to determine length of fiber"
         raise ValueError
 
     L = 0
