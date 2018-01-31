@@ -34,16 +34,7 @@ def findUfiber(fiberData):
         if (L > 30) and (D <= (L / np.pi)) and (L < 90):
             uArray.append(fidx)
             LArray.append(L)
-            DArray.append(D)""" stats.py
-
-Module containing classes and functions used to compute quantitative
-tract-based statistics.
-
-"""
-
-import os, csv
-import numpy as np
-import matplotlib.pyplot as plt
+            DArray.append(D)
 
 def _mean(fiberTree, scalarType, idxes=None):
     """ *INTERNAL FUNCTION*
@@ -91,104 +82,6 @@ def _stddev(fiberTree, scalarType, idxes=None):
         stdev = np.std(fiberTree.getScalars(idxes, scalarType)[:, :])
     return clusterSdev, stdev
 
-def writeCSV(fiberTree, scalarType, idxes=None, dirpath=None):
-    """
-    Writes stats to a csv file. Outputs one file per scalar type
-    Each row of the csv is the average value at each sampled point
-
-    INPUT:
-        fiberTree - tree containing spatial and quantitative information of fibers
-        scalarType - type of quantitative data to plot
-        idxes - indices to extract info from; defaults None (returns data for all fibers)
-        dirpath - location to store plots; defaults None
-
-    OUTPUT:
-        none
-    """
-
-    if dirpath is None:
-        dirpath = os.getcwd()
-    else:
-        if not os.path.exists(dirpath):
-            os.makedirs(dirpath)
-
-    if idxes is None:
-        scalarArray = np.mean(fiberTree.getScalars(range(fiberTree.no_of_fibers),
-                            scalarType)[:, :], axis=0)
-    else:
-        scalarArray = np.mean(fiberTree.getScalars(idxes, scalarType)[:, :], axis=0)
-
-    fileName = scalarType.split('/', -1)[-1]
-    filePath = dirpath + '/stats/' + fileName + '.csv'
-
-    fileExists = os.path.isfile(filePath)
-
-    with open(filePath, 'a') as f:
-        headers = range(1, fiberTree.pts_per_fiber+1)
-        writer = csv.DictWriter(f, delimiter=',', lineterminator='\n', fieldnames=headers)
-        if not fileExists:
-            writer.writeheader()
-
-        writer = csv.writer(f)
-        writer.writerow(scalarArray)
-
-    f.close()
-
-def plotStats(fiberTree, scalarType, idxes=None, dirpath=None):
-    """
-    Plots the calculated tract-based statistics for each fiber bundle
-
-    INPUT:np.mean(fiberTree.getScalars(range(fiberTree.no_of_fibers), scalarType)[:, :])
-        fiberTree - tree containing spatial and quantitative information of fibers
-        scalarType - type of quantitative data to plot
-        idxes - indices to extract info from; defaults None (returns data for all fibers)
-        dirpath - location to store plots; defaults None
-
-    OUTPUT:
-        nonenp.mean(fiberTree.getScalars(range(fiberTree.no_of_fibers), scalarType)[:, :])
-    """
-
-    if dirpath is None:
-        dirpath = os.getcwd()
-    else:
-        if not os.path.exists(dirpath):
-            os.makedirs(dirpath)
-
-    # Statistical calculations for plot
-    x = range(fiberTree.pts_per_fiber)
-    yavg, avg = _mean(fiberTree, scalarType, idxes)
-    ystd, stdev = _stddev(fiberTree, scalarType, idxes)
-
-    # Plot of stats
-    f = plt.figure(figsize=(10, 10))
-    plt.grid()
-
-    avgline = plt.plot(x, yavg, 'b', linewidth=3, label='Mean')
-    avgdot = plt.plot(x, yavg, '.r', markersize=15)
-    stdupper = plt.plot(x, yavg+ystd, 'k', linewidth=2, alpha=0.7)
-    stdlower = plt.plot(x, yavg-ystd, 'k', linewidth=2, alpha=0.7, label='Std. Dev')
-    plt.fill_between(x, yavg-ystd, yavg+ystd, facecolor='grey', alpha=0.7)
-    plt.xlim(min(x), max(x))
-
-    # Plot labels
-    fileName = scalarType.split('/', -1)[-1]
-    title = fileName + ' (%.2f +/- %.2f)' % (avg, stdev)
-    ytitle = fileName
-
-    plt.title(title, fontsize=16)
-    plt.ylabel(ytitle.upper(), fontsize=14)
-    plt.xlabel('Fiber Samples', fontsize=14)
-    plt.legend(loc='upper left', fontsize=14)
-    plt.tick_params(axis='both', which='major', labelsize=14,
-                              length=10, pad=10, width=1, direction='out',
-                              top='off', right='off')
-
-    # Save figure
-    plt.savefig(dirpath + '/' + fileName+ '_stats.png')
-    plt.close(f)
-
-    return uArray, LArray, DArray
-
 def extractUFiber(fiberData, uArray):
     """
     Extracts u-shaped fibers of class FiberTree
@@ -206,7 +99,7 @@ def extractUFiber(fiberData, uArray):
 
     return uFiberTree
 
-def writeCSV(LMean, LStd, DMean, DStd, dirpath=None):
+def writeCSV(LMean, LStd, DMean, DStd, fiberCount, dirpath=None):
     """
     Writes the length and distance of each cluster for a group of fibers.
 
@@ -230,31 +123,19 @@ def writeCSV(LMean, LStd, DMean, DStd, dirpath=None):
     if not os.path.exists(statspath):
         os.makedirs(statspath)
 
-    lengthName = 'clusterLengths'
-    lengthPath = dirpath + '/stats/' + lengthName + '.csv'
-    lengthExists = os.path.isfile(lengthPath)
-    distanceName = 'clusterDistances'
-    distancePath = dirpath + '/stats/' + distanceName + '.csv'
-    distanceExists = os.path.isfile(distancePath)
+    fileName = 'clusterInfo'
+    filePath = dirpath + '/stats/' + fileName + '.csv'
+    fileExists = os.path.isfile(filePath)
 
-    with open(lengthPath, 'a') as f1:
-        header = ['Length Mean', 'Length S.D.']
-        writer = csv.DictWriter(f1, delimiter=',', lineterminator='\n', fieldnames=header)
-        if not lengthExists:
+    with open(filePath, 'a') as f:
+        header = ['Length Mean', 'Length S.D.', 'Distance Mean', 'Distance S.D.', 'Fiber Count']
+        writer = csv.DictWriter(f, delimiter=',', lineterminator='\n', fieldnames=header)
+        if not fileExists:
             writer.writeheader()
-        writer = csv.writer(f1)
-        writer.writerow([LMean, LStd])
+        writer = csv.writer(f)
+        writer.writerow([LMean, LStd. DMean, DStd, fiberCount])
 
-    with open(distancePath, 'a') as f2:
-        header = ['Distance Mean', 'Distance S.D.']
-        writer = csv.DictWriter(f2, delimiter=',', lineterminator='\n', fieldnames=header)
-        if not distanceExists:
-            writer.writeheader()
-        writer = csv.writer(f2)
-        writer.writerow([DMean, DStd])
-
-    f1.close()
-    f2.close()
+    f.close()
 
 def uFiberStats(LArray, DArray, fidxes):
     """
