@@ -21,7 +21,7 @@ def get_parser():
 
     # Required arguments
     g_req = parser.add_argument_group('required arguments')
-    g_req.add_argument('--subjlist', action='store', metavar='subjList',
+    g_req.add_argument('--subjlist', metavar='subjList',
                                       required=True, help='subject ID to add to template tractogprahy')
     return parser
 
@@ -73,12 +73,12 @@ def main():
                 appender.AddInputConnection(reader.GetOutputPort())
                 appender.Update()
 
-                # VTK writer
-                writer = vtk.vtkPolyDataWriter()
-                writer.SetFileTypeToBinary()
-                writer.SetFileName(outTract)
-                writer.SetInputConnection(appender.GetOutputPort())
-                writer.Write()
+            # VTK writer
+            writer = vtk.vtkPolyDataWriter()
+            writer.SetFileTypeToBinary()
+            writer.SetFileName(outTract)
+            writer.SetInputConnection(appender.GetOutputPort())
+            writer.Write()
         else:
             continue
 

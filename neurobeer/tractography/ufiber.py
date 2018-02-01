@@ -36,6 +36,8 @@ def findUfiber(fiberData):
             LArray.append(L)
             DArray.append(D)
 
+    return uArray, LArray, DArray
+
 def _mean(fiberTree, scalarType, idxes=None):
     """ *INTERNAL FUNCTION*
     Finds the average of all fibers in bundle at specific sample points
