@@ -21,7 +21,7 @@ def get_parser():
 
     # Required arguments
     g_req = parser.add_argument_group('required arguments')
-    g_req.add_argument('--subjlist', action='store', nargs='+', default=[], metavar='subjList',
+    g_req.add_argument('--subjlist', action='store', metavar='subjList',
                                       required=True, help='subject ID to add to template tractogprahy')
     return parser
 
@@ -44,7 +44,7 @@ def main():
     templatedir = os.path.abspath('./derivatives/mrtrix/template/tractography')
     if not os.path.exists(templatedir):
         os.makedirs(templatedir)
-        
+
     outTract = os.path.join(templatedir + '/template_tracks.vtk')
 
     # Inputs to add
