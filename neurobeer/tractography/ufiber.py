@@ -9,7 +9,7 @@ import os, csv
 import numpy as np
 import fibers
 
-def findUfiber(fiberData):
+def findUFiber(fiberData):
     """
     Identifies U-fibers from tractography
 
@@ -106,7 +106,7 @@ def writeCSV(clusterLabel, LMean, LStd, DMean, DStd, fiberCount, dirpath=None):
     Writes the length and distance of each cluster for a group of fibers.
 
     INPUT:
-        clusterLabel - label for cluster 
+        clusterLabel - label for cluster
         LMean - mean of length for a cluster
         LStd - standard deviation of length of a cluster
         DMean - mean of distance between end points for a cluster
