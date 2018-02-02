@@ -11,6 +11,8 @@
 * Restructured hierarchy; consolidated files under one folder
 * Moved CLI commands under scripts in setup.py
 * Changed outlier detection using <i>a priori</i> information to make use of distance from centroid
+* Output cluster information into CSV
+* Added CLI to create template tract by combining subject tractography
 
 ### Version 0.1.3 <a name=v013></a>
 * Added ufibre module

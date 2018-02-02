@@ -74,11 +74,12 @@ def calcGeoStats(LArray):
 
     return LMean, LSD, fiberCount
 
-def writeGeoCSV(LMean, LStd, fiberCount, dirpath=None):
+def writeGeoCSV(clusterLabel, LMean, LStd, fiberCount, dirpath=None):
     """
     Writes the length and distance of each cluster for an identified group of fibers
 
     INPUT:
+        clusterLabel - label for cluster
         LMean - mean length of cluster
         LStd - standard deviation of cluster
         fiberCount - number of fibers in cluster
@@ -103,21 +104,22 @@ def writeGeoCSV(LMean, LStd, fiberCount, dirpath=None):
     infoExists = os.path.isfile(infoPath)
 
     with open(infoPath, 'a') as f:
-        header = ['Length Mean', 'Length S.D.', 'Fiber Count']
+        header = ['Cluster ID', 'Length Mean', 'Length S.D.', 'Fiber Count']
         writer = csv.DictWriter(f, delimiter=',', lineterminator='\n', fieldnames=header)
         if not infoExists:
             writer.writeheader()
         writer = csv.writer(f)
-        writer.writerow([LMean, LStd, fiberCount])
+        writer.writerow([clusterLabel, LMean, LStd, fiberCount])
 
     f.close()
 
-def writeCSV(fiberTree, scalarType, idxes=None, dirpath=None):
+def writeCSV(clusterLabel, fiberTree, scalarType, idxes=None, dirpath=None):
     """
     Writes stats to a csv file. Outputs one file per scalar type
     Each row of the csv is the average value at each sampled point
 
     INPUT:
+        clusterLabel - label for cluster
         fiberTree - tree containing spatial and quantitative information of fibers
         scalarType - type of quantitative data to plot
         idxes - indices to extract info from; defaults None (returns data for all fibers)
@@ -145,13 +147,13 @@ def writeCSV(fiberTree, scalarType, idxes=None, dirpath=None):
     fileExists = os.path.isfile(filePath)
 
     with open(filePath, 'a') as f:
-        headers = range(1, fiberTree.pts_per_fiber+1)
+        headers = ['Cluster ID', range(1, fiberTree.pts_per_fiber+1)]
         writer = csv.DictWriter(f, delimiter=',', lineterminator='\n', fieldnames=headers)
         if not fileExists:
             writer.writeheader()
 
         writer = csv.writer(f)
-        writer.writerow(scalarArray)
+        writer.writerow(clusterLabel, scalarArray)
 
     f.close()
 

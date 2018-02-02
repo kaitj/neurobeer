@@ -101,11 +101,12 @@ def extractUFiber(fiberData, uArray):
 
     return uFiberTree
 
-def writeCSV(LMean, LStd, DMean, DStd, fiberCount, dirpath=None):
+def writeCSV(clusterLabel, LMean, LStd, DMean, DStd, fiberCount, dirpath=None):
     """
     Writes the length and distance of each cluster for a group of fibers.
 
     INPUT:
+        clusterLabel - label for cluster 
         LMean - mean of length for a cluster
         LStd - standard deviation of length of a cluster
         DMean - mean of distance between end points for a cluster
@@ -130,12 +131,12 @@ def writeCSV(LMean, LStd, DMean, DStd, fiberCount, dirpath=None):
     fileExists = os.path.isfile(filePath)
 
     with open(filePath, 'a') as f:
-        header = ['Length Mean', 'Length S.D.', 'Distance Mean', 'Distance S.D.', 'Fiber Count']
+        header = ['Cluster ID', 'Length Mean', 'Length S.D.', 'Distance Mean', 'Distance S.D.', 'Fiber Count']
         writer = csv.DictWriter(f, delimiter=',', lineterminator='\n', fieldnames=header)
         if not fileExists:
             writer.writeheader()
         writer = csv.writer(f)
-        writer.writerow([LMean, LStd. DMean, DStd, fiberCount])
+        writer.writerow([clusterLabel, LMean, LStd. DMean, DStd, fiberCount])
 
     f.close()
 
