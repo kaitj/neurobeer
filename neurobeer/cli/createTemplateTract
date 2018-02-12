@@ -41,11 +41,11 @@ def main():
     f.close()
 
     # Output directory and file name
-    templatedir = os.path.abspath('./derivatives/mrtrix/template/tractography')
+    templatedir = os.path.abspath('./derivatives/mrtrix/sub-tmp/tractography')
     if not os.path.exists(templatedir):
         os.makedirs(templatedir)
 
-    outTract = os.path.join(templatedir + '/template_tracks.vtk')
+    outTract = os.path.join(templatedir + '/sub-tmp_space-Template_tract.vtk')
 
     # Inputs to add
     appender = vtk.vtkAppendPolyData()
