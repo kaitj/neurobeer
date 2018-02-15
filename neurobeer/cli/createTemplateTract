@@ -53,7 +53,7 @@ def main():
     for subj in subjList:
         subj = subj.rstrip()
         subjdir = os.path.abspath(os.path.join('./derivatives/mrtrix/' + subj + '/tractography'))
-        inTract = os.path.join(subjdir + '/' + subj + '_TemplateTracks.vtk')
+        inTract = os.path.join(subjdir + '/' + subj + '_space-Template_variant-sift_tract.vtk')
 
         if os.path.isfile(inTract) is True:
             # VTK reader
