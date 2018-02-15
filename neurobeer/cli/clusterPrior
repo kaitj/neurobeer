@@ -113,9 +113,14 @@ def main():
                                     no_of_jobs=opts.j)
     del bundlePolydata, opts.prior, scalarWeightList, scalarDataList
 
+    LArray = fibers.calcFiberLength(fiberData, rejIdx)
+    DArray = fibers.calcEndPointSep(fiberData, rejIdx)
+    fibers.addLDRatio(DArray, LArray, outputPolydata)
     bundleName = opts.bundle[:-4] + '_Clustered.vtk'
     bundledir = os.path.join(outdir, bundleName)
     tractio.writeVTK(outputPolydata, bundledir, opts.verbose)
+    del LArray, DArray
+
     clusterData = fiberData.getFibers(range(fiberData.no_of_fibers), rejIdx)
     clusterData = fibers.convertFromTuple(clusterData)
     clusterData.copyScalar(fiberData, scalarTypeList, fidxes=[], rejIdx=rejIdx)
@@ -133,14 +138,14 @@ def main():
         polyData = bundle.convertToVTK()
         LArray = fibers.calcFiberLength(clusterData, idxes)
         LMean, LStd, fiberCount = stats.calcGeoStats(LArray)
-        stats.writeGeoCSV(LMean, LStd, fiberCount, dirpath=outdir)
+        stats.writeGeoCSV(label, LMean, LStd, fiberCount, dirpath=outdir)
         statsSuffix = 'stats/stats_%i' % label
         statsdir = os.path.join(outdir + '/' + statsSuffix)
 
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, clusterData, Type, idxes)
             stats.plotStats(clusterData, Type, idxes, dirpath=statsdir)
-            stats.writeCSV(clusterData, Type, idxes, dirpath=outdir)
+            stats.writeCSV(label, clusterData, Type, idxes, dirpath=outdir)
 
         bundleSuffix = '_Cluster%i.vtk' % label
         bundleName = opts.bundle[:-4] + bundleSuffix

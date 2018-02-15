@@ -105,7 +105,6 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[], scalarWe
         centroids, clusterIdx = scipy.cluster.vq.kmeans2(emvec, k_clusters, iter=50,
                                                                                         minit='points')
         centroids, clusterIdx = _sortLabel(centroids, clusterIdx)
-        fiberData.addClusterInfo(clusterIdx, centroids)
 
         if k_clusters <= 1:
             print "\nNot enough eigenvectors selected!"
@@ -220,7 +219,6 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[], scalarTypeList=
 
         # 5. Find clusters using K-means clustering
         clusterIdx, dist = scipy.cluster.vq.vq(emvec, priorCentroids)
-
         fiberData.addClusterInfo(clusterIdx, priorCentroids)
 
         if k_clusters <= 1:
@@ -327,6 +325,8 @@ def _pairwiseDistance_matrix(fiberTree, pts_per_fiber, no_of_jobs):
                         fiberTree.getFibers(range(fiberTree.no_of_fibers)))
             for fidx in range(0, fiberTree.no_of_fibers))
     distances = np.array(distances)
+
+    # Normalize between 0 and 1
 
     if np.diag(distances).all() != 0.0:
         print('Diagonals in distance matrix are not equal to 0')
