@@ -1,11 +1,16 @@
 # Patch Notes
 
 ## Content
+* [v1.0.0](#v100)
 * [v0.1.4](#v014)
 * [v0.1.3](#v013)
 * [v0.1.2](#v012)
 * [v0.1.1](#v011)
 * [v0.1.0](#v010)
+
+### Version 1.0.0 <a name=v100></a>
+* Released ready to use v1.0.0 of tractography tool
+* Mapped length:distance ratio for all fibers
 
 ### Version 0.1.4 <a name=v014></a>
 * Restructured hierarchy; consolidated files under one folder

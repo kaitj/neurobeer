@@ -105,7 +105,6 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[], scalarWe
         centroids, clusterIdx = scipy.cluster.vq.kmeans2(emvec, k_clusters, iter=50,
                                                                                         minit='points')
         centroids, clusterIdx = _sortLabel(centroids, clusterIdx)
-        fiberData.addClusterInfo(clusterIdx, centroids)
 
         if k_clusters <= 1:
             print "\nNot enough eigenvectors selected!"
@@ -220,7 +219,6 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[], scalarTypeList=
 
         # 5. Find clusters using K-means clustering
         clusterIdx, dist = scipy.cluster.vq.vq(emvec, priorCentroids)
-
         fiberData.addClusterInfo(clusterIdx, priorCentroids)
 
         if k_clusters <= 1:

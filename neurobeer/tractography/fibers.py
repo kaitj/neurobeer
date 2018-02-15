@@ -47,14 +47,43 @@ def convertFromTuple(fiberTuple):
 
     return fiberTree
 
-def calcFiberLength(fiberData, fidxes):
+def calcEndPointSep(fiberData, rejIdx=[]):
+    """
+    Calculates distance between end points
+
+    INPUT:
+        fiberData - Fiber tree containing tractography information
+        rejIdx - Indices of outlier
+
+    OUTPUT:
+        DArray -  Distance between end points
+    """
+    endpt = fiberData.pts_per_fiber - 1
+
+    DArray = []
+    for fidx in range(fiberData.no_of_fibers):
+        if fidx in rejIdx:
+            continue
+        else:
+            x1 = fiberData.fiberTree[fidx][0]['x']
+            x2 = fiberData.fiberTree[fidx][endpt]['x']
+            y1 = fiberData.fiberTree[fidx][0]['y']
+            y2 = fiberData.fiberTree[fidx][endpt]['y']
+            z1 = fiberData.fiberTree[fidx][0]['z']
+            z2 = fiberData.fiberTree[fidx][endpt]['z']
+
+            DArray.append(np.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2))
+
+    return DArray
+
+def calcFiberLength(fiberData, rejIdx=[]):
     """
     Calculates the fiber length via arc length
     NOTE: same function as ufiber module without removing any fibers
 
     INPUT:
         fiberData - Fiber tree containing tractography information
-        fidxes - Fiber indices to include
+        rejIdx - Indices of outlier
 
     OUTPUT:
         L - length of fiberData
@@ -67,21 +96,45 @@ def calcFiberLength(fiberData, fidxes):
 
     LArray = []
 
-    for fidx in fidxes:
-        L = 0
-        for idx in range(1, no_of_pts):
-            x1 = fiberData.fiberTree[fidx][idx]['x']
-            x2 = fiberData.fiberTree[fidx][idx - 1]['x']
-            y1 = fiberData.fiberTree[fidx][idx]['y']
-            y2 = fiberData.fiberTree[fidx][idx - 1]['y']
-            z1 = fiberData.fiberTree[fidx][idx]['z']
-            z2 = fiberData.fiberTree[fidx][idx - 1]['z']
+    for fidx in range(fiberData.no_of_fibers):
+        if fidx in rejIdx:
+            continue
+        else:
+            L = 0
+            for idx in range(1, no_of_pts):
+                x1 = fiberData.fiberTree[fidx][idx]['x']
+                x2 = fiberData.fiberTree[fidx][idx - 1]['x']
+                y1 = fiberData.fiberTree[fidx][idx]['y']
+                y2 = fiberData.fiberTree[fidx][idx - 1]['y']
+                z1 = fiberData.fiberTree[fidx][idx]['z']
+                z2 = fiberData.fiberTree[fidx][idx - 1]['z']
 
-            L = L + np.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
+                L = L + np.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
 
-        LArray.append(L)
+            LArray.append(L)
 
     return LArray
+
+def addLDRatio(DArray, LArray, polyData):
+    """
+    Calculates and adds LD Ratio to VTK
+
+    INPUT:
+        DArray - Array of distances between end points for fibers
+        LArray - Array of lenghts of fibers
+
+    OUTPUT:
+        none
+    """
+    LDScalar = vtk.vtkFloatArray()
+    LDScalar.SetNumberOfComponents(1)
+    LDScalar.SetName('LDRatio')
+    LDRatio = np.divide(DArray, LArray)
+
+    for fidx in range(len(LArray)):
+        LDScalar.InsertNextTuple1(LDRatio[fidx])
+
+    polyData.GetCellData().AddArray(LDScalar)
 
 class FiberTree:
     """
@@ -106,13 +159,13 @@ class FiberTree:
 
         INPUT:
             fiberLength - Number of points along a fiber
-            pts_per_length - Number of desired points along fiber
+            pts_per_fiber - Number of desired points along fiber
 
-        OUTPUT:
+        OUTPUT:    LDRatio = np.divide(DArray, LArray)
             idxList - Corresponding new indices to traverse along fiber
         """
 
-        # Step length between points along fiber
+        # Step length between points along fiberprint A1
         stepLength = (fiberLength - 1.0) / (pts_per_fiber - 1.0)
 
         # Output indices along fiber
@@ -125,7 +178,7 @@ class FiberTree:
         """
         Extract a single fiber from the group with corresponding data.
         Value returned is of class Fiber.
-
+print A1
         INPUT:
             fiberIdx - Index of fiber to be extracted
 

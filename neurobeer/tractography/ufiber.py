@@ -18,6 +18,8 @@ def findUFiber(fiberData):
 
     OUTPUT:
         uArray - Array containing indices of all u-shaped fibers
+        LArray -Array containing lengths of all u-shaped fibers
+        DArray - Array containing end point seperation distance
     """
     # Array storing indices of u-shaped fibers
     uArray = []
@@ -219,7 +221,7 @@ def _calcEndPointSep(fiberData, fidx):
         fidx - Fiber index
 
     OUTPUT:
-        D - length of fiber
+        D - Distance between end points
     """
     endpt = fiberData.pts_per_fiber - 1
 
