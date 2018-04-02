@@ -69,7 +69,7 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[], scalarWe
                                                     sigma, saveAllSimilarity, pts_per_fiber, matpath, no_of_jobs)
 
         # Outlier detection
-        W, rejIdx = _outlierSimDetection(W)
+        W2, rejIdx = _outlierSimDetection(W)
 
         if saveWSimilarity is True:
             misc.saveMatrix(matpath, W, 'Weighted')
@@ -125,7 +125,7 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[], scalarWe
         # 9. Also add measurements from those used to cluster
         for i in range(len(scalarTypeList)):
             outputPolydata = addScalarToVTK(outputPolydata, fiberData, scalarTypeList[i],
-                                            rejIdx=rejIdx)
+                                        rejIdx=rejIdx)
 
         return outputPolydata, clusterIdx, fiberData, rejIdx
 
@@ -149,7 +149,8 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[], scalarTypeList=
             fiberData - fiber tree containing tractography data to be clustered
             priorVTK - prior polydata file
             scalarDataList - list containing scalar data for similarity measurements; defaults empty
-            scalarTypeList - list containing scalar type for similarity measurements; defaults empty
+            scalarTypeList - list containing scalar type for stest = np.argmax(W, axis=1)
+print testimilarity measurements; defaults empty
             scalarWeightList - list containing scalar weights for similarity measurements; defaults empty
             sigma - width of Gaussian kernel; adjust to alter sensitivity; defaults 0.4
             saveAllSimilarity - flag to save all individual similarity matrices computed; defaults False
@@ -161,7 +162,7 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[], scalarTypeList=
         OUTPUT:
             outputPolydata - polydata containing information from clustering to be written into VTK
             clusterIdx - array containing cluster that each fiber belongs to
-            fiberData - tree containing spatial and quantitative information of fibers
+            fiberData - tree containing spatial and quantitati_priorSive information of fibers
         """
         if dirpath is None:
             dirpath = os.getcwd()
@@ -170,7 +171,7 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[], scalarTypeList=
         if not os.path.exists(matpath):
             os.makedirs(matpath)
 
-        priorData, priorCentroids = prior.load(priorVTK)
+        priorData, priorCentroids, priorLabels = prior.load(priorVTK)
         priorPath = os.path.split(priorVTK)[0]
 
         if not os.path.exists(priorPath + '/eigval.npy'):
@@ -199,55 +200,32 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[], scalarTypeList=
         W = _priorWeightedSimilarity(fiberData, priorData, scalarTypeList, scalarWeightList,
                                                     sigma, saveAllSimilarity, pts_per_fiber, matpath, no_of_jobs)
 
-        # 2. Compute inverse of eigenvalues
-        invEigval = np.diag(np.divide(1, eigval))
-
-        # 3. Compute new eigenvectors vectors in feature space
-        nEigvec = np.dot(np.dot(W, eigvec), invEigval)
-
-        # 4. Compute information for clustering using "N" number of smallest eigenvalues
-        # Skips first eigenvector, no information obtained
-        if k_clusters > nEigvec.shape[0]:
-            print 'Number of user selected clusters greater than number of eigenvectors.'
-            print 'Clustering with maximum number of available eigenvectors.'
-            emvec = nEigvec[:, 1:nEigvec.shape[0]]
-        elif k_clusters == eigvec.shape[0]:
-            emvec = nEigvec[:, 1:k_clusters]
-        else:
-            emvec = nEigvec[:, 1:k_clusters + 1]
-        emvec = emvec.real
-
-        # 5. Find clusters using K-means clustering
-        clusterIdx, dist = scipy.cluster.vq.vq(emvec, priorCentroids)
+        # 2. Identify corresponding cluster indices from similarity
+        simIdx = np.argmax(W, axis=1)
+        clusterIdx = priorLabels[simIdx]
         fiberData.addClusterInfo(clusterIdx, priorCentroids)
 
         if k_clusters <= 1:
             print('Not enough eigenvectors selected!')
             raise ValueError
         elif k_clusters == 2:
-            temp = eigvec[:, 0:3]
-            temp = temp.astype('float')
-            colour = _cluster_to_rgb(temp)
+            temp = eigvec[0:3, :]
+            colour = _cluster_to_rgb(temp.astype('float'))
             del temp
         else:
             colour = _cluster_to_rgb(priorCentroids)
 
-        # 8. Return results
-        # Create model with user / default number of chosen samples along fiber
-        # Outlier rejection based on distance from centroid
-        W, rejIdx, clusterIdx = _distOutlierDetection(W, dist, clusterIdx)
-
         if saveWSimilarity is True:
             misc.saveMatrix(matpath, W, 'Weighted')
 
-        outputData = fiberData.convertToVTK(rejIdx)
+        outputData = fiberData.convertToVTK()
         outputPolydata = _format_outputVTK(outputData, clusterIdx, colour, priorCentroids)
 
         # 9. Also add measurements from those used to cluster
         for i in range(len(scalarTypeList)):
             outputPolydata = addScalarToVTK(outputPolydata, fiberData, scalarTypeList[i])
 
-        return outputPolydata, clusterIdx, fiberData, rejIdx
+        return outputPolydata, clusterIdx, fiberData,
 
 def addScalarToVTK(polyData, fiberTree, scalarType, fidxes=None, rejIdx=[]):
     """
@@ -274,12 +252,14 @@ def addScalarToVTK(polyData, fiberTree, scalarType, fidxes=None, rejIdx=[]):
                 continue
             for pidx in range(0, fiberTree.pts_per_fiber):
                 scalarValue = fiberTree.fiberTree[fidx][pidx][scalarType]
-                data.InsertNextValue(float(scalarValue))
+                data.InsertNextValue(scalarValue)
     else:
+        idx = 0
         for fidx in fidxes:
             for pidx in range(0, fiberTree.pts_per_fiber):
-                scalarValue = fiberTree.fiberTree[fidx][pidx][scalarType]
+                scalarValue = fiberTree.fiberTree[idx][pidx][scalarType]
                 data.InsertNextValue(float(scalarValue))
+            idx += 1
 
     polyData.GetPointData().AddArray(data)
 
@@ -317,7 +297,7 @@ def _pairwiseDistance_matrix(fiberTree, pts_per_fiber, no_of_jobs):
         no_of_jobs - cores to use to perform computation
 
     OUTPUT:
-        distances - NxN matrix containing distances between fibers
+        distances - NxN matrix containing distances between fibersprint len(np.where(newClusters == 2)[0])
     """
 
     distances = Parallel(n_jobs=no_of_jobs, backend="threading")(
@@ -392,8 +372,7 @@ def _pairwiseQDistance_matrix(fiberTree, scalarType, pts_per_fiber, no_of_jobs):
 
     return qDistances
 
-def _pairwiseQSimilarity_matrix(fiberTree, scalarType, sigma, pts_per_fiber,
-                                                      no_of_jobs):
+def _pairwiseQSimilarity_matrix(fiberTree, scalarType, sigma, pts_per_fiber, no_of_jobs):
     """ *INTERNAL FUNCTION*
     Computes the similarity between quantitative points along a fiber.
 
@@ -576,6 +555,7 @@ def _format_outputVTK(polyData, clusterIdx, colour, centroids, rejIdx=[]):
         clusterIdx - cluster indices to be applied to each fiber within the polydata model
         colour - colours to be applied to each fiber within the polydata model
         centroid - centroid location to associated with each cluster
+        rejIdx - indices to reject
 
     OUTPUT:
         polyData - updated polydata with cluster and colour information
@@ -593,7 +573,7 @@ def _format_outputVTK(polyData, clusterIdx, colour, centroids, rejIdx=[]):
     centroid.SetNumberOfComponents(centroids.shape[1])
     centroid.SetName('Centroid')
 
-    for fidx in range(0, polyData.GetNumberOfLines()):
+    for fidx in range(len(clusterIdx)):
         if fidx in rejIdx:
             continue
         dataColour.InsertNextTuple3(
@@ -723,7 +703,7 @@ def _priorWeightedSimilarity(fiberTree, priorTree, scalarTypeList=[], scalarWeig
             if not os.path.exists(dirpath):
                 os.makedirs(dirpath)
 
-        misc.saveMatrix(dirpath, wSimilarity, 'Geometry')
+        misc.saveMatrix(dirpath, np.transpose(wSimilarity), 'Geometry')
 
     else:   # Calculate weighted similarity
 
@@ -740,7 +720,7 @@ def _priorWeightedSimilarity(fiberTree, priorTree, scalarTypeList=[], scalarWeig
 
             matrixType = scalarTypeList[0].split('/', -1)[-1]
             matrixType = matrixType[:-2] + 'geometry'
-            misc.saveMatrix(dirpath, wSimilarity, matrixType)
+            misc.saveMatrix(dirpath, np.transpose(wSimilarity), matrixType)
 
         wSimilarity = wSimilarity * scalarWeightList[0]
 
@@ -753,7 +733,7 @@ def _priorWeightedSimilarity(fiberTree, priorTree, scalarTypeList=[], scalarWeig
                     dirpath = os.getcwd()
 
                 matrixType = scalarTypeList[i].split('/', -1)[-1]
-                misc.saveMatrix(dirpath, similarity, matrixType)
+                misc.saveMatrix(dirpath, np.transpose(similarity), matrixType)
 
             wSimilarity += similarity * scalarWeightList[i+1]
 
@@ -802,7 +782,7 @@ def _outlierSimDetection(W):
 
     # Reject fibers that are 2 standard deviations from mean
     W_rowsum = np.sum(W, 0)
-    W_outlierthr = np.mean(W_rowsum) - 2.0 * np.std(W_rowsum)
+    W_outlierthr = np.mean(W_rowsum) - 2 * np.std(W_rowsum)
 
     rejIdx = np.where(W_rowsum < W_outlierthr)[0]
     # Remove outliers from matrix
@@ -813,6 +793,7 @@ def _outlierSimDetection(W):
 
 def _distOutlierDetection(W, dist, clusterIdx):
     """ * INTERNAL FUNCTION *
+    ***NOT CURRENTLY USED, UPDATES TO BE MADE FOR USED***
     Look for outlifers in fibers to reject based on distance
     from centroid
 

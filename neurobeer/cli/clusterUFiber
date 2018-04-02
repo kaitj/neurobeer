@@ -79,9 +79,7 @@ def main():
     del bundleVTK
 
     # Handling scalar data
-    scalarDataList = []
-    scalarWeightList = []
-    scalarTypeList = []
+    scalarDataList, scalarWeightList, scalarTypeList = [], [], []
     if opts.a is not None:
         scalarFileList = opts.a
         for DataIdx in scalarFileList:
@@ -143,8 +141,8 @@ def main():
 
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, clusterData, Type, idxes)
-            stats.plotStats(clusterData, Type, idxes, dirpath=statsdir)
-            stats.writeCSV(label, clusterData, Type, idxes, dirpath=outdir)
+            stats.plotStats(fiberData, Type, idxes, dirpath=statsdir)
+            stats.writeCSV(label, fiberData, Type, idxes, dirpath=outdir)
 
         bundleSuffix = '_uFibers_Cluster%i.vtk' % label
         bundleName = opts.bundle[:-4] + bundleSuffix

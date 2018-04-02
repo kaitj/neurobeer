@@ -43,6 +43,7 @@ def _stddev(fiberTree, scalarType, idxes=None):
         idxes - indices to extract info from; defaults None (returns data for all fibers)
 
     OUTPUT:
+
         clusterSdev - calculated tract-based standard deviation
         stdev - standard deviation of fiber group
     """
@@ -147,13 +148,18 @@ def writeCSV(clusterLabel, fiberTree, scalarType, idxes=None, dirpath=None):
     fileExists = os.path.isfile(filePath)
 
     with open(filePath, 'a') as f:
-        headers = ['Cluster ID', range(1, fiberTree.pts_per_fiber+1)]
+        headers = ['Cluster ID']
+        for idx in range(fiberTree.pts_per_fiber):
+            headers.append(idx)
         writer = csv.DictWriter(f, delimiter=',', lineterminator='\n', fieldnames=headers)
         if not fileExists:
             writer.writeheader()
 
         writer = csv.writer(f)
-        writer.writerow(clusterLabel, scalarArray)
+        rowInfo = [clusterLabel]
+        for idx in range(fiberTree.pts_per_fiber):
+            rowInfo.append(scalarArray[idx])
+        writer.writerow(rowInfo)
 
     f.close()
 
