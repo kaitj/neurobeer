@@ -44,7 +44,7 @@ def saveMatrix(dirpath, matrix, matrixType):
     """
 
     f = plt.figure(figsize=(10, 10))
-    im = plt.imshow(matrix, cmap='viridis')
+    im = plt.imshow(matrix, cmap='viridis', interpolation='none')
     plt.title((matrixType + ' Similarity'), fontsize=16)
 
     ax = plt.gca()
