@@ -13,6 +13,7 @@
 * Updated prior sampling to subsample from prior/atlas
     * Random subsampling of prior fibers
     * Assignment of cluster index based on similarity (previously Nystrom method)
+* Removed interpolation of matrices for visualization
 
 ### Version 1.0.0 <a name=v100></a>
 * Released ready to use v1.0.0 of tractography tool
