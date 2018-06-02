@@ -149,8 +149,7 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[], scalarTypeList=
             fiberData - fiber tree containing tractography data to be clustered
             priorVTK - prior polydata file
             scalarDataList - list containing scalar data for similarity measurements; defaults empty
-            scalarTypeList - list containing scalar type for stest = np.argmax(W, axis=1)
-print testimilarity measurements; defaults empty
+            scalarTypeList - list containing scalar type for stest = np.argmax(W, axis=1); defaults empty
             scalarWeightList - list containing scalar weights for similarity measurements; defaults empty
             sigma - width of Gaussian kernel; adjust to alter sensitivity; defaults 0.4
             saveAllSimilarity - flag to save all individual similarity matrices computed; defaults False
