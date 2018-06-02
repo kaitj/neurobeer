@@ -85,7 +85,7 @@ def main():
         for DataIdx in scalarFileList:
             path = os.path.join(indir + '/' + str(DataIdx))
             name = path.split('.', -1)[-2]
-            name = name.split('/', -1)[-1]
+            name = name.split('_', -1)[-1]
             data = name + 'Data'
             typevar = name + 'Type'
             exec('%s, %s = tractio.readScalar("%s", opts.verbose)' % (data, typevar, path))
@@ -106,7 +106,7 @@ def main():
     uFiberTree.copyScalar(fiberData, scalarTypeList, fidxes=uArray)
 
     # Perform clustering on provided bundle
-    outputPolydata, clusterIdx, fiberData, rejIdx = cluster.spectralPriorCluster(
+    outputPolydata, clusterIdx, fiberData = cluster.spectralPriorCluster(
                                     uFiberTree, opts.prior, scalarDataList=scalarDataList,
                                     scalarWeightList=scalarWeightList, scalarTypeList=scalarTypeList,
                                     sigma=opts.sig, saveWSimilarity=opts.saveWeight,
@@ -117,9 +117,9 @@ def main():
     bundleName = opts.bundle[:-4] + '_uFibers_Clustered.vtk'
     bundledir = os.path.join(outdir, bundleName)
     tractio.writeVTK(outputPolydata, bundledir, opts.verbose)
-    clusterData = fiberData.getFibers(range(fiberData.no_of_fibers), rejIdx)
+    clusterData = fiberData.getFibers(range(fiberData.no_of_fibers))
     clusterData = fibers.convertFromTuple(clusterData)
-    clusterData.copyScalar(fiberData, scalarTypeList, fidxes=[], rejIdx=rejIdx)
+    clusterData.copyScalar(fiberData, scalarTypeList, fidxes=[])
 
     # NOT USED - SUPPOSE TO EXTRACT STATS FOR COMBINED
     # NEEDS TO BE FIXED FOR USE (IF WANTED/NEEDED)
@@ -135,14 +135,14 @@ def main():
         statsSuffix = 'stats/stats_%i' % label
         statsdir = os.path.join(outdir + '/' + statsSuffix)
         LMean, LStd, DMean, DStd = ufiber.uFiberStats(L, D, idxes)
-        ufiber.writeCSV(LMean, LStd, DMean, DStd, bundle.no_of_fibers, dirpath=outdir)
+        ufiber.writeCSV(label, LMean, LStd, DMean, DStd, bundle.no_of_fibers, dirpath=outdir)
         print "Avg. fiber length for cluster %i: %.2f +/- %.2f" % (label, LMean, LStd)
         print "Avg. distance between end points for cluster %i: %.2f +/- %.2f" % (label, DMean, DStd)
 
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, clusterData, Type, idxes)
             stats.plotStats(clusterData, Type, idxes, dirpath=statsdir)
-            stats.writeCSV(clusterData, Type, idxes, dirpath=outdir)
+            stats.writeCSV(label, clusterData, Type, idxes, dirpath=outdir)
 
         bundleSuffix = '_uFibers_Cluster%i.vtk' % label
         bundleName = opts.bundle[:-4] + bundleSuffix
