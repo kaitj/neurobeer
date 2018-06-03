@@ -87,7 +87,11 @@ def _getSubset(clusterArray):
 
     for cluster in np.unique(clusterArray):
         idx = np.where(clusterArray == cluster)[0]
-        subsetIdx = np.unique(np.random.choice(idx, len(idx)/25))
+        subsetIdx = np.unique(np.random.choice(idx, len(idx)))
+        if len(subsetIdx) == 0:
+            subsetIdx = np.array(idx[0])
+        elif len(subsetIdx) > 100:
+            subsetIdx = np.array(idx[0:100])
         subsetIdxes.extend(subsetIdx)
 
     return subsetIdxes
