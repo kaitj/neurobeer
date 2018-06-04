@@ -69,7 +69,7 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[], scalarWe
                                                     sigma, saveAllSimilarity, pts_per_fiber, matpath, no_of_jobs)
 
         # Outlier detection
-        W2, rejIdx = _outlierSimDetection(W)
+        W, rejIdx = _outlierSimDetection(W)
 
         if saveWSimilarity is True:
             misc.saveMatrix(matpath, W, 'Weighted')
