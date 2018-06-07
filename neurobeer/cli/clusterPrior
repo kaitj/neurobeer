@@ -113,7 +113,7 @@ def main():
     DArray = fibers.calcEndPointSep(fiberData)
     fibers.addLDRatio(DArray, LArray, outputPolydata)
     bundleName = opts.bundle[:-4] + '_Clustered.vtk'
-    bundledir = os.path.join(outdir, bundleName)
+    bundledir = os.path.join(os.path.join(outdir, 'tractography'), bundleName)
     tractio.writeVTK(outputPolydata, bundledir, opts.verbose)
     del LArray, DArray
 
@@ -145,7 +145,7 @@ def main():
 
         bundleSuffix = '_Cluster%i.vtk' % label
         bundleName = opts.bundle[:-4] + bundleSuffix
-        bundledir = os.path.join(outdir + '/' + bundleName)
+        bundledir = os.path.join(os.path.join(outdir, 'tractography'), bundleName)
         tractio.writeVTK(polyData, bundledir, opts.verbose)
 
 

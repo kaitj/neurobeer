@@ -51,7 +51,7 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[], scalarWe
         if dirpath is None:
             dirpath = os.getcwd()
 
-        matpath = dirpath + '/matrices'
+        matpath = dirpath + '/conmat'
         if not os.path.exists(matpath):
             os.makedirs(matpath)
 
@@ -166,7 +166,7 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[], scalarTypeList=
         if dirpath is None:
             dirpath = os.getcwd()
 
-        matpath = dirpath + '/matrices'
+        matpath = dirpath + '/conmat'
         if not os.path.exists(matpath):
             os.makedirs(matpath)
 
