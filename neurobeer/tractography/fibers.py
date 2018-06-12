@@ -91,7 +91,7 @@ def calcFiberLength(fiberData, rejIdx=[]):
     no_of_pts = fiberData.pts_per_fiber
 
     if no_of_pts < 2:
-        print "Not enough samples to determine length of fiber"
+        print("Not enough samples to determine length of fiber")
         raise ValueError
 
     LArray = []
@@ -165,7 +165,7 @@ class FiberTree:
             idxList - Corresponding new indices to traverse along fiber
         """
 
-        # Step length between points along fiberprint A1
+        # Step length between points along fiber
         stepLength = (fiberLength - 1.0) / (pts_per_fiber - 1.0)
 
         # Output indices along fiber
@@ -178,7 +178,7 @@ class FiberTree:
         """
         Extract a single fiber from the group with corresponding data.
         Value returned is of class Fiber.
-print A1
+
         INPUT:
             fiberIdx - Index of fiber to be extracted
 
@@ -366,7 +366,7 @@ print A1
         INPUT:
             inputVTK - Tractography polydata
             pts_per_fiber - Number of points to sample along a fiber
-            verbose - Verbosity of function; 1 to print messages to user.
+            verbose - Verbosity of function; 1 to printmessages to user.
 
         OUTPUT:
             none
@@ -376,9 +376,9 @@ print A1
         self.pts_per_fiber = pts_per_fiber
 
         if verbose == 1:
-            print "\n<fibers.py> Converting polydata to array representation."
-            print "Fibers:", self.no_of_fibers
-            print "Points sampled along fiber:", self.pts_per_fiber
+            print("\n<fibers.py> Converting polydata to array representation.")
+            print("Fibers:", self.no_of_fibers)
+            print("Points sampled along fiber:", self.pts_per_fiber)
 
         # Loop over all fibers
         inputVTK.GetLines().InitTraversal()

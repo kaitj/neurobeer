@@ -57,12 +57,12 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[], scalarWe
 
         noFibers = fiberData.no_of_fibers
         if noFibers == 0:
-            print "\nERROR: Input data has 0 fibers!"
+            print("\nERROR: Input data has 0 fibers!")
             raise ValueError
         elif verbose == 1:
-            print "\nStarting clustering..."
-            print "No. of fibers:", noFibers
-            print "No. of clusters:", k_clusters
+            print("\nStarting clustering...")
+            print("No. of fibers:", noFibers)
+            print("No. of clusters:", k_clusters)
 
         # 1. Compute similarty matrix
         W = _pairwiseWeightedSimilarity(fiberData, scalarTypeList, scalarWeightList,
@@ -93,8 +93,8 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[], scalarWe
         # 6. Compute information for clustering using "N" number of smallest eigenvalues
         # Skips first eigenvector, no information obtained
         if k_clusters > eigvec.shape[0]:
-            print '\nNumber of user selected clusters greater than number of eigenvectors.'
-            print 'Clustering with maximum number of available eigenvectors.'
+            print('\nNumber of user selected clusters greater than number of eigenvectors.')
+            print('Clustering with maximum number of available eigenvectors.')
             emvec = eigvec[:, 1:eigvec.shape[0]]
         elif k_clusters == eigvec.shape[0]:
             emvec = eigvec[:, 1:k_clusters]
@@ -107,7 +107,7 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[], scalarWe
         centroids, clusterIdx = _sortLabel(centroids, clusterIdx)
 
         if k_clusters <= 1:
-            print "\nNot enough eigenvectors selected!"
+            print("\nNot enough eigenvectors selected!")
             raise ValueError
         elif k_clusters == 2:
             temp = eigvec[:, 0:3]
@@ -174,10 +174,10 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[], scalarTypeList=
         priorPath = os.path.split(priorVTK)[0]
 
         if not os.path.exists(priorPath + '/eigval.npy'):
-            print "Eigenvalue binary file does not exist"
+            print("Eigenvalue binary file does not exist")
             raise IOError
         elif not os.path.exists(priorPath + '/eigvec.npy'):
-            print "Eigenvector binary file does not exist"
+            print("Eigenvector binary file does not exist")
             raise IOError
         else:
             eigval, eigvec = prior.loadEig(priorPath, 'eigval.npy', 'eigvec.npy')
@@ -188,12 +188,12 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[], scalarTypeList=
         noFibers = fiberData.no_of_fibers
         nopriorFibers = int(priorData.no_of_fibers)
         if noFibers == 0 or nopriorFibers == 0:
-            print "\nERROR: Input data(s) has 0 fibers!"
+            print("\nERROR: Input data(s) has 0 fibers!")
             raise ValueError
         elif verbose == 1:
-            print "\nStarting clustering..."
-            print "No. of fibers:", noFibers
-            print "No. of clusters:", k_clusters
+            print("\nStarting clustering...")
+            print("No. of fibers:", noFibers)
+            print("No. of clusters:", k_clusters)
 
         # 1. Compute similarty matrix
         W = _priorWeightedSimilarity(fiberData, priorData, scalarTypeList, scalarWeightList,
@@ -296,7 +296,7 @@ def _pairwiseDistance_matrix(fiberTree, pts_per_fiber, no_of_jobs):
         no_of_jobs - cores to use to perform computation
 
     OUTPUT:
-        distances - NxN matrix containing distances between fibersprint len(np.where(newClusters == 2)[0])
+        distances - NxN matrix containing distances between fiber
     """
 
     distances = Parallel(n_jobs=no_of_jobs, backend="threading")(
@@ -366,7 +366,7 @@ def _pairwiseQDistance_matrix(fiberTree, scalarType, pts_per_fiber, no_of_jobs):
     # qDistances = sklearn.preprocessing.MinMaxScaler().fit_transform(qDistances)
 
     if np.diag(qDistances).all() != 0.0:
-        print "Diagonals in distance matrix are not equal to 0"
+        print("Diagonals in distance matrix are not equal to 0")
         exit()
 
     return qDistances
@@ -394,7 +394,7 @@ def _pairwiseQSimilarity_matrix(fiberTree, scalarType, sigma, pts_per_fiber, no_
     qSimilarity = np.array(qSimilarity)
 
     if np.diag(qSimilarity).all() != 1.0:
-        print "Diagonals in similarity marix are not equal to 1"
+        print("Diagonals in similarity marix are not equal to 1")
         exit()
 
     return qSimilarity
@@ -607,15 +607,15 @@ def _pairwiseWeightedSimilarity(fiberTree, scalarTypeList=[], scalarWeightList=[
     """
 
     if ((scalarWeightList == []) and (scalarTypeList != [])):
-        print "\nNo weights given for provided measurements! Exiting..."
+        print("\nNo weights given for provided measurements! Exiting...")
         exit()
 
     elif ((scalarWeightList != []) and (scalarTypeList == [])):
-        print "\nPlease also specify measurement(s) type. Exiting..."
+        print("\nPlease also specify measurement(s) type. Exiting...")
         exit()
 
     elif (((scalarWeightList == [])) and ((scalarTypeList == []))) or (scalarWeightList[0] == 1):
-        print "\nCalculating similarity based on geometry."
+        print("\nCalculating similarity based on geometry.")
         wSimilarity = _pairwiseSimilarity_matrix(fiberTree, sigma, pts_per_fiber, no_of_jobs)
 
         if dirpath is None:
@@ -626,7 +626,7 @@ def _pairwiseWeightedSimilarity(fiberTree, scalarTypeList=[], scalarWeightList=[
     else:   # Calculate weighted similarity
 
         if np.sum(scalarWeightList) != 1.0:
-            print '\nWeights given do not sum 1. Exiting...'
+            print('\nWeights given do not sum 1. Exiting...')
             exit()
 
         wSimilarity = _pairwiseSimilarity_matrix(fiberTree, sigma, pts_per_fiber,
@@ -658,7 +658,7 @@ def _pairwiseWeightedSimilarity(fiberTree, scalarTypeList=[], scalarWeightList=[
         del similarity
 
     if np.diag(wSimilarity).all() != 1.0:
-        print "Diagonals of weighted similarity are not equal to 1"
+        print("Diagonals of weighted similarity are not equal to 1")
         exit()
 
     return wSimilarity
@@ -685,15 +685,15 @@ def _priorWeightedSimilarity(fiberTree, priorTree, scalarTypeList=[], scalarWeig
     """
 
     if ((scalarWeightList == []) and (scalarTypeList != [])):
-        print "\nNo weights given for provided measurements! Exiting..."
+        print("\nNo weights given for provided measurements! Exiting...")
         exit()
 
     elif ((scalarWeightList != []) and (scalarTypeList == [])):
-        print "\nPlease also specify measurement(s) type. Exiting..."
+        print("\nPlease also specify measurement(s) type. Exiting...")
         exit()
 
     elif ((scalarWeightList == []) and (scalarTypeList == [])) or (scalarWeightList[0] == 1):
-        print "\nCalculating similarity based on geometry."
+        print("\nCalculating similarity based on geometry.")
         wSimilarity = _priorSimilarity_matrix(fiberTree, priorTree, sigma, pts_per_fiber, no_of_jobs)
 
         if dirpath is None:
@@ -707,7 +707,7 @@ def _priorWeightedSimilarity(fiberTree, priorTree, scalarTypeList=[], scalarWeig
     else:   # Calculate weighted similarity
 
         if np.sum(scalarWeightList) != 1.0:
-            print '\nWeights given do not sum 1. Exiting...'
+            print('\nWeights given do not sum 1. Exiting...')
             exit()
 
         wSimilarity = _priorSimilarity_matrix(fiberTree, priorTree, sigma, pts_per_fiber,
