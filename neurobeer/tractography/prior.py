@@ -22,11 +22,11 @@ def load(priorVTKPath, verbose=0):
         sortedCentroids - codebook of centroids to be used in future clustering
     """
     if verbose == 1:
-        print '\nLoading prior data.'
-        print '\nPlease wait...'
+        print('\nLoading prior data.')
+        print('\nPlease wait...')
 
     if not os.path.exists(priorVTKPath):
-        print 'Error: Prior data', priorVTKPath, 'does not exist.'
+        print('Error: Prior data', priorVTKPath, 'does not exist.')
         raise IOError
 
     priorVTK = tractio.readVTK(priorVTKPath, verbose)
@@ -44,7 +44,7 @@ def load(priorVTKPath, verbose=0):
     _scalarFromVTK(priorVTK, priorTree, pts_per_fiber=priorPts, verbose=0)
 
     if verbose == 1:
-        print '\nFinished loading prior data.'
+        print('\nFinished loading prior data.')
 
     return priorTree, priorCentroids
 
@@ -106,7 +106,7 @@ def _scalarFromVTK(inputVTK, fiberTree, pts_per_fiber=20, verbose=0):
         idx = 0
 
         if verbose == 1:
-            print "\nAdding %s to fiber data" % scalarType
+            print("\nAdding %s to fiber data" % scalarType)
 
         for fidx in range(0, fiberTree.no_of_fibers):
             for pidx in range(0, fiberTree.pts_per_fiber):

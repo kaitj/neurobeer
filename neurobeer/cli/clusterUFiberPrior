@@ -140,8 +140,8 @@ def main():
         statsdir = os.path.join(outdir + '/' + statsSuffix)
         LMean, LStd, DMean, DStd = ufiber.uFiberStats(L, D, idxes)
         ufiber.writeCSV(LMean, LStd, DMean, DStd, bundle.no_of_fibers, dirpath=outdir)
-        print "Avg. fiber length for cluster %i: %.2f +/- %.2f" % (label, LMean, LStd)
-        print "Avg. distance between end points for cluster %i: %.2f +/- %.2f" % (label, DMean, DStd)
+        print("Avg. fiber length for cluster %i: %.2f +/- %.2f" % (label, LMean, LStd))
+        print("Avg. distance between end points for cluster %i: %.2f +/- %.2f" % (label, DMean, DStd))
 
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, clusterData, Type, idxes)
