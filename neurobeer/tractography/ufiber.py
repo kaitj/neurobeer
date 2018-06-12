@@ -189,7 +189,7 @@ def _calcFiberLength(fiberData, fidx):
     no_of_pts = fiberData.pts_per_fiber
 
     if no_of_pts < 2:
-        print "Not enouguFiberData.fiberTreeh samples to determine length of fiber"
+        print("Not enough samples to determine length of fiber")
         raise ValueError
 
     L = 0
