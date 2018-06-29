@@ -22,11 +22,11 @@ def load(priorVTKPath, verbose=0):
         sortedCentroids - codebook of centroids to be used in future clustering
     """
     if verbose == 1:
-        print '\nLoading prior data.'
-        print '\nPlease wait...'
+        print('\nLoading prior data.')
+        print('\nPlease wait...')
 
     if not os.path.exists(priorVTKPath):
-        print 'Error: Prior data', priorVTKPath, 'does not exist.'
+        print('Error: Prior data', priorVTKPath, 'does not exist.')
         raise IOError
 
     # Prior information
@@ -48,7 +48,7 @@ def load(priorVTKPath, verbose=0):
     clusterArray = _addCentroidInfo(centroidTree, subsetIdxes, clusterArray)
 
     if verbose == 1:
-        print '\nFinished loading prior data.'
+        print('\nFinished loading prior data.')
 
     del priorVTK, priorTree
 
@@ -164,7 +164,7 @@ def _getScalarInfo(priorVTK, centroidTree, subsetIdx, pts_per_fiber=20, verbose=
     for i in range(priorVTK.GetPointData().GetNumberOfArrays()):
         scalarType = priorVTK.GetPointData().GetArray(i).GetName()
         if verbose == 1:
-            print "\nAdding %s to fiber data" % scalarType
+            print("\nAdding %s to fiber data" % scalarType)
 
         fidx = 0
         for idx in subsetIdx:

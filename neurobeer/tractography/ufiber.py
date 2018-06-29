@@ -33,7 +33,7 @@ def findUFiber(fiberData):
         D = _calcEndPointSep(fiberData, fidx)
 
         # Temporary max length constraint
-        if (L > 30) and (D <= (L / np.pi)) and (L < 90):
+        if (L > 30) and (D <= (L / np.pi)) and (L < 80):
             uArray.append(fidx)
             LArray.append(L)
             DArray.append(D)
@@ -189,7 +189,7 @@ def _calcFiberLength(fiberData, fidx):
     no_of_pts = fiberData.pts_per_fiber
 
     if no_of_pts < 2:
-        print "Not enouguFiberData.fiberTreeh samples to determine length of fiber"
+        print("Not enough samples to determine length of fiber")
         raise ValueError
 
     L = 0
