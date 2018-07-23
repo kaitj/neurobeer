@@ -126,6 +126,6 @@ def gausKernel_similarity(distance, sigmasq):
     """
 
     # Computes similarity using a Gaussian kernel
-    similarities = np.exp(-distance / (sigmasq)
+    similarities = np.exp(-distance / sigmasq)
 
     return similarities
