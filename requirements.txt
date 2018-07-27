@@ -3,4 +3,4 @@ Matplotlib >=1.5.1
 NumPy>=1.13.1
 Scikit-learn>=0.19.0
 SciPy>=0.19.1
-VTK==7.1.1
+VTK>=6.3.0
