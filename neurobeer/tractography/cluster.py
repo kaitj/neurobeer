@@ -300,9 +300,8 @@ def _pairwiseDistance_matrix(fiberTree, pts_per_fiber, no_of_jobs):
     """
 
     distances = Parallel(n_jobs=no_of_jobs, backend="threading")(
-            delayed(distance.fiberDistance, has_shareable_memory)(fiberTree.getFiber(fidx),
-                        fiberTree.getFibers(range(fiberTree.no_of_fibers)))
-            for fidx in range(0, fiberTree.no_of_fibers))
+            delayed(distance.fiberDistance, has_shareable_memory)(
+                fiberTree.getFibers(range(fiberTree.no_of_fibers))))
     distances = np.array(distances)
 
     # Normalize between 0 and 1
@@ -356,10 +355,7 @@ def _pairwiseQDistance_matrix(fiberTree, scalarType, pts_per_fiber, no_of_jobs):
 
     qDistances = Parallel(n_jobs=no_of_jobs, backend="threading")(
             delayed(distance.scalarDistance, has_shareable_memory)(
-                fiberTree.getScalar(fidx, scalarType),
-                fiberTree.getScalars(range(fiberTree.no_of_fibers), scalarType))
-            for fidx in range(0, fiberTree.no_of_fibers)
-    )
+                fiberTree.getScalars(range(fiberTree.no_of_fibers), scalarType)))
     qDistances = np.array(qDistances)
 
     # Normalize distance measurements
@@ -415,9 +411,8 @@ def _priorDistance_matrix(fiberTree, priorTree, pts_per_fiber, no_of_jobs):
     """
 
     distances = Parallel(n_jobs=no_of_jobs, backend="threading")(
-            delayed(distance.fiberDistance, has_shareable_memory)(fiberTree.getFiber(fidx),
-                    priorTree.getFibers(range(priorTree.no_of_fibers)))
-            for fidx in range(0, fiberTree.no_of_fibers))
+            delayed(distance.fiberDistance, has_shareable_memory)(
+                    priorTree.getFibers(range(priorTree.no_of_fibers))))
 
     distances = np.array(distances)
 
@@ -468,10 +463,7 @@ def _priorQDistance_matrix(fiberTree, priorTree, scalarType, pts_per_fiber, no_o
 
     qDistances = Parallel(n_jobs=no_of_jobs, backend="threading")(
             delayed(distance.scalarDistance, has_shareable_memory)(
-                fiberTree.getScalar(fidx, scalarType),
-                priorTree.getScalars(range(priorTree.no_of_fibers), scalarType))
-            for fidx in range(0, fiberTree.no_of_fibers)
-    )
+                priorTree.getScalars(range(priorTree.no_of_fibers), scalarType)))
 
     qDistances = np.array(qDistances)
 

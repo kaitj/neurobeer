@@ -6,95 +6,87 @@ similarity measurements.
 """
 
 import numpy as np
+import scipy as sp
 
-def _fiberDistance_internal(fiber, fiberArray):
+def _fiberDistance_internal(fiberMatrix1, fiberMatrix2):
     """ *INTERNAL FUNCTION*
     Computes the distance between one fiber and individual fibers within a
     group (array) of fibers using MeanSquared method.
 
     INPUT:
-        fiber - single fiber to be compared
-        fiberArray - group of fibers that lone fiber is to be compared to
+        fiberMatrix1 - 3D matrix containing fiber spatial infomration
+        fiberMatrix2 - 3D matrix containing fiber spatial information to be
+                    compared with
 
     OUTPUT:
         distance - computed distance from single fiber to those within fiber
-                            group
+                    group
     """
 
-    # Calculates the distance between points of each fiber
-    dx = fiberArray[0] - fiber[0]
-    dy = fiberArray[1] - fiber[1]
-    dz = fiberArray[2] - fiber[2]
+    # Calculates the squared distance between fibers
+    dx_sq = sp.spatial.distance.cdist(fiberMatrix1[0, :, :],
+        fiberMatrix2[0, :, :], metric='sqeuclidean')
+    dy_sq = sp.spatial.distance.cdist(fiberMatrix1[1, :, :],
+        fiberMatrix2[1, :, :], metric='sqeuclidean')
+    dz_sq = sp.spatial.distance.cdist(fiberMatrix1[2, :, :],
+        fiberMatrix2[2, :, :], metric='sqeuclidean')
 
-    # Squares calculated distances
-    dx_sq = np.square(dx)
-    dy_sq = np.square(dy)
-    dz_sq = np.square(dz)
-
-    # Sums the squared values of the distances in each axis
-    distance = dx_sq + dy_sq + dz_sq
-
-    # Sum along fiber
-    distance = np.sum(distance, 1)
-    distance = distance / float(len(fiber[0]))
+    # Computed distance
+    distance = np.sqrt(dx_sq + dy_sq + dz_sq)
 
     return distance
 
-def _scalarDistance_internal(fiberScalar, fiberScalarArray):
+def _scalarDistance_internal(fiberScalarMatrix):
     """ *INTERNAL FUNCTION*
     Computes the "distance" between the scalar values between one fiber and
     the fibers within a group (array) of fibers using MeanSquared method.
 
     INPUT:
-        fiberScalar - lone array containing scalar information for a single fiber
-        fiberScalarArray - array of scalar information pertaining to a group of fibers
+        fiberScalarMatrix - array of scalar information pertaining to a group of fibers
     OUTPUT:
-        qDistance - computed distance between single fiber and group
+        qDistance - computed scalar "distance" between fibers
     """
 
-    # Calculates distance between points
-    dq = fiberScalarArray - fiberScalar
+    # Calculates squared distance of scalars
+    dq_sq = sp.spatial.distance.cdist(fiberScalarMatrix, fiberScalarMatrix,
+        metric='sqeuclidean')
 
-    dq_sq = np.square(dq)
-
-    pts_per_fiber = len(fiberScalar)
-    qDistance = np.sum(dq_sq, 1)
-    qDistance = qDistance / float(pts_per_fiber)
+    qDistance = np.sqrt(dq_sq)
 
     return qDistance
 
-def fiberDistance(fiber, fiberArray):
+def fiberDistance(fiberArray):
     """
     Computes the distance between one fiber and individual fibers within a
     group (array) of fibers. This function also handles equivalent fiber
     representations.
 
     INPUT:
-        fiber - single fiber to be compared
-        fiberArray - group of fibers that lone fiber is to be compared to
+        fiberMatrix - group of fibers for comparison
 
     OUTPUT:
         distance - minimum distance between group of fiber and single fiber
                             traversed in both directions
     """
 
+    fiberMatrix = np.asarray(fiberArray)
+
     # Compute distances for fiber and fiber equivalent to fiber group
-    distance1 = _fiberDistance_internal(fiber, fiberArray)
-    distance2 = _fiberDistance_internal(np.fliplr(fiber), fiberArray)
+    distance1 = _fiberDistance_internal(fiberMatrix, fiberMatrix)
+    distance2 = _fiberDistance_internal(np.fliplr(fiberMatrix), fiberMatrix)
 
     # Minimum distance more likely to be part of cluster; return distance
     distance = np.minimum(distance1, distance2)
 
     return distance
 
-def scalarDistance(fiberScalar, fiberScalarArray):
+def scalarDistance(fiberScalarArray):
     """
     Computes the distance between one fiber and individual fibers within a
     group (array) of fibers. This function also handles equivalent fiber
     representations.
 
     INPUT:
-        fiberScalar - lone array containing scalar information for a single fiber
         fiberScalarArray - array of scalar information pertaining to a group of fibers
 
     OUTPUT:
@@ -103,9 +95,12 @@ def scalarDistance(fiberScalar, fiberScalarArray):
     TODO: Add functionality to calculate reverse fiber if necessary?
     """
 
+    fiberScalarMatrix = np.array(fiberScalarArray)
+
     # Compute distances for fiber and fiber equivalent to fiber group
-    distance1 = _scalarDistance_internal(fiberScalar, fiberScalarArray)
-    distance2 = _scalarDistance_internal(fiberScalar[::-1], fiberScalarArray)
+    distance1 = _scalarDistance_internal(fiberScalarMatrix, fiberScalarMatrix)
+    distance2 = _scalarDistance_internal(np.fliplr(fiberScalarMatrix),  
+                fiberScalarMatrix)
 
     # Minimum distance more likely to be similar; return distance
     distance = np.minimum(distance1, distance2)
