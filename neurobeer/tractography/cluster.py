@@ -7,8 +7,6 @@ parameters pertaining to clusters.
 
 import numpy as np
 import os, scipy.cluster
-from joblib import Parallel, delayed
-from joblib.pool import has_shareable_memory
 from sys import exit
 
 import fibers, distance, misc, prior
@@ -299,9 +297,7 @@ def _pairwiseDistance_matrix(fiberTree, pts_per_fiber, no_of_jobs):
         distances - NxN matrix containing distances between fibersprintlen(np.where(newClusters == 2)[0])
     """
 
-    distances = Parallel(n_jobs=no_of_jobs, backend="threading")(
-            delayed(distance.fiberDistance, has_shareable_memory)(
-                fiberTree.getFibers(range(fiberTree.no_of_fibers))))
+    distances = distance.fiberDistance(fiberTree.getFibers(range(fiberTree.no_of_fibers)))
     distances = np.array(distances)
 
     # Normalize between 0 and 1
@@ -353,9 +349,7 @@ def _pairwiseQDistance_matrix(fiberTree, scalarType, pts_per_fiber, no_of_jobs):
         qDistances - NxN matrix containing pairwise distances between fibers
     """
 
-    qDistances = Parallel(n_jobs=no_of_jobs, backend="threading")(
-            delayed(distance.scalarDistance, has_shareable_memory)(
-                fiberTree.getScalars(range(fiberTree.no_of_fibers), scalarType)))
+    qDistances = distance.scalarDistance(fiberTree.getScalars(range(fiberTree.no_of_fibers)))
     qDistances = np.array(qDistances)
 
     # Normalize distance measurements
@@ -410,9 +404,7 @@ def _priorDistance_matrix(fiberTree, priorTree, pts_per_fiber, no_of_jobs):
         distances - matrix containing distances between fibers
     """
 
-    distances = Parallel(n_jobs=no_of_jobs, backend="threading")(
-            delayed(distance.fiberDistance, has_shareable_memory)(
-                    priorTree.getFibers(range(priorTree.no_of_fibers))))
+    distances = distance.fiberDistance(priorTree.getfibers(range(priorTree.no_of_fibers)))
 
     distances = np.array(distances)
 
@@ -461,10 +453,7 @@ def _priorQDistance_matrix(fiberTree, priorTree, scalarType, pts_per_fiber, no_o
         qDistances - matrix containing pairwise distances between fibers
     """
 
-    qDistances = Parallel(n_jobs=no_of_jobs, backend="threading")(
-            delayed(distance.scalarDistance, has_shareable_memory)(
-                priorTree.getScalars(range(priorTree.no_of_fibers), scalarType)))
-
+    qDistances = distance.scalarDistance(priorTree.getScalars(range(priorTree.no_of_fibers)))
     qDistances = np.array(qDistances)
 
     # Normalize distance measurements
