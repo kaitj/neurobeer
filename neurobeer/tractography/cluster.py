@@ -338,20 +338,15 @@ def _pairwiseSimilarity_matrix(fiberTree, sigma):
                      geometry
     """
 
-    distances = _pairwiseDistance_matrix(fiberTree)
-
-    similarities = distance.gausKernel_similarity(distances,
-                   np.square(sigma))
-
-    # Unused variables
-    del distances
+    similarity = _pairwiseDistance_matrix(fiberTree)
+    similarity = distance.gausKernel_similarity(similarity, np.square(sigma))
 
     # Sanity check
-    if np.diag(similarities).all() != 1.0:
+    if np.diag(similarity).all() != 1.0:
         print('Diagonals in similarity matrix are not equal to 1')
         exit()
 
-    return similarities
+    return similarity
 
 def _pairwiseQDistance_matrix(fiberTree, scalarType):
     """ *INTERNAL FUNCTION*
@@ -388,12 +383,8 @@ def _pairwiseQSimilarity_matrix(fiberTree, scalarType, sigma):
         qSimilarity - NxN matrix containing similarity of quantitative measurements between fibers
     """
 
-    qDistances = _pairwiseQDistance_matrix(fiberTree, scalarType)
-
-    qSimilarity = distance.gausKernel_similarity(qDistances, np.square(sigma))
-
-    # Unused variables
-    del qDistances
+    qSimilarity = _pairwiseQDistance_matrix(fiberTree, scalarType)
+    qSimilarity = distance.gausKernel_similarity(qSimilarity, np.square(sigma))
 
     # Sanity check
     if np.diag(qSimilarity).all() != 1.0:

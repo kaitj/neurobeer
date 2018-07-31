@@ -50,11 +50,11 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2=None, flip=False):
                 distance += sp.spatial.distance.cdist(np.fliplr(fiberMatrix1[i, :, :]),
                     fiberMatrix2[i, :, :], metric='sqeuclidean')
 
-    # Computed distance
-    distance = np.sqrt(distance)
-
     # Delete variables no longer needed
     del fiberMatrix1, fiberMatrix2
+
+    # Computed distance
+    distance = np.sqrt(distance)
 
     return distance
 
