@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
     # Project information
     name='neurobeer',
-    version='1.0.1',
+    version='1.0.2',
     description='NeuroBundle Extraction and Evaluation Resource',
     packages=['neurobeer/tractography'],
     scripts=['neurobeer/cli/clusterSingle',

@@ -14,7 +14,8 @@ def load(priorVTKPath, verbose=0):
     Class used to load .vtk prior file.
 
     INPUT:
-        priorVTKPath - absolute path to VTK file containing prior information to be used
+        priorVTKPath - absolute path to VTK file containing prior information
+                       to be used
         verbose - verbosity of function; defaults 0
 
     OUTPUT:
@@ -44,7 +45,8 @@ def load(priorVTKPath, verbose=0):
     # Get spatial information
     centroidTree = priorTree.getFibers(subsetIdxes)
     centroidTree = fibers.convertFromTuple(centroidTree)
-    _getScalarInfo(priorVTK, centroidTree, subsetIdxes, centroidTree.pts_per_fiber, verbose)
+    _getScalarInfo(priorVTK, centroidTree, subsetIdxes,
+                   centroidTree.pts_per_fiber, verbose)
     clusterArray = _addCentroidInfo(centroidTree, subsetIdxes, clusterArray)
 
     if verbose == 1:
@@ -117,8 +119,8 @@ def _addCentroidInfo(centroidTree, subsetIdxes, clusterArray):
 
 def _getClusterInfo(priorVTK):
     """ *INTERNAL FUNCTION*
-    Function to add cluster info to tree containing prior information. Also returns unique
-    cluster centroids
+    Function to add cluster info to tree containing prior information. Also
+    returns unique cluster centroids
 
     INPUT:
         priorVTK  - prior of .vtk polydata file
@@ -146,7 +148,8 @@ def _getClusterInfo(priorVTK):
 
     return sortedCentroid, clusterArray
 
-def _getScalarInfo(priorVTK, centroidTree, subsetIdx, pts_per_fiber=20, verbose=0):
+def _getScalarInfo(priorVTK, centroidTree, subsetIdx, pts_per_fiber=20,
+                   verbose=0):
     """ *INTERNAL FUNCTION*
     Reads and converts scalar information stored in VTK to fiberTree
 

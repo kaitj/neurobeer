@@ -12,47 +12,50 @@ def get_parser():
     """
     from argparse import ArgumentParser, RawTextHelpFormatter
 
-    parser = ArgumentParser(description='Tractography clustering of single subject',
-                                             formatter_class=RawTextHelpFormatter)
+    parser = ArgumentParser(description=('Tractography clustering of single '
+                                         'subject'),
+                            formatter_class=RawTextHelpFormatter)
 
     # Version option
-    parser.add_argument('--version', action='version',
-                                      version='0.1.3')
+    parser.add_argument('--version', action='version', version='1.0.2')
 
     # Required arguments
     g_req = parser.add_argument_group('required arguments')
     g_req.add_argument('--indir', action='store', required=True,
-                                          help='the directory with input data')
+                       help='the directory with input data')
     g_req.add_argument('--outdir', action='store', required=True,
-                                          help='the directory where output files should be stored')
+                       help='the directory where output files should be stored')
     g_req.add_argument('--subjid', action='store', required=True,
-                                      help='subject id to compute')
+                       help='subject id to compute')
     g_req.add_argument('--bundle', action='store', required=True,
-                                      help='tractography bundle to perform clustering on')
+                       help='tractography bundle to perform clustering on')
 
     # Optional arguments
     g_opt = parser.add_argument_group('control arguments')
     g_opt.add_argument('-a', action='store', nargs='+', metavar='data',
                                       default=[], help='add scalar data to be used')
     g_opt.add_argument('-w', action='store', nargs='+', metavar='wgt',
-                                      default=[], help='provide weighting on data for clustering, ')
+                       default=[], help=('provide weighting on data for '
+                                         'clustering, '))
     g_opt.add_argument('-p', action='store', type=int, metavar='no_samples',
-                                      default=2, help='number of samples to take along each fiber')
+                       default=2, help=('number of samples to take along each '
+                                        'fiber'))
     g_opt.add_argument('-k', action='store', type=int, metavar='k_clusters',
-                                      default=2, help='number of clusters to use in algorithm')
+                       default=2, help='number of clusters to use in algorithm')
     g_opt.add_argument('-sig', action='store', type=float, metavar='sigma',
-                                      default=1.0, help='sigma to be used in clustering algorithm')
+                       default=10, help=('sigma to be used in clustering '
+                                         'algorithm'))
     g_opt.add_argument('-sall', '--saveAll', action='store_true',
-                                      default=False, help='save all similarity matrices')
+                       default=False, help='save all similarity matrices')
     g_opt.add_argument('-swt', '--saveWeight', action='store_true',
-                                      default=False, help='save weighted similarity matrix')
+                       default=False, help='save weighted similarity matrix')
     g_opt.add_argument('-v', '--verbose', action='count', default=0,
-                                      help='verbosity of tool')
+                       help='verbosity of tool')
 
     # Performance arguments
     g_prfm = parser.add_argument_group('performance arguments')
     g_prfm.add_argument('-j', action='store', type=int, metavar='nproc',
-                                         default=1, help='number of0 threads')
+                        default=1, help='number of threads')
 
     return parser
 
@@ -97,16 +100,20 @@ def main():
             scalarWeightList.append(float(val))
 
     for i in range(len(scalarTypeList)):
-        fiberData.addScalar(bundlePolydata, scalarDataList[i], scalarTypeList[i],
-                                        fiberData.pts_per_fiber)
+        fiberData.addScalar(bundlePolydata, scalarDataList[i],
+                            scalarTypeList[i], fiberData.pts_per_fiber)
 
     # Perform clustering on provided bundle
     outputPolydata, clusterIdx, fiberData, rejIdx = cluster.spectralClustering(
                                     fiberData, scalarDataList=scalarDataList,
-                                    scalarWeightList=scalarWeightList, scalarTypeList=scalarTypeList,
-                                    pts_per_fiber=opts.p, k_clusters=opts.k, sigma=opts.sig,
-                                    saveWSimilarity=opts.saveWeight, saveAllSimilarity=opts.saveAll,
-                                    dirpath=outdir, verbose=opts.verbose, no_of_jobs=opts.j)
+                                    scalarWeightList=scalarWeightList,
+                                    scalarTypeList=scalarTypeList,
+                                    pts_per_fiber=opts.p, k_clusters=opts.k,
+                                    sigma=opts.sig,
+                                    saveWSimilarity=opts.saveWeight,
+                                    saveAllSimilarity=opts.saveAll,
+                                    dirpath=outdir, verbose=opts.verbose,
+                                    no_of_jobs=opts.j)
     del bundlePolydata, scalarWeightList, scalarDataList
 
     LArray = fibers.calcFiberLength(fiberData, rejIdx)
@@ -141,13 +148,15 @@ def main():
         statsdir = os.path.join(outdir + '/' + statsSuffix)
 
         for Type in scalarTypeList:
-            polyData = cluster.addScalarToVTK(polyData, clusterData, Type, idxes, rejIdx)
+            polyData = cluster.addScalarToVTK(polyData, clusterData, Type,
+                                              idxes, rejIdx)
             stats.plotStats(fiberData, Type, idxes, dirpath=statsdir)
             stats.writeCSV(label, fiberData, Type, idxes, dirpath=outdir)
 
         bundleSuffix = '_Cluster%i.vtk' % label
         bundleName = opts.bundle[:-4] + bundleSuffix
-        bundledir = os.path.join(os.path.join(outdir, 'tractography'), bundleName)
+        bundledir = os.path.join(os.path.join(outdir, 'tractography'),
+                                 bundleName)
         tractio.writeVTK(polyData, bundledir, opts.verbose)
 
 

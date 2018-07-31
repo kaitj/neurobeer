@@ -99,7 +99,7 @@ def fiberDistance(fiberArray1, fiberArray2=None):
 
     OUTPUT:
         distance - minimum distance between group of fiber and single fiber
-                            traversed in both directions
+                   traversed in both directions
     """
 
     if fiberArray2 is None:
@@ -134,7 +134,8 @@ def scalarDistance(fiberScalarArray):
     representations.
 
     INPUT:
-        fiberScalarArray - array of scalar information pertaining to a group of fibers
+        fiberScalarArray - array of scalar information pertaining to a group of
+                           fibers
 
     OUTPUT:
         distance - distance between group of fiber and single fiber
