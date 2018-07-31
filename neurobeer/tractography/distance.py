@@ -23,24 +23,21 @@ def _fiberDistance_internal(fiberMatrix, flip=False):
                     group
     """
 
+    # Initialize array
+    distance = []
+
     # Calculates the squared distance between fibers
     if flip is False:
-        dx_sq = sp.spatial.distance.cdist(fiberMatrix[0, :, :],
-            fiberMatrix[0, :, :], metric='sqeuclidean')
-        dy_sq = sp.spatial.distance.cdist(fiberMatrix[1, :, :],
-            fiberMatrix[1, :, :], metric='sqeuclidean')
-        dz_sq = sp.spatial.distance.cdist(fiberMatrix[2, :, :],
-            fiberMatrix[2, :, :], metric='sqeuclidean')
+        for i in range(3):
+            distance += sp.spatial.distance.cdist(fiberMatrix[i, :, :],
+                    fiberMatrix[i, :, :], metric='sqeuclidean')
     else:
-        dx_sq = sp.spatial.distance.cdist(np.fliplr(fiberMatrix[0, :, :]),
-            fiberMatrix[0, :, :], metric='sqeuclidean')
-        dy_sq = sp.spatial.distance.cdist(np.fliplr(fiberMatrix[1, :, :]),
-            fiberMatrix[1, :, :], metric='sqeuclidean')
-        dz_sq = sp.spatial.distance.cdist(np.fliplr(fiberMatrix[2, :, :]),
-            fiberMatrix[2, :, :], metric='sqeuclidean')
+        for i in range(3):
+            distance += sp.spatial.distance.cdist(np.fliplr(fiberMatrix[i, :, :]),
+                    fiberMatrix[i, :, :], metric='sqeuclidean')
 
     # Computed distance
-    distance = np.sqrt(dx_sq + dy_sq + dz_sq)
+    distance = np.sqrt(distance)
 
     return distance
 
@@ -82,11 +79,11 @@ def fiberDistance(fiberArray):
                             traversed in both directions
     """
 
-    fiberMatrix = np.asarray(fiberArray)
+    fiberArray = np.asarray(fiberArray, dtype=np.float32)
 
     # Compute distances for fiber and fiber equivalent to fiber group
-    distance1 = _fiberDistance_internal(fiberMatrix)
-    distance2 = _fiberDistance_internal(fiberMatrix, flip=True)
+    distance1 = _fiberDistance_internal(fiberArray)
+    distance2 = _fiberDistance_internal(fiberArray, flip=True)
 
     # Minimum distance more likely to be part of cluster; return distance
     distance = np.minimum(distance1, distance2)
@@ -108,11 +105,11 @@ def scalarDistance(fiberScalarArray):
     TODO: Add functionality to calculate reverse fiber if necessary?
     """
 
-    fiberScalarMatrix = np.array(fiberScalarArray)
+    fiberScalarArray = np.array(fiberScalarArray, dtype=np.float32)
 
     # Compute distances for fiber and fiber equivalent to fiber group
-    distance1 = _scalarDistance_internal(fiberScalarMatrix)
-    distance2 = _scalarDistance_internal(fiberScalarMatrix, flip=True)
+    distance1 = _scalarDistance_internal(fiberScalarArray)
+    distance2 = _scalarDistance_internal(fiberScalarArray, flip=True)
 
     # Minimum distance more likely to be similar; return distance
     distance = np.minimum(distance1, distance2)
