@@ -8,36 +8,53 @@ similarity measurements.
 import numpy as np
 import scipy as sp
 
-def _fiberDistance_internal(fiberMatrix, flip=False):
+def _fiberDistance_internal(fiberMatrix1, fiberMatrix2=None, flip=False):
     """ *INTERNAL FUNCTION*
     Computes the distance between one fiber and individual fibers within a
     group (array) of fibers using MeanSquared method.
 
     INPUT:
         fiberMatrix1 - 3D matrix containing fiber spatial infomration
-        fiberMatrix2 - 3D matrix containing fiber spatial information to be
-                       compared with
+        fiberMatrix2 - 3D matrix containing fiber spatial information for
+                       comparison
 
     OUTPUT:
-        distance - computed distance from single fiber to those within fiber
-                    group
+        distance - Matrix containing distance between fibers
     """
 
     # Initialize array
-    distance = []
+    if fiberMatrix2 is None:
+        distance = np.zeros((fiberMatrix1.shape[1], fiberMatrix1.shape[1]),
+                    dtype=np.float32)
 
-    # Calculates the squared distance between fibers
-    if flip is False:
-        for i in range(3):
-            distance += sp.spatial.distance.cdist(fiberMatrix[i, :, :],
-                    fiberMatrix[i, :, :], metric='sqeuclidean')
+        # Calculates the squared distance between fibers
+        if flip is False:
+            for i in range(3):
+                distance += sp.spatial.distance.cdist(fiberMatrix1[i, :, :],
+                    fiberMatrix1[i, :, :], metric='sqeuclidean')
+        else:
+            for i in range(3):
+                distance += sp.spatial.distance.cdist(np.fliplr(fiberMatrix1[i, :, :]),
+                    fiberMatrix1[i, :, :], metric='sqeuclidean')
     else:
-        for i in range(3):
-            distance += sp.spatial.distance.cdist(np.fliplr(fiberMatrix[i, :, :]),
-                    fiberMatrix[i, :, :], metric='sqeuclidean')
+        distance = np.zeros((fiberMatrix1.shape[1], fiberMatrix2.shape[1]),
+                    dtype=np.float32)
+
+        # Calculates the squared distance between fibers
+        if flip is False:
+            for i in range(3):
+                distance += sp.spatial.distance.cdist(fiberMatrix1[i, :, :],
+                    fiberMatrix2[i, :, :], metric='sqeuclidean')
+        else:
+            for i in range(3):
+                distance += sp.spatial.distance.cdist(np.fliplr(fiberMatrix1[i, :, :]),
+                    fiberMatrix2[i, :, :], metric='sqeuclidean')
 
     # Computed distance
     distance = np.sqrt(distance)
+
+    # Delete variables no longer needed
+    del fiberMatrix1, fiberMatrix2
 
     return distance
 
@@ -54,19 +71,25 @@ def _scalarDistance_internal(fiberScalarMatrix, flip=False):
     """
 
     # Calculates squared distance of scalars
+    qDistance = np.zeros((fiberScalarMatrix.shape[1],
+                fiberScalarMatrix.shape[1]), dtype=np.float32)
+
     if flip is False:
-        dq_sq = sp.spatial.distance.cdist(fiberScalarMatrix, fiberScalarMatrix,
+        qDistance += sp.spatial.distance.cdist(fiberScalarMatrix, fiberScalarMatrix,
             metric='sqeuclidean')
     else:
-        dq_sq = sp.spatial.distance.cdist(np.fliplr(fiberScalarMatrix),
+        qDistance += sp.spatial.distance.cdist(np.fliplr(fiberScalarMatrix),
             fiberScalarMatrix, metric='sqeuclidean')
 
-    qDistance = np.sqrt(dq_sq)
+    qDistance = np.sqrt(qDistance)
+
+    # Delete variables no longer needed
+    del fiberScalarMatrix
 
     return qDistance
 
-def fiberDistance(fiberArray):
-    """
+def fiberDistance(fiberArray1, fiberArray2=None):
+    """ fiberArray
     Computes the distance between one fiber and individual fibers within a
     group (array) of fibers. This function also handles equivalent fiber
     representations.
@@ -79,14 +102,28 @@ def fiberDistance(fiberArray):
                             traversed in both directions
     """
 
-    fiberArray = np.asarray(fiberArray, dtype=np.float32)
+    if fiberArray2 is None:
+        fiberArray1 = np.asarray(fiberArray1, dtype=np.float32)
 
-    # Compute distances for fiber and fiber equivalent to fiber group
-    distance1 = _fiberDistance_internal(fiberArray)
-    distance2 = _fiberDistance_internal(fiberArray, flip=True)
+        # Compute distances for fiber and flipped fiber of group
+        distance1 = _fiberDistance_internal(fiberArray1)
+        distance2 = _fiberDistance_internal(fiberArray1, flip=True)
+
+        del fiberArray1
+    else:
+        fiberArray1 = np.asarray(fiberArray1, dtype=np.float32)
+        fiberArray2 = np.asarray(fiberArray2, dtype=np.float32)
+
+        # Compute distances between two fiber groups
+        distance1 = _fiberDistance_internal(fiberArray1, fiberArray2)
+        distance2 = _fiberDistance_internal(fiberArray1, fiberArray2, flip=True)
+
+        del fiberArray1, fiberArray2
 
     # Minimum distance more likely to be part of cluster; return distance
     distance = np.minimum(distance1, distance2)
+
+    del distance1, distance2
 
     return distance
 
@@ -114,6 +151,8 @@ def scalarDistance(fiberScalarArray):
     # Minimum distance more likely to be similar; return distance
     distance = np.minimum(distance1, distance2)
 
+    del distance1, distance2, fiberScalarArray
+
     return distance
 
 def gausKernel_similarity(distance, sigmasq):
@@ -131,5 +170,7 @@ def gausKernel_similarity(distance, sigmasq):
 
     # Computes similarity using a Gaussian kernel
     similarities = np.exp(-distance / sigmasq)
+
+    del distance, sigmasq
 
     return similarities
