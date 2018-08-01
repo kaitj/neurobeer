@@ -685,28 +685,3 @@ def _outlierSimDetection(W):
     W = np.delete(W, rejIdx, 1)
 
     return W, rejIdx
-
-def _distOutlierDetection(W, dist, clusterIdx):
-    """ * INTERNAL FUNCTION *
-    ***NOT CURRENTLY USED, UPDATES TO BE MADE FOR USED***
-    Look for outlifers in fibers to reject based on distance
-    from centroid
-
-    INPUT:
-        W - similarity matrix between two different datasets
-        dist - array of distance of each fiber to centroid
-        clusterIdx - array of cluster labels for each fiber
-
-    OUTPUT:
-        W - similarity matrix with removed outliers
-        rejIdx - indices of fibers considered outliers
-        clusterIdx - array of clusterLabels with removed outliers
-
-    """
-
-    rejIdx = np.where(dist > (np.mean(dist) + 2.0 * np.std(dist)))[0]
-
-    W = np.delete(W, rejIdx, 0)
-    clusterIdx = np.delete(clusterIdx, rejIdx)
-
-    return W, rejIdx, clusterIdx
