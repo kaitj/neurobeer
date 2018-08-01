@@ -36,8 +36,7 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
                              measurements
             scalarWeightList - list containing scalar weights for similarity
                                measurements
-            pts_per_fiber - number of samples to take along each fi
-                                        ber
+            pts_per_fiber - number of samples to take along each fiber
             k_clusters - number of clusters via k-means clustering
             sigma - width of Gaussian kernel; adjust to alter sensitivity
             saveAllSimilarity - flag to save all computed matrices

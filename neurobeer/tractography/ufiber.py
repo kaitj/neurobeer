@@ -93,6 +93,7 @@ def _stddev(fiberTree, scalarType, idxes=None):
         clusterSdev = np.std(fiberTree.getScalars(idxes, scalarType)[:, :],
                              axis=0)
         stdev = np.std(fiberTree.getScalars(idxes, scalarType)[:, :])
+        
     return clusterSdev, stdev
 
 def extractUFiber(fiberData, uArray):
