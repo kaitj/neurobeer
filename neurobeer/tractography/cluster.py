@@ -14,8 +14,7 @@ import vtk
 
 def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
                        scalarWeightList=[], pts_per_fiber=20, k_clusters=50,
-                       sigma=10, saveAllSimilarity=False,
-                       saveWSimilarity=False, dirpath=None, verbose=0, no_of_jobs=1):
+                       sigma=10, dirpath=None, verbose=0):
         """
         Clustering of fibers based on pairwise fiber similarity.
         See paper: "A tutorial on spectral clustering" (von Luxburg, 2007)
@@ -30,33 +29,24 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
 
         INPUT:
             fiberData - fiber tree of tractography data to be clustered
-            scalarDataList - list containing scalar data for similarity
-                             measurements
-            scalarTypeList - list containing scalar type for similarity
-                             measurements
-            scalarWeightList - list containing scalar weights for similarity
-                               measurements
+            scalarDataList - list of scalar data for similarity measurements
+            scalarTypeList - list of scalar type for similarity measurements
+            scalarWeightList - list of weights for scalar measurements
             pts_per_fiber - number of samples to take along each fiber
             k_clusters - number of clusters via k-means clustering
             sigma - width of Gaussian kernel; adjust to alter sensitivity
-            saveAllSimilarity - flag to save all computed matrices
-            saveWSimilarity - flag to save weighted similarity matrix
             dirpath - directory to store files
             verbose - verbosity of function
-            no_of_jobs - cores to use to perform computation
+
 
         OUTPUT:
             outputPolydata - polydata containing information from clustering
-            clusterIdx - array containing cluster that each fiber belongs to
-            fiberData - tree containing spatial and quantitative information of fibers
-            rejIdx - indices of fibers considered to be outliers
+            clusterIdx - cluster labels of fibers
+            fiberData - tree with spatial and quantitative info of fibers
+            rejIdx - indices of fibers to reject
         """
         if dirpath is None:
             dirpath = os.getcwd()
-
-        matpath = dirpath + '/conmat'
-        if not os.path.exists(matpath):
-            os.makedirs(matpath)
 
         if fiberData.no_of_fibers == 0:
             print("\nERROR: Input data has 0 fibers!")
@@ -68,13 +58,10 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
 
         # 1. Compute similarty matrix
         W = _pairwiseWeightedSimilarity(fiberData, scalarTypeList,
-                                        scalarWeightList, sigma, saveAllSimilarity, pts_per_fiber, matpath, no_of_jobs)
+                                        pts_per_fiber)
 
         # Outlier detection
         W, rejIdx = _outlierSimDetection(W)
-
-        if saveWSimilarity is True:
-            misc.saveMatrix(matpath, W, 'Weighted')
 
         # 2. Compute degree matrix
         D = _degreeMatrix(W)
@@ -97,7 +84,7 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
         # 6. Compute information for clustering using "N" number of smallest eigenvalues
         # Skips first eigenvector, no information obtained
         if k_clusters > eigvec.shape[0]:
-            print('\nNumber of user selected clusters greater than number of eigenvectors.')
+            print('\nNumber of clusters greater than number of eigenvectors.')
             print('Clustering with maximum number of available eigenvectors.')
             emvec = eigvec[:, 1:eigvec.shape[0]]
         elif k_clusters == eigvec.shape[0]:
@@ -137,8 +124,7 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
 
 def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
                          scalarTypeList=[], scalarWeightList=[], sigma=10,
-                         saveAllSimilarity=False, saveWSimilarity=False,
-                         dirpath=None, verbose=0, no_of_jobs=1):
+                         dirpath=None, verbose=0):
         """
         Clustering of fibers based on pairwise fiber similarity using
         previously clustered fibers via a Nystrom-like method.
@@ -160,25 +146,17 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
             scalarTypeList - list with scalar type for similarity type
             scalarWeightList - list with weights for similarity measurements;
             sigma - width of Gaussian kernel; adjust to alter sensitivity
-            saveAllSimilarity - flag to save all matrices computed
-            saveWSimilarity - flag to save weighted similarity matrix computed
             dirpath - directory to store files
             verbose - verbosity of function
-            no_of_jobs - cores to use to perform computation; defaults 1
 
         OUTPUT:
             outputPolydata - polydata containing information from clustering to
                              be written into VTK
-            clusterIdx - array containing cluster that each fiber belongs to
-            fiberData - tree containing spatial and quantitative information of
-                        fibers
+            clusterIdx - cluster labels of fibers
+            fiberData - tree with spatial and quantitative info of fibers
         """
         if dirpath is None:
             dirpath = os.getcwd()
-
-        matpath = dirpath + '/conmat'
-        if not os.path.exists(matpath):
-            os.makedirs(matpath)
 
         priorData, priorCentroids, priorLabels = prior.load(priorVTK)
         priorPath = os.path.split(priorVTK)[0]
@@ -205,9 +183,7 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
 
         # 1. Compute similarty matrix
         W = _priorWeightedSimilarity(fiberData, priorData, scalarTypeList,
-                                     scalarWeightList, sigma,
-                                     saveAllSimilarity, pts_per_fiber, matpath,
-                                     no_of_jobs)
+                                     scalarWeightList, sigma, pts_per_fiber)
 
         # 2. Identify corresponding cluster indices from similarity
         simIdx = np.argmax(W, axis=1)
@@ -223,9 +199,6 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
             del temp
         else:
             colour = _cluster_to_rgb(priorCentroids)
-
-        if saveWSimilarity is True:
-            misc.saveMatrix(matpath, W, 'Weighted')
 
         del W, simIdx
 
@@ -375,8 +348,6 @@ def _pairwiseQSimilarity_matrix(fiberTree, scalarType, sigma):
         fiberTree - tree containing spatial and quantitative information of fibers
         scalarType - type of quantitative measurements to be used for computation
         sigma - width of Gaussian kernel; adjust to alter sensitivity
-        no_of_jobs - cores to use to perform computation
-        pts_per_fiber - number of samples along a fiber
 
     OUTPUT:
         qSimilarity - NxN matrix containing similarity of quantitative measurements between fibers
@@ -576,8 +547,7 @@ def _format_outputVTK(polyData, clusterIdx, colour, centroids, rejIdx=[]):
 
 def _pairwiseWeightedSimilarity(fiberTree, scalarTypeList=[],
                                 scalarWeightList=[], sigma=10,
-                                saveAllSimilarity=False, pts_per_fiber=20,
-                                dirpath=None, no_of_jobs=1):
+                                pts_per_fiber=20, no_of_jobs=1):
     """ *INTERNAL FUNCTION*
     Computes and returns a single weighted similarity matrix.
     Weight list should include weight for distance and sum to 1.
@@ -588,8 +558,6 @@ def _pairwiseWeightedSimilarity(fiberTree, scalarTypeList=[],
                          measurements
         scalarWeightList - list of weights for similarity measurements
         sigma - width of Gaussian kernel; adjust to alter sensitivity
-        saveAllSimilarity - flag to save all matrices computed
-        dirpath - directory to store similarity matrices
         no_of_jobs - cores to use to perform computation; defaults 1
 
     OUTPUT:
@@ -608,42 +576,21 @@ def _pairwiseWeightedSimilarity(fiberTree, scalarTypeList=[],
         print("\nCalculating similarity based on geometry.")
         wSimilarity = _pairwiseSimilarity_matrix(fiberTree, sigma)
 
-        if dirpath is None:
-            dirpath = os.getcwd()
-
-        misc.saveMatrix(dirpath, wSimilarity, 'Geometry')
-
     else:   # Calculate weighted similarity
         if np.sum(scalarWeightList) != 1.0:
             print('\nWeights given do not sum 1. Exiting...')
             exit()
 
         wSimilarity = _pairwiseSimilarity_matrix(fiberTree, sigma)
-
-        if saveAllSimilarity is True:
-            if dirpath is None:
-                dirpath = os.getcwd()
-
-            matrixType = scalarTypeList[0].split('/', -1)[-1]
-            matrixType = matrixType[:-2] + 'geometry'
-            misc.saveMatrix(dirpath, wSimilarity, matrixType)
-
         wSimilarity = wSimilarity * scalarWeightList[0]
 
         for i in range(len(scalarTypeList)):
             similarity = _pairwiseQSimilarity_matrix(fiberTree,
                 scalarTypeList[i], sigma, pts_per_fiber, no_of_jobs)
 
-            if saveAllSimilarity is True:
-                if dirpath is None:
-                    dirpath = os.getcwd()
-
-                matrixType = scalarTypeList[i].split('/', -1)[-1]
-                misc.saveMatrix(dirpath, similarity, matrixType)
-
             wSimilarity += similarity * scalarWeightList[i+1]
 
-        del similarity, matrixType
+        del similarity
 
     if np.diag(wSimilarity).all() != 1.0:
         print("Diagonals of weighted similarity are not equal to 1")
@@ -653,8 +600,7 @@ def _pairwiseWeightedSimilarity(fiberTree, scalarTypeList=[],
 
 def _priorWeightedSimilarity(fiberTree, priorTree, scalarTypeList=[],
                              scalarWeightList=[], sigma=0.4,
-                             saveAllSimilarity=False, pts_per_fiber=20,
-                             dirpath=None, no_of_jobs=1):
+                             pts_per_fiber=20, no_of_jobs=1):
     """ *INTERNAL FUNCTION*
     Computes and returns a single weighted similarity matrix.
     Weight list should include weight for distance and sum to 1.
@@ -665,8 +611,6 @@ def _priorWeightedSimilarity(fiberTree, priorTree, scalarTypeList=[],
         scalarTypeList - list of scalar type for similarity measurements
         scalarWeightList - list of weights for similarity measurements
         sigma - width of Gaussian kernel; adjust to alter sensitivity
-        saveAllSimilarity - flag to save all  matrices computed
-        dirpath - directory to store similarity matrices
         no_of_jobs - cores to use to perform computation
 
     OUTPUT:
@@ -686,14 +630,6 @@ def _priorWeightedSimilarity(fiberTree, priorTree, scalarTypeList=[],
         wSimilarity = _priorSimilarity_matrix(fiberTree, priorTree, sigma,
                                               pts_per_fiber, no_of_jobs)
 
-        if dirpath is None:
-            dirpath = os.getcwd()
-        else:
-            if not os.path.exists(dirpath):
-                os.makedirs(dirpath)
-
-        misc.saveMatrix(dirpath, np.transpose(wSimilarity), 'Geometry')
-
     else:   # Calculate weighted similarity
 
         if np.sum(scalarWeightList) != 1.0:
@@ -701,31 +637,15 @@ def _priorWeightedSimilarity(fiberTree, priorTree, scalarTypeList=[],
             exit()
 
         wSimilarity = _priorSimilarity_matrix(fiberTree, priorTree, sigma)
-
-        if saveAllSimilarity is True:
-            if dirpath is None:
-                dirpath = os.getcwd()
-
-            matrixType = scalarTypeList[0].split('/', -1)[-1]
-            matrixType = matrixType[:-2] + 'geometry'
-            misc.saveMatrix(dirpath, np.transpose(wSimilarity), matrixType)
-
         wSimilarity = wSimilarity * scalarWeightList[0]
 
         for i in range(len(scalarTypeList)):
             similarity = _priorQSimilarity_matrix(fiberTree, priorTree,
                 scalarTypeList[i], sigma, pts_per_fiber, no_of_jobs)
 
-            if saveAllSimilarity is True:
-                if dirpath is None:
-                    dirpath = os.getcwd()
-
-                matrixType = scalarTypeList[i].split('/', -1)[-1]
-                misc.saveMatrix(dirpath, np.transpose(similarity), matrixType)
-
             wSimilarity += similarity * scalarWeightList[i+1]
 
-        del similarity, matrixType
+        del similarity
 
     return wSimilarity
 

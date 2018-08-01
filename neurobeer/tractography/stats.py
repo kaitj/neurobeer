@@ -14,9 +14,11 @@ def _mean(fiberTree, scalarType, idxes=None):
     Finds the average of all fibers in bundle at specific sample points
 
     INPUT:
-        fiberTree - tree containing spatial and quantitative information of fibers
+        fiberTree - tree containing spatial and quantitative information of
+                    fibers
         scalarType - type of quantitative data to find average of
-        idxes - indices to extract info from; defaults None (returns data for all fibers)
+        idxes - indices to extract info from; defaults None (returns data for
+                all fibers)
 
     OUTPUT:
         clusterAvg - calculated tract-based average
@@ -64,7 +66,8 @@ def _stddev(fiberTree, scalarType, idxes=None):
 
 def calcGeoStats(LArray):
     """
-    Calculates the mean and standard deviation fiber length for an identified group of fibers
+    Calculates the mean and standard deviation fiber length for an identified
+    group of fibers
 
     INPUT:
         LArray - array of fiber lengths
@@ -83,7 +86,8 @@ def calcGeoStats(LArray):
 
 def writeGeoCSV(clusterLabel, LMean, LStd, fiberCount, dirpath=None):
     """
-    Writes the length and distance of each cluster for an identified group of fibers
+    Writes the length and distance of each cluster for an identified group of
+    fibers
 
     INPUT:
         clusterLabel - label for cluster
@@ -112,7 +116,8 @@ def writeGeoCSV(clusterLabel, LMean, LStd, fiberCount, dirpath=None):
 
     with open(infoPath, 'a') as f:
         header = ['Cluster ID', 'Length Mean', 'Length S.D.', 'Fiber Count']
-        writer = csv.DictWriter(f, delimiter=',', lineterminator='\n', fieldnames=header)
+        writer = csv.DictWriter(f, delimiter=',', lineterminator='\n',
+                                fieldnames=header)
         if not infoExists:
             writer.writeheader()
         writer = csv.writer(f)
@@ -143,8 +148,9 @@ def writeCSV(clusterLabel, fiberTree, scalarType, idxes=None, dirpath=None):
             os.makedirs(dirpath)
 
     if idxes is None:
-        scalarArray = np.mean(fiberTree.getScalars(range(fiberTree.no_of_fibers),
-                            scalarType)[:, :], axis=0)
+        scalarArray = \
+            np.mean(fiberTree.getScalars(range(fiberTree.no_of_fibers),
+                    scalarType)[:, :], axis=0)
     else:
         scalarArray = np.mean(fiberTree.getScalars(idxes, scalarType)[:, :],
                       axis=0)

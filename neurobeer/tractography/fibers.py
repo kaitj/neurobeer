@@ -354,7 +354,8 @@ class FiberTree:
         idx = 0
         for fidx in fidxes:
             for pidx in range(0, self.pts_per_fiber):
-                scalarList[idx][pidx] = float(self.fiberTree[fidx][pidx][str(scalarType)])
+                scalarList[idx][pidx] = \
+                    float(self.fiberTree[fidx][pidx][str(scalarType)])
 
             idx += 1
 

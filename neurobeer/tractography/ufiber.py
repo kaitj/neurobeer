@@ -156,8 +156,8 @@ def writeCSV(clusterLabel, LMean, LStd, DMean, DStd, fiberCount, dirpath=None):
 
 def uFiberStats(LArray, DArray, fidxes):
     """
-    Calculates the mean and standard deviation for fiber length and distance between
-    end points for a group of fibers.
+    Calculates the mean and standard deviation for fiber length and distance
+    between end points for a group of fibers.
 
     INPUT:
         LArray - array of fiber lengths

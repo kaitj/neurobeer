@@ -33,7 +33,8 @@ def load(priorVTKPath, verbose=0):
     # Prior information
 
     priorTree = fibers.FiberTree()
-    priorVTK, priorTree.no_of_fibers, priorTree.pts_per_fiber = getFiberInfo(priorVTKPath)
+    priorVTK, priorTree.no_of_fibers, priorTree.pts_per_fiber = \
+        getFiberInfo(priorVTKPath)
     priorTree.convertFromVTK(priorVTK, priorTree.pts_per_fiber, verbose)
 
     # Get cluster labels + set number of fibers
@@ -113,7 +114,8 @@ def _addCentroidInfo(centroidTree, subsetIdxes, clusterArray):
     nClusterArray = clusterArray[subsetIdxes]
 
     for fidx in range(centroidTree.no_of_fibers):
-            centroidTree.fiberTree[fidx][str(nClusterArray[fidx])] = nClusterArray[fidx]
+            centroidTree.fiberTree[fidx][str(nClusterArray[fidx])] = \
+                nClusterArray[fidx]
 
     return nClusterArray
 
@@ -157,8 +159,7 @@ def _getScalarInfo(priorVTK, centroidTree, subsetIdx, pts_per_fiber=20,
         priorVTK - prior .vtk polydata file
         centroidTree - tree containing subset fiber data
         subsetIdx - subset of fibers to extract scalars from
-        pts_per_fiber - number of points to sample along fiber; defaults to 20
-        verbose - verbosity of function; defaults 0
+        pts_per_fiber - number of points to sample along
 
     OUTPUT:
         none

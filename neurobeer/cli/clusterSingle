@@ -45,17 +45,8 @@ def get_parser():
     g_opt.add_argument('-sig', action='store', type=float, metavar='sigma',
                        default=10, help=('sigma to be used in clustering '
                                          'algorithm'))
-    g_opt.add_argument('-sall', '--saveAll', action='store_true',
-                       default=False, help='save all similarity matrices')
-    g_opt.add_argument('-swt', '--saveWeight', action='store_true',
-                       default=False, help='save weighted similarity matrix')
     g_opt.add_argument('-v', '--verbose', action='count', default=0,
                        help='verbosity of tool')
-
-    # Performance arguments
-    g_prfm = parser.add_argument_group('performance arguments')
-    g_prfm.add_argument('-j', action='store', type=int, metavar='nproc',
-                        default=1, help='number of threads')
 
     return parser
 
@@ -109,11 +100,7 @@ def main():
                                     scalarWeightList=scalarWeightList,
                                     scalarTypeList=scalarTypeList,
                                     pts_per_fiber=opts.p, k_clusters=opts.k,
-                                    sigma=opts.sig,
-                                    saveWSimilarity=opts.saveWeight,
-                                    saveAllSimilarity=opts.saveAll,
-                                    dirpath=outdir, verbose=opts.verbose,
-                                    no_of_jobs=opts.j)
+                                    sigma=opts.sig, dirpath=outdir, verbose=opts.verbose)
     del bundlePolydata, scalarWeightList, scalarDataList
 
     LArray = fibers.calcFiberLength(fiberData, rejIdx)
