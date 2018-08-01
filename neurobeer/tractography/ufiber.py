@@ -93,7 +93,7 @@ def _stddev(fiberTree, scalarType, idxes=None):
         clusterSdev = np.std(fiberTree.getScalars(idxes, scalarType)[:, :],
                              axis=0)
         stdev = np.std(fiberTree.getScalars(idxes, scalarType)[:, :])
-        
+
     return clusterSdev, stdev
 
 def extractUFiber(fiberData, uArray):
@@ -150,7 +150,7 @@ def writeCSV(clusterLabel, LMean, LStd, DMean, DStd, fiberCount, dirpath=None):
         if not fileExists:
             writer.writeheader()
         writer = csv.writer(f)
-        writer.writerow([clusterLabel, LMean, LStd. DMean, DStd, fiberCount])
+        writer.writerow([clusterLabel, LMean, LStd, DMean, DStd, fiberCount])
 
     f.close()
 

@@ -24,8 +24,7 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2=None, flip=False):
 
     # Initialize array
     if fiberMatrix2 is None:
-        distance = np.zeros((fiberMatrix1.shape[1], fiberMatrix1.shape[1]),
-                    dtype=np.float32)
+        distance = np.zeros((fiberMatrix1.shape[1], fiberMatrix1.shape[1]))
 
         # Calculates the squared distance between fibers
         if flip is False:
@@ -37,8 +36,7 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2=None, flip=False):
                 distance += sp.spatial.distance.cdist(np.fliplr(fiberMatrix1[i, :, :]),
                     fiberMatrix1[i, :, :], metric='sqeuclidean')
     else:
-        distance = np.zeros((fiberMatrix1.shape[1], fiberMatrix2.shape[1]),
-                    dtype=np.float32)
+        distance = np.zeros((fiberMatrix1.shape[1], fiberMatrix2.shape[1]))
 
         # Calculates the squared distance between fibers
         if flip is False:
@@ -72,7 +70,7 @@ def _scalarDistance_internal(fiberScalarMatrix, flip=False):
 
     # Calculates squared distance of scalars
     qDistance = np.zeros((fiberScalarMatrix.shape[1],
-                fiberScalarMatrix.shape[1]), dtype=np.float32)
+                          fiberScalarMatrix.shape[1]))
 
     if flip is False:
         qDistance += sp.spatial.distance.cdist(fiberScalarMatrix, fiberScalarMatrix,
@@ -103,7 +101,7 @@ def fiberDistance(fiberArray1, fiberArray2=None):
     """
 
     if fiberArray2 is None:
-        fiberArray1 = np.asarray(fiberArray1, dtype=np.float32)
+        fiberArray1 = np.asarray(fiberArray1)
 
         # Compute distances for fiber and flipped fiber of group
         distance1 = _fiberDistance_internal(fiberArray1)
@@ -111,8 +109,8 @@ def fiberDistance(fiberArray1, fiberArray2=None):
 
         del fiberArray1
     else:
-        fiberArray1 = np.asarray(fiberArray1, dtype=np.float32)
-        fiberArray2 = np.asarray(fiberArray2, dtype=np.float32)
+        fiberArray1 = np.asarray(fiberArray1)
+        fiberArray2 = np.asarray(fiberArray2)
 
         # Compute distances between two fiber groups
         distance1 = _fiberDistance_internal(fiberArray1, fiberArray2)
@@ -143,7 +141,7 @@ def scalarDistance(fiberScalarArray):
     TODO: Add functionality to calculate reverse fiber if necessary?
     """
 
-    fiberScalarArray = np.array(fiberScalarArray, dtype=np.float32)
+    fiberScalarArray = np.array(fiberScalarArray)
 
     # Compute distances for fiber and fiber equivalent to fiber group
     distance1 = _scalarDistance_internal(fiberScalarArray)
