@@ -104,8 +104,8 @@ def main():
                                     uFiberTree, scalarDataList=scalarDataList,
                                     scalarWeightList=scalarWeightList,
                                     scalarTypeList=scalarTypeList,
-                                    pts_per_fiber=opts.p, k_clusters=opts.k,
-                                    sigma=opts.sig, dirpath=outdir, verbose=opts.verbose)
+                                    k_clusters=opts.k, sigma=opts.sig,
+                                    dirpath=outdir, verbose=opts.verbose)
     del bundlePolydata, scalarWeightList, scalarDataList
 
     bundleName = opts.bundle[:-4] + '_uFibers_Clustered.vtk'
