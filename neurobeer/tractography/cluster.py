@@ -134,8 +134,8 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
         First element of scalarWeightList should be weight placed for geometry, followed by order
         given in scalarTypeList. These weights should sum to 1.0 (weights given as a decimal value).
         ex. scalarDataList
-              scalarTypeList = [FA, T1]
-              scalarWeightList = [Geometry, FA, T1]
+            scalarTypeList = [FA, T1]
+            scalarWeightList = [Geometry, FA, T1]
 
         INPUT:
             fiberData - fiber tree containing tractography data to be clustered
