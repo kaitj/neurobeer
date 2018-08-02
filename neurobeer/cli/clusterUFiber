@@ -109,7 +109,7 @@ def main():
     del bundlePolydata, scalarWeightList, scalarDataList
 
     bundleName = opts.bundle[:-4] + '_uFibers_Clustered.vtk'
-    bundledir = os.path.join(os.path.join(outdir, 'tractography'), bundleName)
+    bundledir = os.path.join(outdir, bundleName)
     tractio.writeVTK(outputPolydata, bundledir, opts.verbose)
     clusterData = fiberData.getFibers(range(fiberData.no_of_fibers), rejIdx)
     clusterData = fibers.convertFromTuple(clusterData)
