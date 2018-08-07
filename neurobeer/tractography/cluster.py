@@ -79,7 +79,8 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
 
         del W, D, L, Lrw
 
-        # 6. Compute information for clustering using "N" number of smallest eigenvalues
+        # 6. Compute information for clustering using "N" number of smallest
+        # eigenvalues
         # Skips first eigenvector, no information obtained
         if k_clusters > eigvec.shape[0]:
             print('\nNumber of clusters greater than number of eigenvectors.')
@@ -131,8 +132,9 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
                    2004)
 
         If no scalar data provided, clustering performed based on geometry.
-        First element of scalarWeightList should be weight placed for geometry, followed by order
-        given in scalarTypeList. These weights should sum to 1.0 (weights given as a decimal value).
+        First element of scalarWeightList should be weight placed for geometry,
+        followed by order given in scalarTypeList. These weights should sum to
+        1.0 (weights given as a decimal value).
         ex. scalarDataList
             scalarTypeList = [FA, T1]
             scalarWeightList = [Geometry, FA, T1]
@@ -213,14 +215,15 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
 def addScalarToVTK(polyData, fiberTree, scalarType, fidxes=None, rejIdx=[]):
     """
     Add scalar to all polydata points to be converted to .vtk file.
-    This function is different from scalars.addScalar, which only considers point
-    used in sampling of fiber.
+    This function is different from scalars.addScalar, which only considers
+    point used in sampling of fiber.
 
     INPUT:
         polyData - polydata for scalar measurements to be added to
         fiberTree - the tree containing polydata information
         scalarType - type of quantitative measurement to be aded to polydata
-        fidxes - array with fiber indices pertaining to scalar data of extracted fibers; default none
+        fidxes - array with fiber indices pertaining to scalar data of
+        extracted fibers; default none
 
     OUTPUT:
         polydata - updated polydata with quantitative information
@@ -285,7 +288,8 @@ def _pairwiseDistance_matrix(fiberTree):
         distances - NxN matrix containing distances between
     """
 
-    distances = distance.fiberDistance(fiberTree.getFibers(range(fiberTree.no_of_fibers)))
+    distances = distance.fiberDistance(fiberTree.getFibers(
+        range(fiberTree.no_of_fibers)))
 
     if np.diag(distances).all() != 0.0:
         print('Diagonals in distance matrix are not equal to 0')
@@ -329,7 +333,8 @@ def _pairwiseQDistance_matrix(fiberTree, scalarType):
         qDistances - NxN matrix containing pairwise distances between fibers
     """
 
-    qDistances = distance.scalarDistance(fiberTree.getScalars(range(fiberTree.no_of_fibers)))
+    qDistances = distance.scalarDistance(fiberTree.getScalars(
+        range(fiberTree.no_of_fibers)))
 
     if np.diag(qDistances).all() != 0.0:
         print("Diagonals in distance matrix are not equal to 0")
@@ -342,12 +347,15 @@ def _pairwiseQSimilarity_matrix(fiberTree, scalarType, sigma):
     Computes the similarity between quantitative points along a fiber.
 
     INPUT:
-        fiberTree - tree containing spatial and quantitative information of fibers
-        scalarType - type of quantitative measurements to be used for computation
+        fiberTree - tree containing spatial and quantitative information of
+                    fibers
+        scalarType - type of quantitative measurements to be used for
+                     computation
         sigma - width of Gaussian kernel; adjust to alter sensitivity
 
     OUTPUT:
-        qSimilarity - NxN matrix containing similarity of quantitative measurements between fibers
+        qSimilarity - NxN matrix containing similarity of quantitative
+                      measurements between fibers
     """
 
     qSimilarity = _pairwiseQDistance_matrix(fiberTree, scalarType)
@@ -375,8 +383,9 @@ def _priorDistance_matrix(fiberTree, priorTree):
         distances - matrix containing distances between fibers
     """
 
-    distances = distance.fiberDistance(fiberTree.getFibers(range(fiberTree.no_of_fibers)),
-                           priorTree.getfibers(range(priorTree.no_of_fibers)))
+    distances = distance.fiberDistance(fiberTree.getFibers(
+        range(fiberTree.no_of_fibers)), priorTree.getfibers(
+        range(priorTree.no_of_fibers)))
 
     return distances
 
@@ -399,7 +408,7 @@ def _priorSimilarity_matrix(fiberTree, priorTree, sigma):
 
     similarities = _priorDistance_matrix(fiberTree, priorTree)
     similarities = distance.gausKernel_similarity(similarities,
-                                                  np.square(sigma))
+                        np.square(sigma))
 
     return similarities
 
@@ -419,7 +428,8 @@ def _priorQDistance_matrix(fiberTree, priorTree, scalarType):
         qDistances - matrix containing pairwise distances between fibers
     """
 
-    qDistances = distance.scalarDistance(priorTree.getScalars(range(priorTree.no_of_fibers)))
+    qDistances = distance.scalarDistance(priorTree.getScalars(
+        range(priorTree.no_of_fibers)))
     qDistances = np.array(qDistances)
 
     return qDistances
@@ -561,7 +571,8 @@ def _pairwiseWeightedSimilarity(fiberTree, scalarTypeList=[],
         print("\nPlease also specify measurement(s) type. Exiting...")
         exit()
 
-    elif (((scalarWeightList == [])) and ((scalarTypeList == []))) or (scalarWeightList[0] == 1):
+    elif ((((scalarWeightList == [])) and ((scalarTypeList == []))) or
+    (scalarWeightList[0] == 1)):
         print("\nCalculating similarity based on geometry.")
         wSimilarity = _pairwiseSimilarity_matrix(fiberTree, sigma)
         print("\nFinished calculating similarity")
@@ -612,7 +623,8 @@ def _priorWeightedSimilarity(fiberTree, priorTree, scalarTypeList=[],
         print("\nPlease also specify measurement(s) type. Exiting...")
         exit()
 
-    elif ((scalarWeightList == []) and (scalarTypeList == [])) or (scalarWeightList[0] == 1):
+    elif (((scalarWeightList == []) and (scalarTypeList == [])) or
+    (scalarWeightList[0] == 1)):
         print("\nCalculating similarity based on geometry.")
         wSimilarity = _priorSimilarity_matrix(fiberTree, priorTree, sigma)
         print("\nFinished calculating similarity)")
