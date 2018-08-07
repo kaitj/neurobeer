@@ -24,7 +24,7 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2=None, flip=False):
 
     # Comparison of single fiber group
     if fiberMatrix2 is None:
-        distance = np.zeros((fiberMatrix1.shape[1], fiberMatrix1.shape[1]),
+        distance = np.empty((fiberMatrix1.shape[1], fiberMatrix1.shape[1]),
                              dtype=np.float32)
 
         # Calculates the squared distance between fibers
@@ -57,7 +57,7 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2=None, flip=False):
         del fiberMatrix1
     # Comparison between two fiber groups
     else:
-        distance = np.zeros((fiberMatrix1.shape[1], fiberMatrix2.shape[1]),
+        distance = np.empty((fiberMatrix1.shape[1], fiberMatrix2.shape[1]),
                              dtype=np.float32)
 
         # Calculates the squared distance between fibers
@@ -109,7 +109,7 @@ def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2=None,
 
     # Calculates squared distance of scalars
     if fiberScalarMatrix2 is None:
-        qDistance = np.zeros((fiberScalarMatrix1.shape[1],
+        qDistance = np.empty((fiberScalarMatrix1.shape[1],
                               fiberScalarMatrix1.shape[1]), dtype=np.float32)
 
         # Calculates the squared distance between fibers
@@ -148,7 +148,7 @@ def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2=None,
         del fiberScalarMatrix1
     # Comparison between two fiber groups
     else:
-        distance = np.zeros((fiberScalarMatrix1.shape[1],
+        distance = np.empty((fiberScalarMatrix1.shape[1],
                              fiberScalarMatrix2.shape[1]), dtype=np.float32)
 
         # Calculates the squared distance between fibers
