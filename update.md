@@ -1,6 +1,7 @@
 # Patch Notes
 
 ## Content
+* [v1.0.2](#v102)
 * [v1.0.1](#v101)
 * [v1.0.0](#v100)
 * [v0.1.4](#v014)
@@ -8,6 +9,17 @@
 * [v0.1.2](#v012)
 * [v0.1.1](#v011)
 * [v0.1.0](#v010)
+
+### Version 1.0.2 <a name=v102></a>
+* Changed np.dot to np.einsum
+* Changed comparison of similarity to lower memory use
+* Output directory changed
+* Unnecessary variables and functions removed
+* Data type changed from float (np.float64) to np.float32
+* Eliminated duplications of matrices in calculations
+* Removed matrix generation
+    * Large memory usage
+* Fixed prints for Python3 compatability
 
 ### Version 1.0.1 <a name=v101></a>
 * Updated prior sampling to subsample from prior/atlas
