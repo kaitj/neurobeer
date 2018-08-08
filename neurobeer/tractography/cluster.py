@@ -66,9 +66,13 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
 
         # 3. Compute unnormalized Laplacian
         L = D - W
+        del W
 
         # 4. Compute normalized Laplacian (random-walk)
-        Lrw = np.dot(np.linalg.inv(D), L)
+        D = np.linalg.pinv(D)
+        Lrw = np.einsum("ij, jk->ik", D, L)
+        del D, L
+        # Lrw = np.dot(np.linalg.inv(D), L)
 
         # 5. Compute eigenvalues and eigenvectors of generalized eigenproblem
         # Sort by ascending eigenvalue
@@ -76,8 +80,7 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
         idx = eigval.argsort()
         eigval, eigvec = eigval[idx], eigvec[:, idx]
         misc.saveEig(dirpath, eigval, eigvec)
-
-        del W, D, L, Lrw
+        del Lrw
 
         # 6. Compute information for clustering using "N" number of smallest
         # eigenvalues
