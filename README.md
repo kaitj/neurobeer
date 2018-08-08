@@ -118,13 +118,6 @@ Usage: clusterSingle --indir <in_dir> --subjid <subjid> --bundle <bundle_name> -
 -p          Number of samples along a fiber
 -k          Number of clusters
 -sig        Sigma to be used for Gaussian kernel
--sall       Flag to save all similarity matrices
--swt        Flag to save weighted similarity matrix
-```
-
-##### Performance arguments <a name="prfmarg"></a>
-```
--j          Number of cores to use for computation
 ```
 
 ##### Additional arguments <a name="addarg"></a>
