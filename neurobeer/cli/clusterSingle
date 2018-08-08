@@ -93,6 +93,7 @@ def main():
     for i in range(len(scalarTypeList)):
         fiberData.addScalar(bundlePolydata, scalarDataList[i],
                             scalarTypeList[i], fiberData.pts_per_fiber)
+    del bundlePolydata
 
     # Perform clustering on provided bundle
     outputPolydata, clusterIdx, fiberData, rejIdx = cluster.spectralClustering(
@@ -101,7 +102,7 @@ def main():
                                     scalarTypeList=scalarTypeList,
                                     k_clusters=opts.k, sigma=opts.sig,
                                     dirpath=outdir, verbose=opts.verbose)
-    del bundlePolydata, scalarWeightList, scalarDataList
+    del scalarWeightList, scalarDataList
 
     LArray = fibers.calcFiberLength(fiberData, rejIdx)
     DArray = fibers.calcEndPointSep(fiberData, rejIdx)
@@ -114,11 +115,6 @@ def main():
     clusterData = fiberData.getFibers(range(fiberData.no_of_fibers), rejIdx)
     clusterData = fibers.convertFromTuple(clusterData)
     clusterData.copyScalar(fiberData, scalarTypeList, fidxes=[], rejIdx=rejIdx)
-
-    # NOT USED - SUPPOSE TO EXTRACT STATS FOR COMBINED
-    # NEEDS TO BE FIXED FOR USE (IF WANTED/NEEDED)
-    # for Type in scalarTypeList:
-    #    stats.plotStats(clusterData, Type, dirpath=os.path.join(outdir + '/stats/stats_Clustered'))
 
     # Extract individual clusters
     for label in np.unique(clusterIdx):
