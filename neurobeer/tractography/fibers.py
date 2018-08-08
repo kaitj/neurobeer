@@ -161,7 +161,7 @@ class FiberTree:
             fiberLength - Number of points along a fiber
             pts_per_fiber - Number of desired points along fiber
 
-        OUTPUT:    LDRatio = np.divide(DArray, LArray)
+        OUTPUT:
             idxList - Corresponding new indices to traverse along fiber
         """
 
@@ -249,8 +249,8 @@ class FiberTree:
 
     def copyScalar(self, fiberData, scalarTypeArray, fidxes=[], rejIdx=[]):
         """ * INTERNAL FUNCTION *
-        Copies the scalar information from a different fiber tree. To be used for
-        removing outliers while retaining information.
+        Copies the scalar information from a different fiber tree. To be used
+        for removing outliers while retaining information.
 
         INPUT:
             fiberData - fiberTree to copy data from
@@ -321,7 +321,7 @@ class FiberTree:
         a single fiber.
 
         INPUT:
-            fidx - Index corresponding to fiber to extract scalar information from
+            fidx - Index corresponding to fiber to extract scalar information
             scalarType - Type of quantitative scalar (ie. FA, T1)
 
         OUTPUT:
@@ -341,7 +341,8 @@ class FiberTree:
         a group of fibers.
 
         INPUT:
-            fidxes - Indices corresponding to fibers to extract scalar information from
+            fidxes - Indices corresponding to fibers to extract scalar
+                     information from
             scalarType - Type of quantitative scalar (ie. FA, T1)
 
         OUTPUT:
@@ -353,7 +354,8 @@ class FiberTree:
         idx = 0
         for fidx in fidxes:
             for pidx in range(0, self.pts_per_fiber):
-                scalarList[idx][pidx] = float(self.fiberTree[fidx][pidx][str(scalarType)])
+                scalarList[idx][pidx] = \
+                    float(self.fiberTree[fidx][pidx][str(scalarType)])
 
             idx += 1
 
@@ -429,8 +431,8 @@ class FiberTree:
 
             for pidx in range(0, self.pts_per_fiber):
                 idx = outPts.InsertNextPoint(self.fiberTree[fidx][pidx]['x'],
-                                                               self.fiberTree[fidx][pidx]['y'],
-                                                               self.fiberTree[fidx][pidx]['z'])
+                                             self.fiberTree[fidx][pidx]['y'],
+                                             self.fiberTree[fidx][pidx]['z'])
                 ptIds.InsertNextId(idx)
 
             outFibers.InsertNextCell(ptIds)

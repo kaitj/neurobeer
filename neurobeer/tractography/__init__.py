@@ -13,8 +13,8 @@ for dep in dependencies:
     try:
         exec('import %s' % dep)
     except ImportError:
-        print '%s is not installed. Functionality of this package will be unavailable..' % dep
-        print 'Please install %s to use this package.' % dep
+        print('%s is not installed. Functionality of this package will be unavailable..' % dep)
+        print('Please install %s to use this package.' % dep)
 
 for module in modules:
     exec('import %s' % module)

@@ -6,8 +6,6 @@ in with other modules.
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 def saveEig(dirpath, eigvalArray, eigvecArray):
     """
@@ -29,29 +27,43 @@ def saveEig(dirpath, eigvalArray, eigvecArray):
     np.save(eigvalPath, eigvalArray)
     np.save(eigvecPath, eigvecArray)
 
-def saveMatrix(dirpath, matrix, matrixType):
-    """
-    Function used to save similarity matrices.
-
-    INPUT:
-        dirpath - Directory path for storing matrix images
-        matrix - Similarity matrix to be saved
-        matrixType - Type of similarity matrix (ie. weighted, FA, T1)
-
-    OUTPUT:
-        none
-    """
-
-    f = plt.figure(figsize=(10, 10))
-    im = plt.imshow(matrix, cmap='viridis')
-    plt.title((matrixType + ' Similarity'), fontsize=16)
-
-    ax = plt.gca()
-    ax.tick_params(axis='both', labelsize=14)
-    div = make_axes_locatable(ax)
-    cax = div.append_axes('right', size='5%', pad=0.25)
-    cax.tick_params(labelsize=14)
-    plt.colorbar(im, cax)
-
-    plt.savefig(dirpath + '/' + matrixType + '_Similarity.png')
-    plt.close(f)
+###############################
+# SAVE MATRIX CODE DEPRECATED #
+###############################
+# def saveMatrix(dirpath, matrix, matrixType):
+#     """
+#     Function used to save similarity matrices.
+#     NOTE: Matplotlib not memory-friendly, save matrix to textfile
+#
+#     INPUT:
+#         dirpath - Directory path for storing matrix images
+#         matrix - Similarity matrix to be saved
+#         matrixType - Type of similarity matrix (ie. weighted, FA, T1)
+#
+#     OUTPUT:
+#         none
+#     """
+#
+#     fname = (dirpath + matrixType + '_Similarity.txt')
+#
+#     np.savetxt(fname, matrix)
+#
+#     OLD CODE FOR PLOTTING FIGURE
+#     f = plt.figure(figsize=(10, 10))
+#     matrix = plt.imshow(matrix, cmap='viridis', interpolation='none')
+#     plt.title((matrixType + ' Similarity'), fontsize=16)
+#
+#     ax = plt.gca()
+#     ax.tick_params(axis='both', labelsize=14)
+#     for axis in [ax.xaxis, ax.yaxis]:
+#         axis.set_major_locator(ticker.MaxNLocator(integer=True))
+#     div = make_axes_locatable(ax)
+#     cax = div.append_axes('right', size='5%', pad=0.25)
+#     cax.tick_params(labelsize=14)
+#     plt.colorbar(matrix, cax)
+#     plt.tight_layout()
+#
+#     plt.savefig(dirpath + '/' + matrixType + '_Similarity.png')
+#     plt.close(f)
+#
+#     del matrix

@@ -33,7 +33,7 @@ def findUFiber(fiberData):
         D = _calcEndPointSep(fiberData, fidx)
 
         # Temporary max length constraint
-        if (L > 30) and (D <= (L / np.pi)) and (L < 90):
+        if (L > 30) and (D <= (L / np.pi)) and (L < 80):
             uArray.append(fidx)
             LArray.append(L)
             DArray.append(D)
@@ -45,9 +45,11 @@ def _mean(fiberTree, scalarType, idxes=None):
     Finds the average of all fibers in bundle at specific sample points
 
     INPUT:
-        fiberTree - tree containing spatial and quantitative information of fibers
+        fiberTree - tree containing spatial and quantitative information of
+                    fibers
         scalarType - type of quantitative data to find average of
-        idxes - indices to extract info from; defaults None (returns data for all fibers)
+        idxes - indices to extract info from; defaults None (returns data for
+                all fibers)
 
     OUTPUT:
         clusterAvg - calculated tract-based average
@@ -56,22 +58,27 @@ def _mean(fiberTree, scalarType, idxes=None):
 
     if idxes is None:
         clusterAvg = np.mean(fiberTree.getScalars(range(fiberTree.no_of_fibers),
-                            scalarType)[:, :], axis=0)
-        avg = np.mean(fiberTree.getScalars(range(fiberTree.no_of_fibers), scalarType)[:, :])
+                             scalarType)[:, :], axis=0)
+        avg = np.mean(fiberTree.getScalars(range(fiberTree.no_of_fibers),
+                      scalarType)[:, :])
     else:
-        clusterAvg = np.mean(fiberTree.getScalars(idxes, scalarType)[:, :], axis=0)
+        clusterAvg = np.mean(fiberTree.getScalars(idxes, scalarType)[:, :],
+                             axis=0)
         avg = np.mean(fiberTree.getScalars(idxes, scalarType)[:, :])
 
     return clusterAvg, avg
 
 def _stddev(fiberTree, scalarType, idxes=None):
     """ *INTERNAL FUNCTION*
-    Finds the standard deviation of all fibers in bundle at specific sample points
+    Finds the standard deviation of all fibers in bundle at specific sample
+    points
 
     INPUT:
-        fiberTree - tree containing spatial and quantitative information of fibers
+        fiberTree - tree containing spatial and quantitative information of
+                    fibers
         scalarType - type of quantitative data to find standard deviation of
-        idxes - indices to extract info from; defaults None (returns data for all fibers)
+        idxes - indices to extract info from; defaults None (returns data for
+                     all fibers)
 
     OUTPUT:
         clusterSdev - calculated tract-based standard deviation
@@ -79,11 +86,14 @@ def _stddev(fiberTree, scalarType, idxes=None):
     """
     if idxes is None:
         clusterSdev = np.std(fiberTree.getScalars(range(fiberTree.no_of_fibers),
-                            scalarType)[:, :], axis=0)
-        stdev = np.std(fiberTree.getScalars(range(fiberTree.no_of_fibers), scalarType)[:, :])
+                             scalarType)[:, :], axis=0)
+        stdev = np.std(fiberTree.getScalars(range(fiberTree.no_of_fibers),
+                       scalarType)[:, :])
     else:
-        clusterSdev = np.std(fiberTree.getScalars(idxes, scalarType)[:, :], axis=0)
+        clusterSdev = np.std(fiberTree.getScalars(idxes, scalarType)[:, :],
+                             axis=0)
         stdev = np.std(fiberTree.getScalars(idxes, scalarType)[:, :])
+
     return clusterSdev, stdev
 
 def extractUFiber(fiberData, uArray):
@@ -133,19 +143,21 @@ def writeCSV(clusterLabel, LMean, LStd, DMean, DStd, fiberCount, dirpath=None):
     fileExists = os.path.isfile(filePath)
 
     with open(filePath, 'a') as f:
-        header = ['Cluster ID', 'Length Mean', 'Length S.D.', 'Distance Mean', 'Distance S.D.', 'Fiber Count']
-        writer = csv.DictWriter(f, delimiter=',', lineterminator='\n', fieldnames=header)
+        header = ['Cluster ID', 'Length Mean', 'Length S.D.', 'Distance Mean',
+                  'Distance S.D.', 'Fiber Count']
+        writer = csv.DictWriter(f, delimiter=',', lineterminator='\n',
+                                fieldnames=header)
         if not fileExists:
             writer.writeheader()
         writer = csv.writer(f)
-        writer.writerow([clusterLabel, LMean, LStd. DMean, DStd, fiberCount])
+        writer.writerow([clusterLabel, LMean, LStd, DMean, DStd, fiberCount])
 
     f.close()
 
 def uFiberStats(LArray, DArray, fidxes):
     """
-    Calculates the mean and standard deviation for fiber length and distance between
-    end points for a group of fibers.
+    Calculates the mean and standard deviation for fiber length and distance
+    between end points for a group of fibers.
 
     INPUT:
         LArray - array of fiber lengths
