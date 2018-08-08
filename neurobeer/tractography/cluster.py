@@ -208,7 +208,7 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
         outputPolydata = _format_outputVTK(outputData, clusterIdx, colour,
                                            priorCentroids)
 
-        # 9. Also add measurements from those used to cluster
+        # 3. Also add measurements from those used to cluster
         for i in range(len(scalarTypeList)):
             outputPolydata = addScalarToVTK(outputPolydata, fiberData,
                                             scalarTypeList[i])

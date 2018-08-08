@@ -163,7 +163,6 @@ def uFiberStats(LArray, DArray, fidxes):
         LArray - array of fiber lengths
         DArray - array of distances between end points for fibers
         fidxes - array of indices of fibers to calculate
-        no_of_fibers - number of fibers in tractography
 
     OUTPUT:
         LMean - mean fiber length
@@ -192,7 +191,7 @@ def _calcFiberLength(fiberData, fidx):
     Calculates the fiber length via arc length
 
     INPUT:
-        fiberData - Fiber tree copython popntaining tractography information
+        fiberData - Fiber tree containing tractography information
         fidx - Fiber index
 
     OUTPUT:
