@@ -74,7 +74,7 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
 
         # 5. Compute eigenvalues and eigenvectors of generalized eigenproblem
         # Sort by ascending eigenvalue
-        eigval, eigvec = np.linalg.eigh(Lrw)
+        eigval, eigvec = np.linalg.eig(Lrw)
         idx = eigval.argsort()
         eigval, eigvec = eigval[idx], eigvec[:, idx]
         misc.saveEig(dirpath, eigval, eigvec)
