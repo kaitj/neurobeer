@@ -69,8 +69,7 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
         del W
 
         # 4. Compute normalized Laplacian (random-walk)
-        D = np.linalg.pinv(D)
-        Lrw = np.dot(D, L)
+        Lrw = np.dot(np.diag(np.divide(1, np.sum(D, axis=0))), L)
         del D, L
 
         # 5. Compute eigenvalues and eigenvectors of generalized eigenproblem
@@ -475,7 +474,7 @@ def _degreeMatrix(inputMatrix):
     """
 
     # Determine the degree matrix
-    degMat = np.diag(np.sum(inputMatrix, 0))
+    degMat = np.diag(np.sum(inputMatrix, axis=0))
 
     return degMat
 
