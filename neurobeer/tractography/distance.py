@@ -268,7 +268,7 @@ def scalarDistance(fiberScalarArray1, fiberScalarArray2=None):
 
     return distance
 
-def gausKernel_similarity(distance, sigmasq):
+def gausKernel_similarity(distance, sigma):
     """
     Computes the similarity using a Gaussian (RBF) kernel.
 
@@ -282,8 +282,7 @@ def gausKernel_similarity(distance, sigmasq):
     """
 
     # Computes similarity using a Gaussian kernel
-    similarities = np.exp(-distance / sigmasq)
-
-    del distance, sigmasq
+    similarities = np.exp(-np.square(distance) / np.square(sigma))
+    del distance, sigma
 
     return similarities

@@ -6,7 +6,7 @@ parameters pertaining to clusters.
 """
 
 import numpy as np
-import scipy.cluster, scipy.linalg
+import scipy.cluster
 import os
 from sys import exit
 
@@ -76,11 +76,11 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
 
         # 5. Compute eigenvalues and eigenvectors of generalized eigenproblem
         # Sort by ascending eigenvalue
-        eigval, eigvec = scipy.linalg.eig(Lrw)
+        eigval, eigvec = np.linalg.eigh(Lrw)
         idx = eigval.argsort()
         eigval, eigvec = eigval[idx], eigvec[:, idx]
         misc.saveEig(dirpath, eigval, eigvec)
-        del Lrw
+        del Lrw, idx
 
         # 6. Compute information for clustering using "N" number of smallest
         # eigenvalues
@@ -315,7 +315,7 @@ def _pairwiseSimilarity_matrix(fiberTree, sigma):
     """
 
     similarity = _pairwiseDistance_matrix(fiberTree)
-    similarity = distance.gausKernel_similarity(similarity, np.square(sigma))
+    similarity = distance.gausKernel_similarity(similarity, sigma)
 
     # Sanity check
     if np.diag(similarity).all() != 1.0:
@@ -362,7 +362,7 @@ def _pairwiseQSimilarity_matrix(fiberTree, scalarType, sigma):
     """
 
     qSimilarity = _pairwiseQDistance_matrix(fiberTree, scalarType)
-    qSimilarity = distance.gausKernel_similarity(qSimilarity, np.square(sigma))
+    qSimilarity = distance.gausKernel_similarity(qSimilarity, sigma)
 
     # Sanity check
     if np.diag(qSimilarity).all() != 1.0:
@@ -411,7 +411,7 @@ def _priorSimilarity_matrix(fiberTree, priorTree, sigma):
 
     similarities = _priorDistance_matrix(fiberTree, priorTree)
     similarities = distance.gausKernel_similarity(similarities,
-                        np.square(sigma))
+                        sigma)
 
     return similarities
 
@@ -457,7 +457,7 @@ def _priorQSimilarity_matrix(fiberTree, priorTree, scalarType, sigma):
 
     qDistances = _priorQDistance_matrix(fiberTree, priorTree, scalarType)
 
-    qSimilarity = distance.gausKernel_similarity(qDistances, np.square(sigma))
+    qSimilarity = distance.gausKernel_similarity(qDistances, sigma)
 
     # Unused variables
     del qDistances
