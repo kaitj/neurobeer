@@ -6,7 +6,8 @@ parameters pertaining to clusters.
 """
 
 import numpy as np
-import os, scipy.cluster
+import scipy.cluster, scipy.linalg
+import os
 from sys import exit
 
 import fibers, distance, misc, prior
@@ -56,7 +57,8 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
             print("No. of clusters:", k_clusters)
 
         # 1. Compute similarty matrix
-        W = _pairwiseWeightedSimilarity(fiberData, scalarTypeList)
+        W = _pairwiseWeightedSimilarity(fiberData, scalarTypeList,
+                                        scalarWeightList, sigma)
 
         # Outlier detection
         W, rejIdx = _outlierSimDetection(W)
@@ -74,7 +76,7 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
 
         # 5. Compute eigenvalues and eigenvectors of generalized eigenproblem
         # Sort by ascending eigenvalue
-        eigval, eigvec = np.linalg.eig(Lrw)
+        eigval, eigvec = scipy.linalg.eig(Lrw)
         idx = eigval.argsort()
         eigval, eigvec = eigval[idx], eigvec[:, idx]
         misc.saveEig(dirpath, eigval, eigvec)
