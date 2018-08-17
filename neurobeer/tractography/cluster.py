@@ -71,7 +71,8 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
         del W
 
         # 4. Compute normalized Laplacian (random-walk)
-        Lsym = np.dot(np.diag(np.divide(1, np.sqrt(np.sum(D, axis=1)))), L)
+        D = np.diag(np.divide(1, np.sqrt(np.sum(D, axis=1))))
+        Lsym = np.dot(np.dot(D, L), D)
         del D, L
 
         # 5. Compute eigenvalues and eigenvectors of generalized eigenproblem
