@@ -71,45 +71,54 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
         del W
 
         # 4. Compute normalized Laplacian (random-walk)
-        Lrw = np.dot(np.diag(np.divide(1, np.sum(D, axis=0))), L)
+        Lsym = np.dot(np.diag(np.divide(1, np.sqrt(np.sum(D, axis=1)))), L)
         del D, L
 
         # 5. Compute eigenvalues and eigenvectors of generalized eigenproblem
         # Sort by ascending eigenvalue
-        eigval, eigvec = np.linalg.eigh(Lrw)
+        eigval, eigvec = np.linalg.eigh(Lsym)
         idx = eigval.argsort()
         eigval, eigvec = eigval[idx], eigvec[:, idx]
         misc.saveEig(dirpath, eigval, eigvec)
-        del Lrw, idx
+        del Lsym, idx
+
+        # 6. Find optimal eigengap and select embedding vector
+        gap_idx = _eiggap(eigval)
+        emvec = eigvec[:, 1:gap_idx + 1]
+
+        if (k_clusters < gap_idx + 1) and (verbose != 0):
+            print("Warning: k clusters chosen may end in undesirable results")
+
+        del eigval, eigvec, gap_idx
 
         # 6. Compute information for clustering using "N" number of smallest
         # eigenvalues
         # Skips first eigenvector, no information obtained
-        if k_clusters > eigvec.shape[0]:
-            print('\nNumber of clusters greater than number of eigenvectors.')
-            print('Clustering with maximum number of available eigenvectors.')
-            emvec = eigvec[:, 1:eigvec.shape[0]]
-        elif k_clusters == eigvec.shape[0]:
-            emvec = eigvec[:, 1:k_clusters]
-        else:
-            emvec = eigvec[:, 1:k_clusters + 1]
+        # if k_clusters > eigvec.shape[0]:
+        #     print('\nNumber of clusters greater than number of eigenvectors.')
+        #     print('Clustering with maximum number of available eigenvectors.')
+        #     emvec = eigvec[:, 1:eigvec.shape[0]]
+        # elif gap_idx == eigvec.shape[0]:
+        #     emvec = eigvec[:, 1:k_clusters]
+        # else:
+        #     emvec = eigvec[:, 1:k_clusters + 1]
 
         # 7. Find clusters using K-means clustering
         centroids, clusterIdx = scipy.cluster.vq.kmeans2(emvec, k_clusters,
                                                          iter=100,
                                                          minit='points')
         centroids, clusterIdx = _sortLabel(centroids, clusterIdx)
-
-        if k_clusters <= 1:
-            print("\nNot enough eigenvectors selected!")
-            raise ValueError
-        elif k_clusters == 2:
-            temp = eigvec[:, 0:3]
-            temp = temp.astype('float')
-            colour = _cluster_to_rgb(temp)
-            del temp
-        else:
-            colour = _cluster_to_rgb(centroids)
+        colour = _cluster_to_rgb(centroids)
+        # if k_clusters <= 1:
+        #     print("\nNot enough eigenvectors selected!")
+        #     raise ValueError
+        # elif k_clusters == 2:
+        #     temp = eigvec[:, 0:3]
+        #     temp = temp.astype('float')
+        #     colour = _cluster_to_rgb(temp)
+        #     del temp
+        # else:
+        #    colour = _cluster_to_rgb(centroids)
 
         # 8. Return results
         # Create model with user / default number of chosen samples along fiber
@@ -162,23 +171,23 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
             dirpath = os.getcwd()
 
         priorData, priorCentroids, priorLabels = prior.load(priorVTK)
-        priorPath = os.path.split(priorVTK)[0]
-
-        if not os.path.exists(priorPath + '/eigval.npy'):
-            print("Eigenvalue binary file does not exist")
-            raise IOError
-        elif not os.path.exists(priorPath + '/eigvec.npy'):
-            print("Eigenvector binary file does not exist")
-            raise IOError
-        else:
-            _, eigvec = prior.loadEig(priorPath, 'eigval.npy', 'eigvec.npy')
+        # priorPath = os.path.split(priorVTK)[0]
+        #
+        # if not os.path.exists(priorPath + '/eigval.npy'):
+        #     print("Eigenvalue binary file does not exist")
+        #     raise IOError
+        # elif not os.path.exists(priorPath + '/eigvec.npy'):
+        #     print("Eigenvector binary file does not exist")
+        #     raise IOError
+        # else:
+        #     _, eigvec = prior.loadEig(priorPath, 'eigval.npy', 'eigvec.npy')
 
         k_clusters = len(priorCentroids)
 
         if fiberData.no_of_fibers == 0 or int(priorData.no_of_fibers) == 0:
             print("\nERROR: Input data(s) has 0 fibers!")
             raise ValueError
-        elif verbose == 1:
+        elif verbose != 0:
             print("\nStarting clustering...")
             print("No. of fibers:", fiberData.no_of_fibers)
             print("No. of clusters:", k_clusters)
@@ -191,16 +200,17 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
         simIdx = np.argmax(W, axis=1)
         clusterIdx = priorLabels[simIdx]
         fiberData.addClusterInfo(clusterIdx, priorCentroids)
+        colour = _cluster_to_rgb(priorCentroids)
 
-        if k_clusters <= 1:
-            print('Not enough eigenvectors selected!')
-            raise ValueError
-        elif k_clusters == 2:
-            temp = eigvec[0:3, :]
-            colour = _cluster_to_rgb(temp.astype('float'))
-            del temp
-        else:
-            colour = _cluster_to_rgb(priorCentroids)
+        # if k_clusters <= 1:
+        #     print('Not enough eigenvectors selected!')
+        #     raise ValueError
+        # elif k_clusters == 2:
+        #     temp = eigvec[0:3, :]
+        #     colour = _cluster_to_rgb(temp.astype('float'))
+        #     del temp
+        # else:
+        #     colour = _cluster_to_rgb(priorCentroids)
 
         del W, simIdx
 
@@ -476,7 +486,7 @@ def _degreeMatrix(inputMatrix):
     """
 
     # Determine the degree matrix
-    degMat = np.diag(np.sum(inputMatrix, axis=0))
+    degMat = np.diag(np.sum(inputMatrix, axis=1))
 
     return degMat
 
@@ -681,7 +691,7 @@ def _outlierSimDetection(W):
     """ * INTERNAL FUNCTION *
     Look for outliers in fibers to reject
 
-    INPUT::
+    INPUT
         W - similarity matrix
 
     OUTPUT:
@@ -700,3 +710,25 @@ def _outlierSimDetection(W):
     W = np.delete(W, rejIdx, 1)
 
     return W, rejIdx
+
+def _eiggap(eigval):
+    """ * INTERNAL FUNCTION*
+    Automatically identify eigengap for stable embedding vector
+
+    Adapted from: https://github.com/mingmingyang/auto_spectral_clustering
+
+    INPUT:
+        eigval - eigenvalues from solving eigenproblem
+
+    OUTPUT:
+        gap_idx - vectors required for stable embedding vector
+    """
+    max_gap, gap_idx = 0, 0
+    for i in range(1, eigval.size):
+        gap = eigval[i] - eigval[i-1]
+        if gap > max_gap:
+            max_gap = gap
+            gap_idx = i - 1
+    del gap, max_gap
+
+    return gap_idx
