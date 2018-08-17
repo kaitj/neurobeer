@@ -185,7 +185,7 @@ def _getScalarInfo(priorVTK, centroidTree, subsetIdx, pts_per_fiber=20,
             fidx += 1
 
 def loadEig(dirpath, eigvalFile, eigvecFile):
-    """
+    """ WARNING: TO BE DEPRECATED
     Loads eigenvalue and eigenvector arrays from previously clustered data
 
     INPUT:
