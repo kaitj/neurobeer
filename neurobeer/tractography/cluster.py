@@ -6,7 +6,7 @@ parameters pertaining to clusters.
 """
 
 import numpy as np
-import scipy.cluster
+import scipy.cluster, scipy.linalg
 import os
 from sys import exit
 
@@ -77,7 +77,7 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
 
         # 5. Compute eigenvalues and eigenvectors of generalized eigenproblem
         # Sort by ascending eigenvalue
-        eigval, eigvec = np.linalg.eigh(Lsym)
+        eigval, eigvec = scipy.linalg.eigh(Lsym)
         idx = eigval.argsort()
         eigval, eigvec = eigval[idx], eigvec[:, idx]
         misc.saveEig(dirpath, eigval, eigvec)
