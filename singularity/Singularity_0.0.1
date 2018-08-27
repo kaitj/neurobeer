@@ -17,6 +17,8 @@ bash 06_install_camino_source.sh
 bash 07_install_octave.sh
 bash 08_install_vasst_dev.sh
 
+#remove all install install scripts
+rm -rf /src
 
 %environment
 
@@ -29,4 +31,4 @@ export CAMINO_HEAP_SIZE=16000
 
 #vasst-dev
 export VASST_DEV_HOME=/opt/git/vasst-dev
-export PIPELINE_ATLAS_DIR=/opt/git/vasst-dev
+export PATH=$VASST_DEV_HOME:$PATH
