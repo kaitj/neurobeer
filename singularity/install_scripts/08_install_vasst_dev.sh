@@ -19,7 +19,7 @@ HASH=9cfced6a089a857adcf1e3a2e709c4917f16c592
 # rm -rf $TMP_DIR
 
 # VASST-DEV
-git clone https://github.com/akhanf/vasst-dev $DIR/
+git clone https://github.com/kaitj/vasst-dev $DIR/
 pushd $DIR
 git checkout $HASH
 popd
