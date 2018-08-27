@@ -4,7 +4,7 @@ DIR=/opt/git
 mkdir -p $DIR/neurobeer
 
 # Install missing dependencies
-apt-get install -y libsm6 libxt6 libgl1-mesa-glx
+apt-get install -y libsm6 libxt6 libgl1-mesa-glx libpng16-16
 apt-get install -y python3-tk
 
 # Git
