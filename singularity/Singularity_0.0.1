@@ -7,7 +7,7 @@ mkdir -p $SINGULARITY_ROOTFS/src
 cp -Rv . $SINGULARITY_ROOTFS/src
 
 
-% post
+%post
 
 cd /src/install_scripts
 
@@ -18,7 +18,7 @@ bash 07_install_octave.sh
 bash 08_install_vasst_dev.sh
 
 
-% environment
+%environment
 
 #camino
 export CAMINO_DIR=/opt/camino
