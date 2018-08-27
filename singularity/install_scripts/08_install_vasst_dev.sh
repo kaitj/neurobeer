@@ -2,7 +2,7 @@
 
 # Install vasst-dev repo & MCR v92 (2017a)
 DIR=/opt/git/vasst-dev
-HASH=9cfced6a089a857adcf1e3a2e709c4917f16c592
+# HASH=9cfced6a089a857adcf1e3a2e709c4917f16c592
 
 # # MCR
 # TMP_DIR=/tmp/mcr
@@ -20,9 +20,9 @@ HASH=9cfced6a089a857adcf1e3a2e709c4917f16c592
 
 # VASST-DEV
 git clone https://github.com/kaitj/vasst-dev $DIR/
-pushd $DIR
-git checkout $HASH
-popd
+# pushd $DIR
+# git checkout $HASH
+# popd
 
 # if octave exists:
 #if [ -e /etc/octave.conf ]
