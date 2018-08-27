@@ -1,0 +1,33 @@
+Bootstrap: docker
+From: ubuntu:xenial
+
+%setup
+
+mkdir -p $SINGULARITY_ROOTFS/src
+cp -Rv . $SINGULARITY_ROOTFS/src
+
+
+% post
+
+cd /src/install_scripts
+
+bash 00_install_basics.sh
+bash 05_install_neurobeer.sh
+bash 06_install_camino_source.sh
+bash 07_install_octave.sh
+bash 08_install_vasst_dev.sh
+
+
+% environment
+
+#camino
+export CAMINO_DIR=/opt/camino
+export PATH=$CAMINO_DIR/bin:$PATH
+export LD_LIBRARY_PATH=$CAMINO_DIR/lib:$LD_LIBRARY_PATH
+export MANPATH=$CAMINO_DIR/man:$MANPATH
+export CAMINO_HEAP_SIZE=16000
+
+#vasst-dev
+export VASST_DEV_HOME=/opt/git/vasst-dev
+export PIPELINE_ATLAS_DIR=/opt/git/vasst-dev
+export . /opt/git/vasst-dev/init_vasst_dev.sh
