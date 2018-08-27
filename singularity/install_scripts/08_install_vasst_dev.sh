@@ -25,7 +25,7 @@ git checkout $HASH
 popd
 
 # if octave exists:
-if [ -e /etc/octave.conf ]
-then
-    echo addpath\(genpath\(\'${PIPELINE_TOOL_DIR}/matlab\'\)\)\; >> /etc/octave.conf
-fi
+#if [ -e /etc/octave.conf ]
+#then
+echo addpath\(genpath\(\'$DIR/tools/matlab\'\)\)\; >> /etc/octave.conf
+#fi
