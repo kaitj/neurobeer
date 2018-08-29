@@ -144,7 +144,7 @@ def main():
         LMean, LStd, DMean, DStd = ufiber.uFiberStats(L, D, idxes)
         ufiber.writeCSV(label, LMean, LStd, DMean, DStd, bundle.no_of_fibers,
                         dirpath=statsdir)
-        print("Avg. fiber length for cluster %i: %.2f +/- %.2f"
+        print("\nAvg. fiber length for cluster %i: %.2f +/- %.2f"
                 % (label, LMean, LStd))
         print("Avg. distance between end points for cluster %i: %.2f +/- %.2f"
                 % (label, DMean, DStd))

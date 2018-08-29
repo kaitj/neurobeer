@@ -69,7 +69,7 @@ def main():
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
-    bundleVTK = os.path.join(indir + '/tractography/' + opts.bundle)
+    bundleVTK = os.path.join(indir + '/' + opts.bundle)
     bundlePolydata = tractio.readVTK(bundleVTK, opts.verbose)
     fiberData = fibers.FiberTree()
     fiberData.convertFromVTK(bundlePolydata, opts.p, opts.verbose)
@@ -140,7 +140,7 @@ def main():
         LMean, LStd, DMean, DStd = ufiber.uFiberStats(L, D, idxes)
         ufiber.writeCSV(label, LMean, LStd, DMean, DStd, bundle.no_of_fibers,
                         dirpath=statsdir)
-        print("Avg. fiber length for cluster %i: %.2f +/- %.2f"
+        print("\nAvg. fiber length for cluster %i: %.2f +/- %.2f"
                     % (label, LMean, LStd))
         print("Avg. distance between end points for cluster %i: %.2f +/- %.2f"
                     % (label, DMean, DStd))

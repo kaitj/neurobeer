@@ -88,7 +88,7 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
         emvec = eigvec[:, 1:gap_idx + 1]
 
         if (k_clusters < gap_idx + 1) and (verbose != 0):
-            print("Warning: k clusters chosen may end in undesirable results")
+            print("\nWarning: k clusters chosen may end in undesirable results")
 
         del eigval, eigvec, gap_idx
 

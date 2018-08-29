@@ -91,7 +91,7 @@ def main():
     tck, scalar = getBIDS(layout, subjid, scalar_img)
 
     if args.verbose != 0:
-        print("Converting streamlines from .tck to .bfloat...")
+        print("\nConverting streamlines from .tck to .bfloat...")
 
     tck_str = '"{}"'.format(tck)
     # Convert to bfloat
@@ -107,11 +107,11 @@ def main():
                                  stdout=open(os.devnull, 'wb')).communicate()
 
     if conv_proc[0] is not None or not op.exists(bfloat):
-        print("Error converting .tck to .bfloat")
+        print("\nError converting .tck to .bfloat")
         exit()
 
     if args.verbose != 0:
-        print("Tracking scalar to streamlines...")
+        print("\nTracking scalar to streamlines...")
 
     # Tract scalar and write to Bdouble
     filename = scalar.split('.', -1)
@@ -129,11 +129,11 @@ def main():
                                        stdin=bfloat_proc.stdout).communicate()
 
     if tractstats_proc[0] is not None or not op.exists(bdouble):
-        print("Error tracking scalar to streamlines")
+        print("\nError tracking scalar to streamlines")
         exit()
 
     if args.verbose != 0:
-        print("Writing tracked scalar to text file...")
+        print("\nWriting tracked scalar to text file...")
 
     # Convert to text file
     filename, _ = op.splitext(bdouble)
@@ -146,18 +146,18 @@ def main():
                                  stdin=bdouble_proc.stdout).communicate()
 
     if txt_proc[0] is not None or not op.exists(txt):
-        print("Error writing scalars to text file")
+        print("\nError writing scalars to text file")
         exit()
 
     if args.verbose != 0:
-        print("Cleaning up files")
+        print("\nCleaning up files")
 
     # Clean up files
     cmd = proc_cmd("rm -f %s %s" % (bfloat, bdouble))
     rm_proc = subprocess.Popen(cmd, stdout=open(os.devnull, "wb")).communicate()
 
     if rm_proc[0] is not None:
-        print("Error removing %s and %s" % (bfloat, bdouble))
+        print("\nError removing %s and %s" % (bfloat, bdouble))
         exit()
 
     filename = txt.split('/', -1)[-1]
@@ -166,7 +166,7 @@ def main():
     mv_proc = subprocess.Popen(cmd, stdout=open(os.devnull, "wb")).communicate()
 
     if mv_proc[0] is not None or not op.exists(out_file):
-        print("Error moving %s" % (txt))
+        print("\nError moving %s" % (txt))
         exit()
 
 
