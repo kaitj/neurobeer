@@ -3,13 +3,14 @@ from distutils.core import setup
 setup(
     # Project information
     name='neurobeer',
-    version='1.0.2',
+    version='1.1.0',
     description='NeuroBundle Extraction and Evaluation Resource',
     packages=['neurobeer/tractography'],
     scripts=['neurobeer/cli/clusterSingle',
              'neurobeer/cli/clusterPrior',
              'neurobeer/cli/clusterUFiber',
-             'neurobeer/cli/clusterUFiberPrior'],
+             'neurobeer/cli/clusterUFiberPrior',
+             'neurobeer/cli/tractscalar'],
 
     # Metadata
     author='Jason Kai',
