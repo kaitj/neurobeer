@@ -69,7 +69,7 @@ def main():
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
-    bundleVTK = os.path.join(indir + '/' + opts.bundle)
+    bundleVTK = os.path.join(indir + '/tractography/' + opts.bundle)
     bundlePolydata = tractio.readVTK(bundleVTK, opts.verbose)
     fiberData = fibers.FiberTree()
     fiberData.convertFromVTK(bundlePolydata, opts.p, opts.verbose)
@@ -119,6 +119,7 @@ def main():
 
     bundleName = opts.bundle[:-4] + '_uFibers_Clustered.vtk'
     bundledir = os.path.join(tractdir, bundleName)
+    bundleName = bundleName.split('/', -1)[-1]
     tractio.writeVTK(outputPolydata, bundledir, opts.verbose)
     clusterData = fiberData.getFibers(range(fiberData.no_of_fibers), rejIdx)
     clusterData = fibers.convertFromTuple(clusterData)
@@ -152,6 +153,7 @@ def main():
 
         bundleSuffix = '_uFibers_Cluster%i.vtk' % label
         bundleName = opts.bundle[:-4] + bundleSuffix
+        bundleName = bundleName.split('/', -1)[-1]
         bundledir = os.path.join(tractdir, bundleName)
         tractio.writeVTK(polyData, bundledir, opts.verbose)
 

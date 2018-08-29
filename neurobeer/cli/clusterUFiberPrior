@@ -117,6 +117,7 @@ def main():
     del bundlePolydata, opts.prior, scalarWeightList, scalarDataList
 
     bundleName = opts.bundle[:-4] + '_uFibers_Clustered.vtk'
+    bundleName = bundleName.split('/', -1)[-1]
     bundledir = os.path.join(tractdir, bundleName)
     tractio.writeVTK(outputPolydata, bundledir, opts.verbose)
     clusterData = fiberData.getFibers(range(fiberData.no_of_fibers))
@@ -156,6 +157,7 @@ def main():
 
         bundleSuffix = '_uFibers_Cluster%i.vtk' % label
         bundleName = opts.bundle[:-4] + bundleSuffix
+        bundleName = bundleName.split('/', -1)[-1]
         bundledir = os.path.join(tractdir, bundleName)
         tractio.writeVTK(polyData, bundledir, opts.verbose)
 
