@@ -1,6 +1,7 @@
 # Patch Notes
 
 ## Content
+* [v1.1.0](#v110)
 * [v1.0.2](#v102)
 * [v1.0.1](#v101)
 * [v1.0.0](#v100)
@@ -9,6 +10,11 @@
 * [v0.1.2](#v012)
 * [v0.1.1](#v011)
 * [v0.1.0](#v010)
+
+### Version 1.1.0 <a name=v110></a>
+* Added singularity recipe for containerizing software suite
+* Added tractscalar cli to map scalars to text file for vtk
+    * Requires camino and conversion from .tck (MRTrix) to .bfloat
 
 ### Version 1.0.2 <a name=v102></a>
 * Changed np.dot to np.einsum
