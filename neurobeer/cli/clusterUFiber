@@ -66,6 +66,9 @@ def main():
     indir = os.path.abspath(os.path.join(opts.indir + '/' + opts.subjid))
     outdir = os.path.abspath(os.path.join(opts.outdir + '/' + opts.subjid))
 
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+
     bundleVTK = os.path.join(indir + '/' + opts.bundle)
     bundlePolydata = tractio.readVTK(bundleVTK, opts.verbose)
     fiberData = fibers.FiberTree()
@@ -82,7 +85,8 @@ def main():
             name = name.split('/', -1)[-1]
             data = name + 'Data'
             typevar = name + 'Type'
-            exec('%s, %s = tractio.readScalar("%s", opts.verbose)' % (data, typevar, path))
+            exec('%s, %s = tractio.readScalar("%s", opts.verbose)'
+                % (data, typevar, path))
             exec('scalarDataList.append(%s)' % (data))
             exec('scalarTypeList.append(%s)' % (typevar))
 
@@ -99,45 +103,56 @@ def main():
     uFiberTree = ufiber.extractUFiber(fiberData, uArray)
     uFiberTree.copyScalar(fiberData, scalarTypeList, fidxes=uArray, rejIdx=[])
 
+    # Tractography directory
+    tractdir = os.path.join(outdir, 'tractography')
+    if not os.path.exists(tractdir):
+        os.makedirs(tractdir)
+
     # Perform clustering on provided bundle
     outputPolydata, clusterIdx, fiberData, rejIdx = cluster.spectralClustering(
                                     uFiberTree, scalarDataList=scalarDataList,
                                     scalarWeightList=scalarWeightList,
                                     scalarTypeList=scalarTypeList,
                                     k_clusters=opts.k, sigma=opts.sig,
-                                    dirpath=outdir, verbose=opts.verbose)
+                                    dirpath=tractdir, verbose=opts.verbose)
     del bundlePolydata, scalarWeightList, scalarDataList
 
     bundleName = opts.bundle[:-4] + '_uFibers_Clustered.vtk'
-    bundledir = os.path.join(outdir, bundleName)
+    bundledir = os.path.join(tractdir, bundleName)
     tractio.writeVTK(outputPolydata, bundledir, opts.verbose)
     clusterData = fiberData.getFibers(range(fiberData.no_of_fibers), rejIdx)
     clusterData = fibers.convertFromTuple(clusterData)
     clusterData.copyScalar(fiberData, scalarTypeList, fidxes=[], rejIdx=rejIdx)
 
     # Extract individual clusters
+    statsdir = os.path.join(tractdir, 'stats')
+    if not os.path.exists(statsdir):
+        os.makedirs(statsdir)
+
     for label in np.unique(clusterIdx):
         idxes = np.where(clusterIdx == label)[0]
         bundle = clusterData.getFibers(idxes)
         bundle = fibers.convertFromTuple(bundle)
         polyData = bundle.convertToVTK()
-        statsSuffix = 'stats/stats_%i' % label
-        statsdir = os.path.join(outdir + '/' + statsSuffix)
+        statsSuffix = 'stats_%i' % label
+        labeldir = os.path.join(statsdir, statsSuffix)
         LMean, LStd, DMean, DStd = ufiber.uFiberStats(L, D, idxes)
         ufiber.writeCSV(label, LMean, LStd, DMean, DStd, bundle.no_of_fibers,
-                        dirpath=outdir)
-        print("Avg. fiber length for cluster %i: %.2f +/- %.2f" % (label, LMean, LStd))
-        print("Avg. distance between end points for cluster %i: %.2f +/- %.2f" % (label, DMean, DStd))
+                        dirpath=statsdir)
+        print("Avg. fiber length for cluster %i: %.2f +/- %.2f"
+                    % (label, LMean, LStd))
+        print("Avg. distance between end points for cluster %i: %.2f +/- %.2f"
+                    % (label, DMean, DStd))
 
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, clusterData, Type,
                                               idxes)
-            stats.plotStats(fiberData, Type, idxes, dirpath=statsdir)
-            stats.writeCSV(label, fiberData, Type, idxes, dirpath=outdir)
+            stats.plotStats(fiberData, Type, idxes, dirpath=labeldir)
+            stats.writeCSV(label, fiberData, Type, idxes, dirpath=statsdir)
 
         bundleSuffix = '_uFibers_Cluster%i.vtk' % label
         bundleName = opts.bundle[:-4] + bundleSuffix
-        bundledir = os.path.join(outdir, bundleName)
+        bundledir = os.path.join(tractdir, bundleName)
         tractio.writeVTK(polyData, bundledir, opts.verbose)
 
 
