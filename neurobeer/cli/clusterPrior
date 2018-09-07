@@ -17,7 +17,7 @@ def get_parser():
                             formatter_class=RawTextHelpFormatter)
 
     # Version option
-    parser.add_argument('--version', action='version', version='1.0.2')
+    parser.add_argument('--version', action='version', version='1.1.0')
 
     # Required arguments
     g_req = parser.add_argument_group('required arguments')
@@ -62,6 +62,9 @@ def main():
     indir = os.path.abspath(os.path.join(opts.indir + '/' + opts.subjid))
     outdir = os.path.abspath(os.path.join(opts.outdir + '/' + opts.subjid))
 
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+
     bundleVTK = os.path.join(indir + '/' + opts.bundle)
     bundlePolydata = tractio.readVTK(bundleVTK, opts.verbose)
 
@@ -80,7 +83,8 @@ def main():
             name = name.split('_', -1)[-1]
             data = name + 'Data'
             typevar = name + 'Type'
-            exec('%s, %s = tractio.readScalar("%s", opts.verbose)' % (data, typevar, path))
+            exec('%s, %s = tractio.readScalar("%s", opts.verbose)'
+                % (data, typevar, path))
             exec('scalarDataList.append(%s)' % (data))
             exec('scalarTypeList.append(%s)' % (typevar))
 
@@ -93,12 +97,16 @@ def main():
                             scalarTypeList[i], fiberData.pts_per_fiber)
 
     # Perform clustering on provided bundle
+    tractdir = os.path.join(outdir, 'tractograhy')
+    if not os.path.exists(tractdir):
+        os.makedirs(tractdir)
+
     outputPolydata, clusterIdx, fiberData = cluster.spectralPriorCluster(
                                     fiberData, opts.prior,
                                     scalarDataList=scalarDataList,
                                     scalarWeightList=scalarWeightList,
                                     scalarTypeList=scalarTypeList,
-                                    sigma=opts.sig, dirpath=outdir,
+                                    sigma=opts.sig, dirpath=tractdir,
                                     verbose=opts.verbose)
     del bundlePolydata, opts.prior, scalarWeightList, scalarDataList
 
@@ -106,7 +114,8 @@ def main():
     DArray = fibers.calcEndPointSep(fiberData)
     fibers.addLDRatio(DArray, LArray, outputPolydata)
     bundleName = opts.bundle[:-4] + '_Clustered.vtk'
-    bundledir = os.path.join(outdir, bundleName)
+    bundleName = bundleName.split('/', -1)[-1]
+    bundledir = os.path.join(tractdir, bundleName)
     tractio.writeVTK(outputPolydata, bundledir, opts.verbose)
     del LArray, DArray
 
@@ -120,6 +129,10 @@ def main():
     #    stats.plotStats(fiberData, Type, dirpath=os.path.join(outdir + '/stats/stats_Clustered'))
 
     # Extract individual clusters
+    statsdir = os.path.join(tractdir, 'stats')
+    if not os.path.exists(statsdir):
+        os.makedirs(statsdir)
+
     for label in np.unique(clusterIdx):
         idxes = np.where(clusterIdx == label)[0]
         bundle = clusterData.getFibers(idxes)
@@ -127,19 +140,20 @@ def main():
         polyData = bundle.convertToVTK()
         LArray = fibers.calcFiberLength(clusterData, idxes)
         LMean, LStd, fiberCount = stats.calcGeoStats(LArray)
-        stats.writeGeoCSV(label, LMean, LStd, fiberCount, dirpath=outdir)
-        statsSuffix = 'stats/stats_%i' % label
-        statsdir = os.path.join(outdir + '/' + statsSuffix)
+        stats.writeGeoCSV(label, LMean, LStd, fiberCount, dirpath=statsdir)
+        statsSuffix = 'stats_%i' % label
+        labeldir = os.path.join(statsdir + '/' + statsSuffix)
 
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, clusterData, Type,
                                               idxes)
-            stats.plotStats(clusterData, Type, idxes, dirpath=statsdir)
-            stats.writeCSV(label, clusterData, Type, idxes, dirpath=outdir)
+            stats.plotStats(clusterData, Type, idxes, dirpath=labeldir)
+            stats.writeCSV(label, clusterData, Type, idxes, dirpath=statsdir)
 
         bundleSuffix = '_Cluster%i.vtk' % label
         bundleName = opts.bundle[:-4] + bundleSuffix
-        bundledir = os.path.join(outdir, bundleName)
+        bundleName = bundleName.split('/', -1)[-1]
+        bundledir = os.path.join(tractdir, bundleName)
         tractio.writeVTK(polyData, bundledir, opts.verbose)
 
 
