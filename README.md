@@ -51,6 +51,7 @@ To use the Docker container, run the following command:
 `docker pull kaitj/neurobeer`
 
 To use the Singularity container, users will have to build the container from the recipe found in the container directory. To do so, run the following command:
+
 `singularity build neurobeer_0.0.2.img Singularity.0.0.2`
 
 _Note: `sudo` may be required to pull or build container._
