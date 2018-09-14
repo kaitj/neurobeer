@@ -1,6 +1,7 @@
 # Patch Notes
 
 ## Content
+* [v1.1.1](#v111)
 * [v1.1.0](#v110)
 * [v1.0.2](#v102)
 * [v1.0.1](#v101)
@@ -10,6 +11,10 @@
 * [v0.1.2](#v012)
 * [v0.1.1](#v011)
 * [v0.1.0](#v010)
+
+### Version 1.1.1 <a name=v111></a>
+* Switched to docker for containerization of tool
+* Revamped singularity recipe file to build from image on dockerhub
 
 ### Version 1.1.0 <a name=v110></a>
 * Added singularity recipe for containerizing software suite
