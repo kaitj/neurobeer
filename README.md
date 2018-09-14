@@ -44,9 +44,16 @@ Finally, to install the package, run the following command:
 
 #### Containerized package <a name="container"></a>
 
-NeuroBundle Extraction and Evaluation Resource is also available as a container via Singularity. Currently, users will have to build the container themselves via the Singularity recipe found under the singularity directory.
+NeuroBundle Extraction and Evaluation Resource is also available as a container via both Docker and Singularity.
 
-Future updates will look to implement and support Docker.
+To use the Docker container, run the following command:
+
+`docker pull kaitj/neurobeer`
+
+To use the Singularity container, users will have to build the container from the recipe found in the container directory. To do so, run the following command:
+`singularity build neurobeer_0.0.2.img Singularity.0.0.2`
+
+_Note: `sudo` may be required to pull or build container._
 
 ## Running tractography tool <a name="runmain"></a>
 The NeuroBundle Extraction and Evaluation Resource can be used via command line or as a Python library to be used in Python scripts.
