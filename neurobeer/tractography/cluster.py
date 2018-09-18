@@ -348,7 +348,7 @@ def _pairwiseQDistance_matrix(fiberTree, scalarType):
     """
 
     qDistances = distance.scalarDistance(fiberTree.getScalars(
-        range(fiberTree.no_of_fibers)))
+        range(fiberTree.no_of_fibers), scalarType))
 
     if np.diag(qDistances).all() != 0.0:
         print("Diagonals in distance matrix are not equal to 0")
@@ -443,7 +443,7 @@ def _priorQDistance_matrix(fiberTree, priorTree, scalarType):
     """
 
     qDistances = distance.scalarDistance(priorTree.getScalars(
-        range(priorTree.no_of_fibers)))
+        range(priorTree.no_of_fibers), scalarType))
     qDistances = np.array(qDistances)
 
     return qDistances
