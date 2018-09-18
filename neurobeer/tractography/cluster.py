@@ -703,7 +703,7 @@ def _outlierSimDetection(W):
 
     # Reject fibers that are 2 standard deviations from mean
     W_rowsum = np.sum(W, 0)
-    W_outlierthr = np.mean(W_rowsum) - 2 * np.std(W_rowsum)
+    W_outlierthr = np.mean(W_rowsum) - 1 * np.std(W_rowsum)
 
     rejIdx = np.where(W_rowsum < W_outlierthr)[0]
     # Remove outliers from matrix
