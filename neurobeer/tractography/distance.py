@@ -65,12 +65,6 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2=None, flip=False):
             for i in range(fiberMatrix1.shape[1]):
                 distance[i] = np.sqrt((np.linalg.norm(fiberMatrix1[0, i, :] -
                                                       fiberMatrix2[0, :, :],
-                                                      axis=1))**2 +
-                                      (np.linalg.norm(fiberMatrix1[1, i, :] -
-                                                      fiberMatrix2[1, :, :],
-                                                      axis=1))**2 +
-                                      (np.linalg.norm(fiberMatrix1[2, i, :] -
-                                                      fiberMatrix2[2, :, :],
                                                       axis=1))**2)
         # Flipped fiber
         else:
@@ -78,15 +72,7 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2=None, flip=False):
                 distance[i] = np.sqrt((np.linalg.norm(
                                        np.flip(fiberMatrix1[0, i, :], axis=0) -
                                                fiberMatrix2[0, :, :],
-                                               axis=1))**2 +
-                                      (np.linalg.norm(
-                                       np.flip(fiberMatrix1[1, i, :], axis=0) -
-                                               fiberMatrix2[1, :, :],
-                                               axis=1))**2 +
-                                      (np.linalg.norm(
-                                       np.flip(fiberMatrix1[2, i, :], axis=0) -
-                                               fiberMatrix2[2, :, :],
-                                               axis=1))**2)
+                                               axis=1)))
         del fiberMatrix1, fiberMatrix2
 
     return distance
@@ -109,85 +95,47 @@ def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2=None,
 
     # Calculates squared distance of scalars
     if fiberScalarMatrix2 is None:
-        qDistance = np.empty((fiberScalarMatrix1.shape[1],
-                              fiberScalarMatrix1.shape[1]), dtype=np.float32)
+        qDistance = np.empty((fiberScalarMatrix1.shape[0],
+                              fiberScalarMatrix1.shape[0]), dtype=np.float32)
 
         # Calculates the squared distance between fibers
         if flip is False:
-            for i in range(fiberScalarMatrix1.shape[1]):
-                qDistance[i] = np.sqrt((np.linalg.norm(
-                                            fiberScalarMatrix1[0, i, :] -
-                                            fiberScalarMatrix1[0, :, :],
-                                            axis=1))**2 +
-                                       (np.linalg.norm(
-                                            fiberScalarMatrix1[1, i, :] -
-                                            fiberScalarMatrix1[1, :, :],
-                                            axis=1))**2 +
-                                       (np.linalg.norm(
-                                            fiberScalarMatrix1[2, i, :] -
-                                            fiberScalarMatrix1[2, :, :],
-                                            axis=1))**2)
+            for i in range(fiberScalarMatrix1.shape[0]):
+                qDistance[i] = np.linalg.norm(
+                                    fiberScalarMatrix1[i, :] -
+                                    fiberScalarMatrix1[:, :],
+                                    axis=1)
         # Flip fiber
         else:
-            for i in range(fiberScalarMatrix1.shape[1]):
-                qDistance[i] = np.sqrt((np.linalg.norm(
-                                        np.flip(fiberScalarMatrix1[0, i, :],
-                                                axis=0) -
-                                                fiberScalarMatrix1[0, :, :],
-                                                axis=1))**2 +
-                                       (np.linalg.norm(
-                                        np.flip(fiberScalarMatrix1[1, i, :],
-                                                axis=0) -
-                                                fiberScalarMatrix1[1, :, :],
-                                                axis=1))**2 +
-                                       (np.linalg.norm(
-                                        np.flip(fiberScalarMatrix1[2, i, :],
-                                                axis=0) -
-                                                fiberScalarMatrix1[2, :, :],
-                                                axis=1))**2)
+            for i in range(fiberScalarMatrix1.shape[0]):
+                qDistance[i] = np.linalg.norm(
+                                    np.flip(fiberScalarMatrix1[i, :]) -
+                                    fiberScalarMatrix1[:, :],
+                                    axis=1)
         del fiberScalarMatrix1
     # Comparison between two fiber groups
     else:
-        distance = np.empty((fiberScalarMatrix1.shape[1],
-                             fiberScalarMatrix2.shape[1]), dtype=np.float32)
+        qDistance = np.empty((fiberScalarMatrix1.shape[0],
+                             fiberScalarMatrix2.shape[0]), dtype=np.float32)
 
         # Calculates the squared distance between fibers
         if flip is False:
-            for i in range(fiberScalarMatrix1.shape[1]):
-                qDistance[i] = np.sqrt((np.linalg.norm(
-                                            fiberScalarMatrix1[0, i, :] -
-                                            fiberScalarMatrix2[0, :, :],
-                                            axis=1))**2 +
-                                       (np.linalg.norm(
-                                            fiberScalarMatrix1[1, i, :] -
-                                            fiberScalarMatrix2[1, :, :],
-                                            axis=1))**2 +
-                                       (np.linalg.norm(
-                                            fiberScalarMatrix1[2, i, :] -
-                                            fiberScalarMatrix2[2, :, :],
-                                            axis=1))**2)
+            for i in range(fiberScalarMatrix1.shape[0]):
+                qDistance[i] = np.linalg.norm(
+                                    fiberScalarMatrix1[i, :] -
+                                    fiberScalarMatrix2[:, :],
+                                    axis=1)
         # Flip fiber
         else:
-            for i in range(fiberScalarMatrix1.shape[1]):
-                qDistance[i] = np.sqrt((np.linalg.norm(
-                                        np.flip(fiberScalarMatrix1[0, i, :],
-                                                axis=0) -
-                                                fiberScalarMatrix2[0, :, :],
-                                                axis=1))**2 +
-                                       (np.linalg.norm(
-                                        np.flip(fiberScalarMatrix1[1, i, :],
-                                                axis=0) -
-                                                fiberScalarMatrix2[1, :, :],
-                                                axis=1))**2 +
-                                       (np.linalg.norm(
-                                        np.flip(fiberScalarMatrix1[2, i, :],
-                                                axis=0) -
-                                                fiberScalarMatrix2[2, :, :],
-                                                axis=1))**2)
+            for i in range(fiberScalarMatrix1.shape[0]):
+                qDistance[i] = np.linalg.norm(
+                                    np.flip(fiberScalarMatrix1[i, :]) -
+                                    fiberScalarMatrix2[:, :],
+                                    axis=1)
 
         del fiberScalarMatrix1, fiberScalarMatrix2
 
-    return distance
+    return qDistance
 
 def fiberDistance(fiberArray1, fiberArray2=None):
     """
