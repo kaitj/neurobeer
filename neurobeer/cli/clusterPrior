@@ -38,9 +38,9 @@ def get_parser():
                        default=[], help='add scalar data to be used')
     g_opt.add_argument('-w', action='store', nargs='+', metavar='wgt',
                        default=[], help='provide weighting on data clustering')
-    g_opt.add_argument('-sig', action='store', type=float, metavar='sigma',
-                       default=1.0, help=('sigma to be used in clustering '
-                                          'algorithm'))
+    g_opt.add_argument('-sig', action='store', nargs='+',
+                       type=float, metavar='sigma', default=1.0,
+                       help=('sigma to be used in clustering algorithm'))
     g_opt.add_argument('-v', '--verbose', action='count', default=0,
                        help='verbosity of tool')
 

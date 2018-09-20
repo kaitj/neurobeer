@@ -5,3 +5,6 @@ Scikit-learn==0.19.0
 matplotlib==2.2.3
 VTK==8.1.0
 pybids==0.6.3
+pandas==0.23.4
+nibabel==2.3.0
+patsy==0.5.0

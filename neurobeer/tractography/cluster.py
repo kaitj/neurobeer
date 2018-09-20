@@ -14,7 +14,7 @@ import fibers, distance, misc, prior
 import vtk
 
 def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
-                       scalarWeightList=[], k_clusters=50, sigma=10,
+                       scalarWeightList=[], k_clusters=50, sigma=[10],
                        dirpath=None, verbose=0):
         """
         Clustering of fibers based on pairwise fiber similarity.
@@ -135,7 +135,7 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
         return outputPolydata, clusterIdx, fiberData, rejIdx
 
 def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
-                         scalarTypeList=[], scalarWeightList=[], sigma=10,
+                         scalarTypeList=[], scalarWeightList=[], sigma=[10],
                          dirpath=None, verbose=0):
         """
         Clustering of fibers based on pairwise fiber similarity using
@@ -348,7 +348,7 @@ def _pairwiseQDistance_matrix(fiberTree, scalarType):
     """
 
     qDistances = distance.scalarDistance(fiberTree.getScalars(
-        range(fiberTree.no_of_fibers)))
+        range(fiberTree.no_of_fibers), scalarType))
 
     if np.diag(qDistances).all() != 0.0:
         print("Diagonals in distance matrix are not equal to 0")
@@ -443,7 +443,7 @@ def _priorQDistance_matrix(fiberTree, priorTree, scalarType):
     """
 
     qDistances = distance.scalarDistance(priorTree.getScalars(
-        range(priorTree.no_of_fibers)))
+        range(priorTree.no_of_fibers), scalarType))
     qDistances = np.array(qDistances)
 
     return qDistances
@@ -561,7 +561,7 @@ def _format_outputVTK(polyData, clusterIdx, colour, centroids, rejIdx=[]):
     return polyData
 
 def _pairwiseWeightedSimilarity(fiberTree, scalarTypeList=[],
-                                scalarWeightList=[], sigma=10):
+                                scalarWeightList=[], sigma=[10]):
     """ *INTERNAL FUNCTION*
     Computes and returns a single weighted similarity matrix.
     Weight list should include weight for distance and sum to 1.
@@ -588,7 +588,7 @@ def _pairwiseWeightedSimilarity(fiberTree, scalarTypeList=[],
     elif ((((scalarWeightList == [])) and ((scalarTypeList == []))) or
     (scalarWeightList[0] == 1)):
         print("\nCalculating similarity based on geometry.")
-        wSimilarity = _pairwiseSimilarity_matrix(fiberTree, sigma)
+        wSimilarity = _pairwiseSimilarity_matrix(fiberTree, sigma[0])
         print("\nFinished calculating similarity")
 
     else:   # Calculate weighted similarity
@@ -596,12 +596,12 @@ def _pairwiseWeightedSimilarity(fiberTree, scalarTypeList=[],
             print('\nWeights given do not sum 1. Exiting...')
             exit()
 
-        wSimilarity = _pairwiseSimilarity_matrix(fiberTree, sigma)
+        wSimilarity = _pairwiseSimilarity_matrix(fiberTree, sigma[0])
         wSimilarity = wSimilarity * scalarWeightList[0]
 
         for i in range(len(scalarTypeList)):
             similarity = _pairwiseQSimilarity_matrix(fiberTree,
-                scalarTypeList[i], sigma)
+                scalarTypeList[i], sigma[i+1])
 
             wSimilarity += similarity * scalarWeightList[i+1]
 
@@ -614,7 +614,7 @@ def _pairwiseWeightedSimilarity(fiberTree, scalarTypeList=[],
     return wSimilarity
 
 def _priorWeightedSimilarity(fiberTree, priorTree, scalarTypeList=[],
-                             scalarWeightList=[], sigma=10):
+                             scalarWeightList=[], sigma=[10]):
     """ *INTERNAL FUNCTION*
     Computes and returns a single weighted similarity matrix.
     Weight list should include weight for distance and sum to 1.
@@ -640,7 +640,7 @@ def _priorWeightedSimilarity(fiberTree, priorTree, scalarTypeList=[],
     elif (((scalarWeightList == []) and (scalarTypeList == [])) or
     (scalarWeightList[0] == 1)):
         print("\nCalculating similarity based on geometry.")
-        wSimilarity = _priorSimilarity_matrix(fiberTree, priorTree, sigma)
+        wSimilarity = _priorSimilarity_matrix(fiberTree, priorTree, sigma[0])
         print("\nFinished calculating similarity)")
 
     else:   # Calculate weighted similarity
@@ -649,12 +649,12 @@ def _priorWeightedSimilarity(fiberTree, priorTree, scalarTypeList=[],
             print('\nWeights given do not sum 1. Exiting...')
             exit()
 
-        wSimilarity = _priorSimilarity_matrix(fiberTree, priorTree, sigma)
+        wSimilarity = _priorSimilarity_matrix(fiberTree, priorTree, sigma[0])
         wSimilarity = wSimilarity * scalarWeightList[0]
 
         for i in range(len(scalarTypeList)):
             similarity = _priorQSimilarity_matrix(fiberTree, priorTree,
-                scalarTypeList[i], sigma)
+                scalarTypeList[i], sigma[i+1])
 
             wSimilarity += similarity * scalarWeightList[i+1]
 
@@ -702,10 +702,11 @@ def _outlierSimDetection(W):
     """
 
     # Reject fibers that are 2 standard deviations from mean
-    W_rowsum = np.sum(W, 0)
-    W_outlierthr = np.mean(W_rowsum) - 2 * np.std(W_rowsum)
+    W_rowsum = np.nansum(W, 1)
+    W_outlierthr = np.mean(W_rowsum) - 1 * np.std(W_rowsum)
 
     rejIdx = np.where(W_rowsum < W_outlierthr)[0]
+
     # Remove outliers from matrix
     W = np.delete(W, rejIdx, 0)
     W = np.delete(W, rejIdx, 1)
