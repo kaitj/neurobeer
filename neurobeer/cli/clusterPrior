@@ -99,7 +99,7 @@ def main():
                             scalarTypeList[i], fiberData.pts_per_fiber)
 
     # Perform clustering on provided bundle
-    tractdir = os.path.join(outdir, 'tractograhy')
+    tractdir = os.path.join(outdir, 'tractography')
     if not os.path.exists(tractdir):
         os.makedirs(tractdir)
 
