@@ -398,7 +398,7 @@ def _priorDistance_matrix(fiberTree, priorTree):
     """
 
     distances = distance.fiberDistance(fiberTree.getFibers(
-        range(fiberTree.no_of_fibers)), priorTree.getfibers(
+        range(fiberTree.no_of_fibers)), priorTree.getFibers(
         range(priorTree.no_of_fibers)))
 
     return distances

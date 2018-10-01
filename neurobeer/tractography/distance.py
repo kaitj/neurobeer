@@ -65,6 +65,12 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2=None, flip=False):
             for i in range(fiberMatrix1.shape[1]):
                 distance[i] = np.sqrt((np.linalg.norm(fiberMatrix1[0, i, :] -
                                                       fiberMatrix2[0, :, :],
+                                                      axis=1))**2 +
+                                      (np.linalg.norm(fiberMatrix1[1, i, :] -
+                                                      fiberMatrix2[1, :, :],
+                                                      axis=1))**2 +
+                                      (np.linalg.norm(fiberMatrix1[2, i, :] -
+                                                      fiberMatrix2[2, :, :],
                                                       axis=1))**2)
         # Flipped fiber
         else:
@@ -72,7 +78,16 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2=None, flip=False):
                 distance[i] = np.sqrt((np.linalg.norm(
                                        np.flip(fiberMatrix1[0, i, :], axis=0) -
                                                fiberMatrix2[0, :, :],
-                                               axis=1)))
+                                               axis=1))**2 +
+                                      (np.linalg.norm(
+                                       np.flip(fiberMatrix1[1, i, :], axis=0) -
+                                               fiberMatrix2[1, :, :],
+                                               axis=1))**2 +
+                                      (np.linalg.norm(
+                                       np.flip(fiberMatrix1[2, i, :], axis=0) -
+                                               fiberMatrix2[2, :, :],
+                                               axis=1))**2)
+                                    
         del fiberMatrix1, fiberMatrix2
 
     return distance

@@ -1,3 +1,5 @@
 # Byte-compiled files / optimized/ DLL files / Build folder
 *.py[cod]
 build/*
+
+neurobeer_venv/*
