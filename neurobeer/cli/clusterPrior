@@ -103,17 +103,18 @@ def main():
     if not os.path.exists(tractdir):
         os.makedirs(tractdir)
 
-    outputPolydata, clusterIdx, fiberData = cluster.spectralPriorCluster(
-                                    fiberData, opts.prior,
-                                    scalarDataList=scalarDataList,
-                                    scalarWeightList=scalarWeightList,
-                                    scalarTypeList=scalarTypeList,
-                                    sigma=opts.sig, dirpath=tractdir,
-                                    verbose=opts.verbose)
+    outputPolydata, clusterIdx, fiberData, rejIdx = \
+                                    cluster.spectralPriorCluster(
+                                        fiberData, opts.prior,
+                                        scalarDataList=scalarDataList,
+                                        scalarWeightList=scalarWeightList,
+                                        scalarTypeList=scalarTypeList,
+                                        sigma=opts.sig, dirpath=tractdir,
+                                        verbose=opts.verbose)
     del bundlePolydata, opts.prior, scalarWeightList, scalarDataList
 
-    LArray = fibers.calcFiberLength(fiberData)
-    DArray = fibers.calcEndPointSep(fiberData)
+    LArray = fibers.calcFiberLength(fiberData, rejIdx)
+    DArray = fibers.calcEndPointSep(fiberData, rejIdx)
     fibers.addLDRatio(DArray, LArray, outputPolydata)
     bundleName = opts.bundle[:-4] + '_Clustered.vtk'
     bundleName = bundleName.split('/', -1)[-1]
@@ -121,9 +122,9 @@ def main():
     tractio.writeVTK(outputPolydata, bundledir, opts.verbose)
     del LArray, DArray
 
-    clusterData = fiberData.getFibers(range(fiberData.no_of_fibers))
+    clusterData = fiberData.getFibers(range(fiberData.no_of_fibers), rejIdx)
     clusterData = fibers.convertFromTuple(clusterData)
-    clusterData.copyScalar(fiberData, scalarTypeList, fidxes=[])
+    clusterData.copyScalar(fiberData, scalarTypeList, fidxes=[], rejIdx=rejIdx)
 
     # NOT USED - SUPPOSE TO EXTRACT STATS FOR COMBINED
     # NEEDS TO BE FIXED FOR USE (IF WANTED/NEEDED)
@@ -148,7 +149,7 @@ def main():
 
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, clusterData, Type,
-                                              idxes)
+                                              idxes, rejIdx)
             stats.plotStats(clusterData, Type, idxes, dirpath=labeldir)
             stats.writeCSV(label, clusterData, Type, idxes, dirpath=statsdir)
 
