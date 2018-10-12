@@ -63,8 +63,8 @@ def main():
     opts = get_parser().parse_args()
 
     # Read input polydata
-    indir = os.path.abspath(os.path.join(opts.indir + '/' + opts.subjid))
-    outdir = os.path.abspath(os.path.join(opts.outdir + '/' + opts.subjid))
+    indir = os.path.realpath(os.path.join(opts.indir + '/' + opts.subjid))
+    outdir = os.path.realpath(os.path.join(opts.outdir + '/' + opts.subjid))
 
     if not os.path.exists(outdir):
         os.makedirs(outdir)
