@@ -6,7 +6,7 @@ Module containing classes and functions pertaining to use of previously clustere
 
 import os
 import numpy as np
-import fibers, tractio
+from . import fibers, tractio
 from vtk.util import numpy_support
 
 def load(priorVTKPath, verbose=0):

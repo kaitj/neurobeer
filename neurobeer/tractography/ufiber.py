@@ -7,7 +7,7 @@ ufibers
 
 import os, csv
 import numpy as np
-import fibers
+from . import fibers
 
 def findUFiber(fiberData):
     """

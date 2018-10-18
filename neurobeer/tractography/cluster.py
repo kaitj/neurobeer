@@ -10,7 +10,7 @@ import scipy.cluster, scipy.linalg
 import os
 from sys import exit
 
-import fibers, distance, misc, prior
+from . import fibers, distance, misc, prior
 import vtk
 
 def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
