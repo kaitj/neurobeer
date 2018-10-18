@@ -10,9 +10,6 @@ WORKS WITH SINGULARITY CONTAINER (RECIPE CAN BE FOUND IN GIT REPO:
 https://github.com/kaitj/neurobeer)
 
 """
-import sys, imp
-sys.path.append(imp.find_module('neurobeer')[1])
-
 def getBIDS(bids_layout, subjid, scalar_img):
     subjid = subjid.lstrip('sub-')
 

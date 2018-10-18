@@ -5,9 +5,6 @@ Python command line interface for automated tractography clustering
 and evaluation.
 
 """
-import sys, imp
-sys.path.append(imp.find_module('neurobeer')[1])
-
 def get_parser():
     """
     Argument Parser
