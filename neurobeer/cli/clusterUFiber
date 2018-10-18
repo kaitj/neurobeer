@@ -11,13 +11,14 @@ def get_parser():
     Argument Parser
     """
     from argparse import ArgumentParser, RawTextHelpFormatter
+    from .._version import __version__
 
     parser = ArgumentParser(description=('Tractography extraction and '
                                          'clustering of U-fibers'),
                             formatter_class=RawTextHelpFormatter)
 
     # Version option
-    parser.add_argument('--version', action='version', version='1.1.1')
+    parser.add_argument('--version', action='version', version=__version__)
 
     # Required arguments
     g_req = parser.add_argument_group('required arguments')
