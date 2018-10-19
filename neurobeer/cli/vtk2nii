@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""" clusterUFiberPrior
+""" vtk2nii
 
 Python command line interface for converting vtk polydata to nifti using
 Camino. Outputs image with number of streamlines through voxel, raw

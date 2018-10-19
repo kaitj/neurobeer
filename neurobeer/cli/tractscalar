@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""" clusterUFiberPrior
+""" tractscalar
 
 Python command line interface for tracking scalar information to vtk polydata
 streamlines
