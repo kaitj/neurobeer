@@ -43,13 +43,14 @@ def get_parser():
 
     # Required arguments
     g_req = parser.add_argument_group('required arguments')
-    g_req.add_argument('bids_dir', help='Directory with input dataset, '
+    g_req.add_argument('nii_dir', help='Directory with input dataset, '
                                         'formatted according to BIDS standard')
-    g_req.add_argument('subjid', help='Participant id to track')
     g_req.add_argument('vtk_dir', help='Derivatives directory where VTKs are '
                                        'located')
-    g_req.add_argument('vtk_path', help='Path to VTK to be converted after '
-                                        'subject id')
+    g_req.add_argument('vtk_file', help='VTK file to be converted. Searches in '
+                                        'tractography folder under subject. '
+                                        '<vtk_dir>/<subj>/tractography/<vtk_file>')
+    g_req.add_argument('subjid', help='Participant id to track')
     g_req.add_argument('ref_img', help='Nifti image to use as reference for '
                                        'header (eg. fa, t1, etc.)')
 
@@ -57,7 +58,7 @@ def get_parser():
     g_opt = parser.add_argument_group('control arguments')
     g_opt.add_argument('-o', '--out_dir', dest="out_dir",
                                           help="Output directory. Defaults to "
-                                            "<bids_dir>/derivatives/neurobeer ")
+                                            "<bids_dir>/derivatives/camino")
     g_opt.add_argument('-v', '--verbose', action='count', default=0,
                        help='verbosity of tool')
 
@@ -76,10 +77,10 @@ def main():
 
     args = get_parser().parse_args()
     # Required inputs
-    bids_dir = args.bids_dir
+    nii_dir = args.nii_dir
     subjid = args.subjid
     vtk_dir = args.vtk_dir
-    vtk_path= args.vtk_path
+    vtk_file = args.vtk_file
     ref_img = args.ref_img
 
     # Set output directory
@@ -89,19 +90,20 @@ def main():
     else:
         out_dir = op.join(op.join('derivatives/camino', subjid),
                                   'tractography')
-        out_dir = op.join(op.realpath(bids_dir), out_dir)
+        out_dir = op.join(op.realpath(nii_dir), out_dir)
 
     if not op.exists(out_dir):
         os.makedirs(out_dir)
 
-    in_vtk = op.join(op.join(vtk_dir, subjid), vtk_path)
+    in_vtk = op.join(op.join(op.join(vtk_dir, subjid), 'tractography'),
+                vtk_file)
 
     # Set file defaults
     filename = op.splitext(in_vtk)[-2]
     filename = filename.split('/', -1)[-1]
 
     # Grab necessary files
-    layout = BIDSLayout(bids_dir)
+    layout = BIDSLayout(nii_dir)
     nii = getBIDS(layout, subjid, ref_img)
 
     # Read vtk and convert to bfloat
@@ -109,7 +111,7 @@ def main():
     bfloat = filename + '.Bfloat'
     bfloat = op.join(out_dir, bfloat)
     bfloat_str = '"{}"'.format(bfloat)
-    cmd = proc_cmd("runOctaveCmd writeCaminoTracts 'readTractsFromVTK(%s)' %s"
+    cmd = proc_cmd("runOctaveCmd writeCaminoTracts readTractsFromVTK(%s) %s"
                     % (vtk_str, bfloat_str))
     conv_proc = subprocess.Popen(cmd,
                                  stdout=open(os.devnull, 'wb')).communicate()
