@@ -131,7 +131,7 @@ def main():
     cmd = proc_cmd("procstreamlines -header %s -outputacm -outputsc "
                    "-outputroot %s" % (nii, out_root))
     streamlines_proc = subprocess.Popen(cmd,
-                                       stdout=open(os.devnull, 'wb').communiate(),
+                                       stdout=open(os.devnull, 'wb'),
                                        stdin=bfloat_in).communicate()
 
     if streamlines_proc[0] is not None:
