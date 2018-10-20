@@ -12,6 +12,7 @@ RUN bash /src/install_scripts/05_install_neurobeer.sh > log_05_neurobeer
 RUN bash /src/install_scripts/06_install_camino_source.sh > log_06_camino
 RUN bash /src/install_scripts/07_install_octave.sh > log_07_octave
 RUN bash /src/install_scripts/08_install_vasst_dev.sh > log_08_vasst_dev
+RUN bash /src/install_scripts/09_install_fsl.sh > log_09_fsl
 
 # Remove install scripts
 RUN rm -rf /src

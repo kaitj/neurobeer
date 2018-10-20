@@ -5,19 +5,19 @@ Python command line interface for automated tractography clustering
 and evaluation.
 
 """
-
 def get_parser():
     """
     Argument Parser
     """
     from argparse import ArgumentParser, RawTextHelpFormatter
+    from neurobeer._version import __version__
 
     parser = ArgumentParser(description=('Tractography clustering of single '
                                          'subject'),
                             formatter_class=RawTextHelpFormatter)
 
     # Version option
-    parser.add_argument('--version', action='version', version='1.1.1')
+    parser.add_argument('--version', action='version', version=__version__)
 
     # Required arguments
     g_req = parser.add_argument_group('required arguments')
@@ -54,17 +54,16 @@ def main():
     """
     Entry point of code
     """
-    import os, sys, imp
-    sys.path.append(imp.find_module('neurobeer/tractography')[1])
-    import cluster, fibers, stats, tractio
+    import os
     import numpy as np
+    from neurobeer.tractography import cluster, fibers, stats, tractio
 
     # Run parser
     opts = get_parser().parse_args()
 
     # Read input polydata
-    indir = os.path.abspath(os.path.join(opts.indir + '/' + opts.subjid))
-    outdir = os.path.abspath(os.path.join(opts.outdir + '/' + opts.subjid))
+    indir = os.path.realpath(os.path.join(opts.indir + '/' + opts.subjid))
+    outdir = os.path.realpath(os.path.join(opts.outdir + '/' + opts.subjid))
 
     if not os.path.exists(outdir):
         os.makedirs(outdir)

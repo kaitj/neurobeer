@@ -7,7 +7,7 @@ similarity measurements.
 
 import numpy as np
 
-def _fiberDistance_internal(fiberMatrix1, fiberMatrix2=None, flip=False):
+def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False):
     """ *INTERNAL FUNCTION*
     Computes the distance between one fiber and individual fibers within a
     group (array) of fibers.
@@ -22,77 +22,42 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2=None, flip=False):
         distance - Matrix containing distance between fibers
     """
 
-    # Comparison of single fiber group
-    if fiberMatrix2 is None:
-        distance = np.empty((fiberMatrix1.shape[1], fiberMatrix1.shape[1]),
-                             dtype=np.float32)
+    distance = np.empty((fiberMatrix1.shape[1], fiberMatrix2.shape[1]),
+                         dtype=np.float32)
 
-        # Calculates the squared distance between fibers
-        if flip is False:
-            for i in range(fiberMatrix1.shape[1]):
-                distance[i] = np.sqrt((np.linalg.norm(fiberMatrix1[0, i, :] -
-                                                      fiberMatrix1[0, :, :],
-                                                      axis=1))**2 +
-                                      (np.linalg.norm(fiberMatrix1[1, i, :] -
-                                                      fiberMatrix1[1, :, :],
-                                                      axis=1))**2 +
-                                      (np.linalg.norm(fiberMatrix1[2, i, :] -
-                                                      fiberMatrix1[2, :, :],
-                                                      axis=1))**2)
-        # Flipped fiber
-        else:
-            for i in range(fiberMatrix1.shape[1]):
-                distance[i] = np.sqrt((np.linalg.norm(
-                                       np.flip(fiberMatrix1[0, i, :], axis=0) -
-                                               fiberMatrix1[0, :, :],
-                                               axis=1))**2 +
-                                      (np.linalg.norm(
-                                       np.flip(fiberMatrix1[1, i, :], axis=0) -
-                                               fiberMatrix1[1, :, :],
-                                               axis=1))**2 +
-                                      (np.linalg.norm(
-                                       np.flip(fiberMatrix1[2, i, :], axis=0) -
-                                               fiberMatrix1[2, :, :],
-                                               axis=1))**2)
-        del fiberMatrix1
-    # Comparison between two fiber groups
+    # Calculates the squared distance between fibers
+    if flip is False:
+        for i in range(fiberMatrix1.shape[1]):
+            distance[i] = np.sqrt((np.linalg.norm(fiberMatrix1[0, i, :] -
+                                                  fiberMatrix2[0, :, :],
+                                                  axis=1))**2 +
+                                  (np.linalg.norm(fiberMatrix1[1, i, :] -
+                                                  fiberMatrix2[1, :, :],
+                                                  axis=1))**2 +
+                                  (np.linalg.norm(fiberMatrix1[2, i, :] -
+                                                  fiberMatrix2[2, :, :],
+                                                  axis=1))**2)
+    # Flipped fiber
     else:
-        distance = np.empty((fiberMatrix1.shape[1], fiberMatrix2.shape[1]),
-                             dtype=np.float32)
+        for i in range(fiberMatrix1.shape[1]):
+            distance[i] = np.sqrt((np.linalg.norm(
+                                   np.flip(fiberMatrix1[0, i, :], axis=0) -
+                                           fiberMatrix2[0, :, :],
+                                           axis=1))**2 +
+                                  (np.linalg.norm(
+                                   np.flip(fiberMatrix1[1, i, :], axis=0) -
+                                           fiberMatrix2[1, :, :],
+                                           axis=1))**2 +
+                                  (np.linalg.norm(
+                                   np.flip(fiberMatrix1[2, i, :], axis=0) -
+                                           fiberMatrix2[2, :, :],
+                                           axis=1))**2)
 
-        # Calculates the squared distance between fibers
-        if flip is False:
-            for i in range(fiberMatrix1.shape[1]):
-                distance[i] = np.sqrt((np.linalg.norm(fiberMatrix1[0, i, :] -
-                                                      fiberMatrix2[0, :, :],
-                                                      axis=1))**2 +
-                                      (np.linalg.norm(fiberMatrix1[1, i, :] -
-                                                      fiberMatrix2[1, :, :],
-                                                      axis=1))**2 +
-                                      (np.linalg.norm(fiberMatrix1[2, i, :] -
-                                                      fiberMatrix2[2, :, :],
-                                                      axis=1))**2)
-        # Flipped fiber
-        else:
-            for i in range(fiberMatrix1.shape[1]):
-                distance[i] = np.sqrt((np.linalg.norm(
-                                       np.flip(fiberMatrix1[0, i, :], axis=0) -
-                                               fiberMatrix2[0, :, :],
-                                               axis=1))**2 +
-                                      (np.linalg.norm(
-                                       np.flip(fiberMatrix1[1, i, :], axis=0) -
-                                               fiberMatrix2[1, :, :],
-                                               axis=1))**2 +
-                                      (np.linalg.norm(
-                                       np.flip(fiberMatrix1[2, i, :], axis=0) -
-                                               fiberMatrix2[2, :, :],
-                                               axis=1))**2)
-                                    
         del fiberMatrix1, fiberMatrix2
 
     return distance
 
-def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2=None,
+def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2,
                              flip=False):
     """ *INTERNAL FUNCTION*
     Computes the "distance" between the scalar values between one fiber and
@@ -109,46 +74,25 @@ def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2=None,
     """
 
     # Calculates squared distance of scalars
-    if fiberScalarMatrix2 is None:
-        qDistance = np.empty((fiberScalarMatrix1.shape[0],
-                              fiberScalarMatrix1.shape[0]), dtype=np.float32)
+    qDistance = np.empty((fiberScalarMatrix1.shape[0],
+                         fiberScalarMatrix2.shape[0]), dtype=np.float32)
 
-        # Calculates the squared distance between fibers
-        if flip is False:
-            for i in range(fiberScalarMatrix1.shape[0]):
-                qDistance[i] = np.linalg.norm(
-                                    fiberScalarMatrix1[i, :] -
-                                    fiberScalarMatrix1[:, :],
-                                    axis=1)
-        # Flip fiber
-        else:
-            for i in range(fiberScalarMatrix1.shape[0]):
-                qDistance[i] = np.linalg.norm(
-                                    np.flip(fiberScalarMatrix1[i, :]) -
-                                    fiberScalarMatrix1[:, :],
-                                    axis=1)
-        del fiberScalarMatrix1
-    # Comparison between two fiber groups
+    # Calculates the squared distance between fibers
+    if flip is False:
+        for i in range(fiberScalarMatrix1.shape[0]):
+            qDistance[i] = np.linalg.norm(
+                                fiberScalarMatrix1[i, :] -
+                                fiberScalarMatrix2[:, :],
+                                axis=1)
+    # Flip fiber
     else:
-        qDistance = np.empty((fiberScalarMatrix1.shape[0],
-                             fiberScalarMatrix2.shape[0]), dtype=np.float32)
+        for i in range(fiberScalarMatrix1.shape[0]):
+            qDistance[i] = np.linalg.norm(
+                                np.flip(fiberScalarMatrix1[i, :]) -
+                                fiberScalarMatrix2[:, :],
+                                axis=1)
 
-        # Calculates the squared distance between fibers
-        if flip is False:
-            for i in range(fiberScalarMatrix1.shape[0]):
-                qDistance[i] = np.linalg.norm(
-                                    fiberScalarMatrix1[i, :] -
-                                    fiberScalarMatrix2[:, :],
-                                    axis=1)
-        # Flip fiber
-        else:
-            for i in range(fiberScalarMatrix1.shape[0]):
-                qDistance[i] = np.linalg.norm(
-                                    np.flip(fiberScalarMatrix1[i, :]) -
-                                    fiberScalarMatrix2[:, :],
-                                    axis=1)
-
-        del fiberScalarMatrix1, fiberScalarMatrix2
+    del fiberScalarMatrix1, fiberScalarMatrix2
 
     return qDistance
 
@@ -171,8 +115,8 @@ def fiberDistance(fiberArray1, fiberArray2=None):
         fiberArray1 = np.asarray(fiberArray1, dtype=np.float32)
 
         # Compute distances for fiber and flipped fiber of group
-        distance1 = _fiberDistance_internal(fiberArray1)
-        distance2 = _fiberDistance_internal(fiberArray1, flip=True)
+        distance1 = _fiberDistance_internal(fiberArray1, fiberArray1)
+        distance2 = _fiberDistance_internal(fiberArray1, fiberArray1, flip=True)
         del fiberArray1
 
     else:
@@ -209,8 +153,11 @@ def scalarDistance(fiberScalarArray1, fiberScalarArray2=None):
         fiberScalarArray1 = np.asarray(fiberScalarArray1, dtype=np.float32)
 
         # Compute distances for fiber and fiber equivalent to fiber group
-        distance1 = _scalarDistance_internal(fiberScalarArray1)
-        distance2 = _scalarDistance_internal(fiberScalarArray1, flip=True)
+        distance1 = _scalarDistance_internal(fiberScalarArray1,
+                                             fiberScalarArray1)
+        distance2 = _scalarDistance_internal(fiberScalarArray1,
+                                             fiberScalarArray1,
+                                             flip=True)
         del fiberScalarArray1
 
     else:

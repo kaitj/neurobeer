@@ -1,5 +1,6 @@
 # Byte-compiled files / optimized/ DLL files / Build folder
 *.py[cod]
 build/*
+neurobeer/__pycache__/*
 
 neurobeer_venv/*

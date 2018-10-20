@@ -5,19 +5,19 @@ Python command line interface for automated tractography clustering
 and evaluation from previously clustered data
 
 """
-
 def get_parser():
     """
     Argument Parser
     """
     from argparse import ArgumentParser, RawTextHelpFormatter
+    from neurobeer._version import __version__
 
     parser = ArgumentParser(description=('Tractography clustering based on '
                                          'clustered data'),
                             formatter_class=RawTextHelpFormatter)
 
     # Version option
-    parser.add_argument('--version', action='version', version='1.1.1')
+    parser.add_argument('--version', action='version', version=__version__)
 
     # Required arguments
     g_req = parser.add_argument_group('required arguments')
@@ -50,17 +50,16 @@ def main():
     """
     Entry point of code
     """
-    import os, sys, imp
-    sys.path.append(imp.find_module('neurobeer/tractography')[1])
-    import cluster, fibers, prior, stats, tractio
+    import os
     import numpy as np
+    from neurobeer.tractography import cluster, fibers, prior, stats, tractio
 
     # Run parser
     opts = get_parser().parse_args()
 
     # Read input polydata
-    indir = os.path.abspath(os.path.join(opts.indir + '/' + opts.subjid))
-    outdir = os.path.abspath(os.path.join(opts.outdir + '/' + opts.subjid))
+    indir = os.path.realpath(os.path.join(opts.indir + '/' + opts.subjid))
+    outdir = os.path.realpath(os.path.join(opts.outdir + '/' + opts.subjid))
 
     if not os.path.exists(outdir):
         os.makedirs(outdir)
@@ -103,17 +102,18 @@ def main():
     if not os.path.exists(tractdir):
         os.makedirs(tractdir)
 
-    outputPolydata, clusterIdx, fiberData = cluster.spectralPriorCluster(
-                                    fiberData, opts.prior,
-                                    scalarDataList=scalarDataList,
-                                    scalarWeightList=scalarWeightList,
-                                    scalarTypeList=scalarTypeList,
-                                    sigma=opts.sig, dirpath=tractdir,
-                                    verbose=opts.verbose)
+    outputPolydata, clusterIdx, fiberData, rejIdx = \
+                                    cluster.spectralPriorCluster(
+                                        fiberData, opts.prior,
+                                        scalarDataList=scalarDataList,
+                                        scalarWeightList=scalarWeightList,
+                                        scalarTypeList=scalarTypeList,
+                                        sigma=opts.sig, dirpath=tractdir,
+                                        verbose=opts.verbose)
     del bundlePolydata, opts.prior, scalarWeightList, scalarDataList
 
-    LArray = fibers.calcFiberLength(fiberData)
-    DArray = fibers.calcEndPointSep(fiberData)
+    LArray = fibers.calcFiberLength(fiberData, rejIdx)
+    DArray = fibers.calcEndPointSep(fiberData, rejIdx)
     fibers.addLDRatio(DArray, LArray, outputPolydata)
     bundleName = opts.bundle[:-4] + '_Clustered.vtk'
     bundleName = bundleName.split('/', -1)[-1]
@@ -121,9 +121,9 @@ def main():
     tractio.writeVTK(outputPolydata, bundledir, opts.verbose)
     del LArray, DArray
 
-    clusterData = fiberData.getFibers(range(fiberData.no_of_fibers))
+    clusterData = fiberData.getFibers(range(fiberData.no_of_fibers), rejIdx)
     clusterData = fibers.convertFromTuple(clusterData)
-    clusterData.copyScalar(fiberData, scalarTypeList, fidxes=[])
+    clusterData.copyScalar(fiberData, scalarTypeList, fidxes=[], rejIdx=rejIdx)
 
     # NOT USED - SUPPOSE TO EXTRACT STATS FOR COMBINED
     # NEEDS TO BE FIXED FOR USE (IF WANTED/NEEDED)
@@ -148,7 +148,7 @@ def main():
 
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, clusterData, Type,
-                                              idxes)
+                                              idxes, rejIdx)
             stats.plotStats(clusterData, Type, idxes, dirpath=labeldir)
             stats.writeCSV(label, clusterData, Type, idxes, dirpath=statsdir)
 

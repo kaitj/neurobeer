@@ -10,7 +10,7 @@ import scipy.cluster, scipy.linalg
 import os
 from sys import exit
 
-import fibers, distance, misc, prior
+from . import fibers, distance, misc, prior
 import vtk
 
 def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
@@ -197,6 +197,8 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
         W = _priorWeightedSimilarity(fiberData, priorData, scalarTypeList,
                                      scalarWeightList, sigma)
 
+        W, rejIdx = _outlierSimDetection(W, pflag=1)
+
         # 2. Identify corresponding cluster indices from similarity
         simIdx = np.argmax(W, axis=1)
         clusterIdx = priorLabels[simIdx]
@@ -215,16 +217,16 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
 
         del W, simIdx
 
-        outputData = fiberData.convertToVTK()
+        outputData = fiberData.convertToVTK(rejIdx)
         outputPolydata = _format_outputVTK(outputData, clusterIdx, colour,
                                            priorCentroids)
 
         # 3. Also add measurements from those used to cluster
         for i in range(len(scalarTypeList)):
             outputPolydata = addScalarToVTK(outputPolydata, fiberData,
-                                            scalarTypeList[i])
+                                            scalarTypeList[i], rejIdx=rejIdx)
 
-        return outputPolydata, clusterIdx, fiberData
+        return outputPolydata, clusterIdx, fiberData, rejIdx
 
 def addScalarToVTK(polyData, fiberTree, scalarType, fidxes=None, rejIdx=[]):
     """
@@ -688,12 +690,13 @@ def _sortLabel(centroids, clusterIdx):
 
     return newCentroids, newClusters
 
-def _outlierSimDetection(W):
+def _outlierSimDetection(W, pflag=0):
     """ * INTERNAL FUNCTION *
     Look for outliers in fibers to reject
 
     INPUT
         W - similarity matrix
+        pflag - flag for outlier detection with priors
 
     OUTPUT:
         W - similarity matrix with removed outliers
@@ -701,17 +704,22 @@ def _outlierSimDetection(W):
 
     """
 
-    # Reject fibers that are 2 standard deviations from mean
+    # Reject fibers that is 1 standard deviations from mean
     W_rowsum = np.nansum(W, 1)
     W_outlierthr = np.mean(W_rowsum) - 1 * np.std(W_rowsum)
 
-    rejIdx = np.where(W_rowsum < W_outlierthr)[0]
-
     # Remove outliers from matrix
-    W = np.delete(W, rejIdx, 0)
-    W = np.delete(W, rejIdx, 1)
+    if pflag == 0:
+        rejIdx = np.where(W_rowsum < W_outlierthr)
 
-    return W, rejIdx
+        W = np.delete(W, rejIdx[0], 0)
+        W = np.delete(W, rejIdx[0], 1)
+
+    else:
+        W = np.delete(W, rejIdx[0], 0)
+        W = np.delete(W, rejIdx[1], 1)
+
+    return W, rejIdx[0]
 
 def _eiggap(eigval):
     """ * INTERNAL FUNCTION*
