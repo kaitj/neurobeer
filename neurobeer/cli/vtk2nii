@@ -130,9 +130,8 @@ def main():
     bfloat_in = open(bfloat)
     cmd = proc_cmd("procstreamlines -header %s -outputacm -outputsc "
                    "-outputroot %s" % (nii, out_root))
-    streamlines_proc = subprocess.Popen(cmd,
-                                       stdout=open(os.devnull, 'wb'),
-                                       stdin=bfloat_in).communicate()
+    streamlines_proc = subprocess.Popen(cmd, stdin=bfloat_in,
+                                       stdout=open(os.devnull, 'wb')).communicate()
 
     if streamlines_proc[0] is not None:
         print("\nError converting to nifti.")
