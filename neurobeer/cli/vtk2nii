@@ -87,7 +87,7 @@ def main():
     ref_img = args.ref_img
 
     if args.resamplestepsize:
-        resamplestepsize = args.resamplestepsize
+        resamplestepsize = float(args.resamplestepsize)
     else:
         resamplestepsize = 0.1
 
