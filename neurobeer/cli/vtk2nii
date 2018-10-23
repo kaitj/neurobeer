@@ -59,6 +59,9 @@ def get_parser():
     g_opt.add_argument('-o', '--out_dir', dest="out_dir",
                                           help="Output directory. Defaults to "
                                             "<bids_dir>/derivatives/camino")
+    g_opt.add_argument('-r', '--resamplestepsize', dest="resamplestepsize",
+                                                   help="Sample size for for "
+                                                        "tracking streamlines ")
     g_opt.add_argument('-v', '--verbose', action='count', default=0,
                        help='verbosity of tool')
 
@@ -82,6 +85,11 @@ def main():
     vtk_dir = args.vtk_dir
     vtk_file = args.vtk_file
     ref_img = args.ref_img
+
+    if args.resamplestepsize:
+        resamplestepsize = float(args.resamplestepsize)
+    else:
+        resamplestepsize = 0.1
 
     # Set output directory
     if args.out_dir:
@@ -128,8 +136,9 @@ def main():
     out_root = op.join(out_dir, out_root)
 
     bfloat_in = open(bfloat)
-    cmd = proc_cmd("procstreamlines -header %s -outputacm -outputsc "
-                   "-outputroot %s" % (nii, out_root))
+    cmd = proc_cmd("procstreamlines -header %s -resamplestepsize %f "
+                   "-outputacm -outputsc -outputroot %s" %
+                   (nii, resamplestepsize, out_root))
     streamlines_proc = subprocess.Popen(cmd, stdin=bfloat_in,
                                        stdout=open(os.devnull, 'wb')).communicate()
 
