@@ -81,7 +81,7 @@ def main():
         for DataIdx in scalarFileList:
             path = os.path.join(indir + '/' + str(DataIdx))
             name = path.split('.', -1)[-2]
-            name = name.split('_', -1)[-1]
+            name = name.split('/', -1)[-1]
             if name.split('-', -1)[-2] == 'sub':
                 name = name.split('-', -1)[-1]
             data = name + 'Data'
