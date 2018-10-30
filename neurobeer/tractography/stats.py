@@ -26,14 +26,14 @@ def _mean(fiberTree, scalarType, idxes=None):
     """
 
     if idxes is None:
-        clusterAvg = np.mean(fiberTree.getScalars(range(fiberTree.no_of_fibers),
+        clusterAvg = np.nanmean(fiberTree.getScalars(range(fiberTree.no_of_fibers),
                             scalarType)[:, :], axis=0)
-        avg = np.mean(fiberTree.getScalars(range(fiberTree.no_of_fibers),
+        avg = np.nanmean(fiberTree.getScalars(range(fiberTree.no_of_fibers),
                       scalarType)[:, :])
     else:
-        clusterAvg = np.mean(fiberTree.getScalars(idxes, scalarType)[:, :],
+        clusterAvg = np.nanmean(fiberTree.getScalars(idxes, scalarType)[:, :],
                              axis=0)
-        avg = np.mean(fiberTree.getScalars(idxes, scalarType)[:, :])
+        avg = np.nanmean(fiberTree.getScalars(idxes, scalarType)[:, :])
 
     return clusterAvg, avg
 
@@ -54,14 +54,14 @@ def _stddev(fiberTree, scalarType, idxes=None):
         stdev - standard deviation of fiber group
     """
     if idxes is None:
-        clusterSdev = np.std(fiberTree.getScalars(range(fiberTree.no_of_fibers),
+        clusterSdev = np.nanstd(fiberTree.getScalars(range(fiberTree.no_of_fibers),
                              scalarType)[:, :], axis=0)
-        stdev = np.std(fiberTree.getScalars(range(fiberTree.no_of_fibers),
+        stdev = np.nanstd(fiberTree.getScalars(range(fiberTree.no_of_fibers),
                        scalarType)[:, :])
     else:
-        clusterSdev = np.std(fiberTree.getScalars(idxes, scalarType)[:, :],
+        clusterSdev = np.nanstd(fiberTree.getScalars(idxes, scalarType)[:, :],
                              axis=0)
-        stdev = np.std(fiberTree.getScalars(idxes, scalarType)[:, :])
+        stdev = np.nanstd(fiberTree.getScalars(idxes, scalarType)[:, :])
     return clusterSdev, stdev
 
 def calcGeoStats(LArray):
@@ -78,8 +78,8 @@ def calcGeoStats(LArray):
         fiberCount - number of fibers
     """
 
-    LMean = np.mean(LArray)
-    LSD = np.std(LArray)
+    LMean = np.nanmean(LArray)
+    LSD = np.nanstd(LArray)
     fiberCount= len(LArray)
 
     return LMean, LSD, fiberCount
@@ -149,10 +149,10 @@ def writeCSV(clusterLabel, fiberTree, scalarType, idxes=None, dirpath=None):
 
     if idxes is None:
         scalarArray = \
-            np.mean(fiberTree.getScalars(range(fiberTree.no_of_fibers),
+            np.nanmean(fiberTree.getScalars(range(fiberTree.no_of_fibers),
                     scalarType)[:, :], axis=0)
     else:
-        scalarArray = np.mean(fiberTree.getScalars(idxes, scalarType)[:, :],
+        scalarArray = np.nanmean(fiberTree.getScalars(idxes, scalarType)[:, :],
                       axis=0)
 
     fileName = scalarType.split('/', -1)[-1]

@@ -708,16 +708,14 @@ def _outlierSimDetection(W, pflag=0):
     W_rowsum = np.nansum(W, 1)
     W_outlierthr = np.mean(W_rowsum) - 1 * np.std(W_rowsum)
 
+    rejIdx = np.where(W_rowsum < W_outlierthr)
+
     # Remove outliers from matrix
     if pflag == 0:
-        rejIdx = np.where(W_rowsum < W_outlierthr)
-
-        W = np.delete(W, rejIdx[0], 0)
-        W = np.delete(W, rejIdx[0], 1)
-
+        W = np.delete(W, rejIdx[0], axis=0)
+        W = np.delete(W, rejIdx[0], axis=1)
     else:
-        W = np.delete(W, rejIdx[0], 0)
-        W = np.delete(W, rejIdx[1], 1)
+        W = np.delete(W, rejIdx[0], axis=0)
 
     return W, rejIdx[0]
 
