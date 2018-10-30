@@ -712,11 +712,10 @@ def _outlierSimDetection(W, pflag=0):
 
     # Remove outliers from matrix
     if pflag == 0:
-        W = np.delete(W, rejIdx[0], 0)
-        W = np.delete(W, rejIdx[0], 1)
+        W = np.delete(W, rejIdx[0], axis=0)
+        W = np.delete(W, rejIdx[0], axis=1)
     else:
-        W = np.delete(W, rejIdx[0], 0)
-        W = np.delete(W, rejIdx[1], 1)
+        W = np.delete(W, rejIdx[0], axis=0)
 
     return W, rejIdx[0]
 
