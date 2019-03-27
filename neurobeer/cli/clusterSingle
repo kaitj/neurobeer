@@ -138,7 +138,11 @@ def main():
         polyData = bundle.convertToVTK()
 
         # Stats
+<<<<<<< HEAD
         LArray = fibers.calcFiberLength(bundle, [])
+=======
+        LArray = fibers.calcFiberLength(bundle)
+>>>>>>> 3bff1b51f80ba95eec0c8dea8d65355c9de81de5
         LMean, LStd, fiberCount = stats.calcGeoStats(LArray)
         stats.writeGeoCSV(label, LMean, LStd, fiberCount, dirpath=statsdir)
         statsSuffix = 'stats_%i' % label
@@ -146,7 +150,11 @@ def main():
 
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, clusterData, Type,
+<<<<<<< HEAD
                                               idxes, [])
+=======
+                                              idxes, rejIdx)
+>>>>>>> 3bff1b51f80ba95eec0c8dea8d65355c9de81de5
             stats.plotStats(fiberData, Type, idxes, dirpath=labeldir)
             stats.writeCSV(label, fiberData, Type, idxes, dirpath=statsdir)
 

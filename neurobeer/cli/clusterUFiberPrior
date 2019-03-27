@@ -154,7 +154,11 @@ def main():
 
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, clusterData, Type,
+<<<<<<< HEAD
                                               idxes, [])
+=======
+                                              idxes, rejIdx)
+>>>>>>> 3bff1b51f80ba95eec0c8dea8d65355c9de81de5
             stats.plotStats(clusterData, Type, idxes, dirpath=labeldir)
             stats.writeCSV(label, clusterData, Type, idxes, dirpath=statsdir)
 
