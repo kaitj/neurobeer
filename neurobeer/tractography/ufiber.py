@@ -33,11 +33,7 @@ def findUFiber(fiberData):
         D = _calcEndPointSep(fiberData, fidx)
 
         # Temporary max length constraint
-<<<<<<< HEAD
         if (L > 20) and (D <= (L / np.pi)) and (L < 80):
-=======
-        if (L > 30) and (D <= (L / np.pi)) and (L < 80):
->>>>>>> 3bff1b51f80ba95eec0c8dea8d65355c9de81de5
             uArray.append(fidx)
             LArray.append(L)
             DArray.append(D)
@@ -228,7 +224,7 @@ def _calcFiberLength(fiberData, fidx):
     return L
 
 def _calcEndPointSep(fiberData, fidx):
-    """ * INTERNAL uFiberData.fiberTreeFUNCTION *
+    """ * INTERNAL FUNCTION *
     Calculates distance between end points
 
     INPUT:
