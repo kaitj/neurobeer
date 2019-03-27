@@ -92,6 +92,8 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
 
         del eigval, eigvec, gap_idx
 
+<<<<<<< HEAD
+=======
         # 6. Compute information for clustering using "N" number of smallest
         # eigenvalues
         # Skips first eigenvector, no information obtained
@@ -104,12 +106,15 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
         # else:
         #     emvec = eigvec[:, 1:k_clusters + 1]
 
+>>>>>>> 3bff1b51f80ba95eec0c8dea8d65355c9de81de5
         # 7. Find clusters using K-means clustering
         centroids, clusterIdx = scipy.cluster.vq.kmeans2(emvec, k_clusters,
                                                          iter=100,
                                                          minit='points')
         centroids, clusterIdx = _sortLabel(centroids, clusterIdx)
         colour = _cluster_to_rgb(centroids)
+<<<<<<< HEAD
+=======
         # if k_clusters <= 1:
         #     print("\nNot enough eigenvectors selected!")
         #     raise ValueError
@@ -120,6 +125,7 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
         #     del temp
         # else:
         #    colour = _cluster_to_rgb(centroids)
+>>>>>>> 3bff1b51f80ba95eec0c8dea8d65355c9de81de5
 
         # 8. Return results
         # Create model with user / default number of chosen samples along fiber
@@ -172,6 +178,8 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
             dirpath = os.getcwd()
 
         priorData, priorCentroids, priorLabels = prior.load(priorVTK)
+<<<<<<< HEAD
+=======
         # priorPath = os.path.split(priorVTK)[0]
         #
         # if not os.path.exists(priorPath + '/eigval.npy'):
@@ -182,6 +190,7 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
         #     raise IOError
         # else:
         #     _, eigvec = prior.loadEig(priorPath, 'eigval.npy', 'eigvec.npy')
+>>>>>>> 3bff1b51f80ba95eec0c8dea8d65355c9de81de5
 
         k_clusters = len(priorCentroids)
 
@@ -205,6 +214,8 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
         fiberData.addClusterInfo(clusterIdx, priorCentroids)
         colour = _cluster_to_rgb(priorCentroids)
 
+<<<<<<< HEAD
+=======
         # if k_clusters <= 1:
         #     print('Not enough eigenvectors selected!')
         #     raise ValueError
@@ -215,6 +226,7 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
         # else:
         #     colour = _cluster_to_rgb(priorCentroids)
 
+>>>>>>> 3bff1b51f80ba95eec0c8dea8d65355c9de81de5
         del W, simIdx
 
         outputData = fiberData.convertToVTK(rejIdx)
