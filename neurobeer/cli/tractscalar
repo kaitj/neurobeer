@@ -1,0 +1,174 @@
+#!/usr/bin/env python
+""" tractscalar
+
+Python command line interface for tracking scalar information to vtk polydata
+streamlines
+
+**NOTE**
+REQUIRES INSTALLATION OF CAMINO AND ABILITY TO CONVERT FROM TCK TO BFLOAT
+WORKS WITH SINGULARITY CONTAINER (RECIPE CAN BE FOUND IN GIT REPO:
+https://github.com/kaitj/neurobeer)
+
+"""
+def getBIDS(bids_layout, subjid, scalar_img):
+    subjid = subjid.lstrip('sub-')
+
+    # Grab necessary files
+    tck = bids_layout.get(subject=subjid, type='tract', return_type='file',
+                          extensions=['tck'])
+    scalar = bids_layout.get(subject=subjid, type=scalar_img,
+                             return_type='file', extensions=['nii', 'nii.gz'])
+
+    return tck[0], scalar[0]
+
+def proc_cmd(cmd):
+    procCmd = cmd.split(" ")
+
+    return procCmd
+
+def get_parser():
+    """
+    Argument Parser
+    """
+    from argparse import ArgumentParser, RawTextHelpFormatter
+    from neurobeer._version import __version__
+
+    parser = ArgumentParser(description=('Tracks scalar information to vtk '
+                                         'polydata and returns text file'),
+                            formatter_class=RawTextHelpFormatter)
+
+    # Version option
+    parser.add_argument('--version', action='version', version=__version__)
+
+    # Required arguments
+    g_req = parser.add_argument_group('required arguments')
+    g_req.add_argument('bids_dir', help='Directory with input dataset, '
+                                        'formatted according to BIDS standard')
+    g_req.add_argument('subjid', help='Participant id to track')
+    g_req.add_argument('scalar_img', help='Nifti image with scalar to be '
+                                          'tracked (eg. fa.nii.gz)')
+
+    # Optional arguments
+    g_opt = parser.add_argument_group('control arguments')
+    g_opt.add_argument('-o', '--out_dir', dest="out_dir",
+                                          help="Output directory. Defaults to "
+                                            "<bids_dir>/derivatives/neurobeer ")
+    g_opt.add_argument('-v', '--verbose', action='count', default=0,
+                       help='verbosity of tool')
+
+    return parser
+
+def main():
+    """
+    Entry point of code
+    """
+    import os
+    import os.path as op
+    import subprocess
+
+    from bids.grabbids import BIDSLayout
+
+    args = get_parser().parse_args()
+    # Required inputs
+    bids_dir = args.bids_dir
+    subjid = args.subjid
+    scalar_img = args.scalar_img
+
+    # Set output directory
+    if args.out_dir:
+        out_dir = op.realpath(args.out_dir)
+        out_dir = op.join(op.join(out_dir, subjid), 'quantitative')
+    else:
+        out_dir = op.join(op.join('derivatives/neurobeer', subjid),
+                                  'quantitative')
+        out_dir = op.join(op.realpath(bids_dir), out_dir)
+
+    if not op.exists(out_dir):
+        os.makedirs(out_dir)
+
+    # Grab necessary files
+    layout = BIDSLayout(bids_dir)
+    tck, scalar = getBIDS(layout, subjid, scalar_img)
+
+    if args.verbose != 0:
+        print("\nConverting streamlines from .tck to .bfloat...")
+
+    tck_str = '"{}"'.format(tck)
+    # Convert to bfloat
+    # Output bfloat file
+    filename, _ = op.splitext(tck)
+    bfloat = filename.split('/', -1)[-1]
+    bfloat = op.join(out_dir, bfloat) + '.bfloat'
+    bfloat_str = '"{}"'.format(bfloat)
+
+    cmd = proc_cmd("runOctaveCmd convertTractsMRTrixToCamino %s %s"
+                    % (tck_str, bfloat_str))
+    conv_proc = subprocess.Popen(cmd,
+                                 stdout=open(os.devnull, 'wb')).communicate()
+
+    if conv_proc[0] is not None or not op.exists(bfloat):
+        print("\nError converting .tck to .bfloat")
+        exit()
+
+    if args.verbose != 0:
+        print("\nTracking scalar to streamlines...")
+
+    # Tract scalar and write to Bdouble
+    filename = scalar.split('.', -1)
+    if filename[-1] == 'gz':
+        filename = filename[-3]
+    else:
+        filename = filename[-2]
+    bdouble = filename + '.bdouble'
+
+    cmd = proc_cmd("cat %s" % (bfloat))
+    bfloat_proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+    cmd = proc_cmd("tractstats -tractstat none -interpolate -scalarfile %s"
+                   % (scalar))
+    tractstats_proc = subprocess.Popen(cmd, stdout=open(bdouble, "w+"),
+                                       stdin=bfloat_proc.stdout).communicate()
+
+    if tractstats_proc[0] is not None or not op.exists(bdouble):
+        print("\nError tracking scalar to streamlines")
+        exit()
+
+    if args.verbose != 0:
+        print("\nWriting tracked scalar to text file...")
+
+    # Convert to text file
+    filename, _ = op.splitext(bdouble)
+    txt = filename + '.txt'
+
+    cmd = proc_cmd("cat %s" % (bdouble))
+    bdouble_proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+    cmd = proc_cmd("double2txt")
+    txt_proc = subprocess.Popen(["double2txt"], stdout=open(txt, "w+"),
+                                 stdin=bdouble_proc.stdout).communicate()
+
+    if txt_proc[0] is not None or not op.exists(txt):
+        print("\nError writing scalars to text file")
+        exit()
+
+    if args.verbose != 0:
+        print("\nCleaning up files")
+
+    # Clean up files
+    cmd = proc_cmd("rm -f %s %s" % (bfloat, bdouble))
+    rm_proc = subprocess.Popen(cmd, stdout=open(os.devnull, "wb")).communicate()
+
+    if rm_proc[0] is not None:
+        print("\nError removing %s and %s" % (bfloat, bdouble))
+        exit()
+
+    filename = txt.split('/', -1)[-1]
+    out_file = op.join(out_dir, filename)
+    cmd = proc_cmd("mv %s %s" % (txt, out_file))
+    mv_proc = subprocess.Popen(cmd, stdout=open(os.devnull, "wb")).communicate()
+
+    if mv_proc[0] is not None or not op.exists(out_file):
+        print("\nError moving %s" % (txt))
+        exit()
+
+
+if __name__ == '__main__':
+    main()
