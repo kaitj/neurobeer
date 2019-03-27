@@ -47,11 +47,7 @@ def convertFromTuple(fiberTuple):
 
     return fiberTree
 
-<<<<<<< HEAD
 def calcEndPointSep(fiberData, rejIdx):
-=======
-def calcEndPointSep(fiberData, rejIdx=[]):
->>>>>>> 3bff1b51f80ba95eec0c8dea8d65355c9de81de5
     """
     Calculates distance between end points
 
@@ -80,11 +76,7 @@ def calcEndPointSep(fiberData, rejIdx=[]):
 
     return DArray
 
-<<<<<<< HEAD
 def calcFiberLength(fiberData, rejIdx):
-=======
-def calcFiberLength(fiberData, rejIdx=[]):
->>>>>>> 3bff1b51f80ba95eec0c8dea8d65355c9de81de5
     """
     Calculates the fiber length via arc length
     NOTE: same function as ufiber module without removing any fibers
@@ -105,17 +97,10 @@ def calcFiberLength(fiberData, rejIdx=[]):
     LArray = []
 
     for fidx in range(fiberData.no_of_fibers):
-<<<<<<< HEAD
         L = 0
         if fidx in rejIdx:
             continue
         else:
-=======
-        if fidx in rejIdx:
-            continue
-        else:
-            L = 0
->>>>>>> 3bff1b51f80ba95eec0c8dea8d65355c9de81de5
             for idx in range(1, no_of_pts):
                 x1 = fiberData.fiberTree[fidx][idx]['x']
                 x2 = fiberData.fiberTree[fidx][idx - 1]['x']
