@@ -28,22 +28,16 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False):
     # Calculates the squared distance between fibers
     if flip is False:
         for i in range(fiberMatrix1.shape[1]):
-            distance[i] = np.mean(np.sqrt((fiberMatrix1[0, i, :] -
-                                           fiberMatrix2[0, :, :])**2 +
-                                          (fiberMatrix1[1, i, :] -
-                                           fiberMatrix2[1, :, :])**2 +
-                                          (fiberMatrix1[2, i, :] -
-                                           fiberMatrix2[2, :, :])**2), axis=1)
+            distance[i] = np.mean(np.linalg.norm(np.subtract(
+                            fiberMatrix1[:, i, None],
+                            fiberMatrix2), axis=0), axis=1)
+
     # Flipped fiber
     else:
         for i in range(fiberMatrix1.shape[1]):
-            distance[i] = np.mean(np.sqrt(
-                                  (np.flip(fiberMatrix1[0, i, :], axis=0) -
-                                           fiberMatrix2[0, :, :])**2 +
-                                  (np.flip(fiberMatrix1[1, i, :], axis=0) -
-                                           fiberMatrix2[1, :, :])**2 +
-                                  (np.flip(fiberMatrix1[2, i, :], axis=0) -
-                                           fiberMatrix2[2, :, :])**2), axis=1)
+            distance[i] = np.mean(np.linalg.norm(np.subtract(
+                            np.flip(fiberMatrix1[:, i, None], axis=2),
+                            fiberMatrix2), axis=0), axis=1)
 
         del fiberMatrix1, fiberMatrix2
 
