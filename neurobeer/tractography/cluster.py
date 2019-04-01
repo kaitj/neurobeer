@@ -100,6 +100,8 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
                                                          minit='points')
         centroids, clusterIdx = _sortLabel(centroids, clusterIdx)
         colour = _cluster_to_rgb(centroids)
+        if verbose == 1:
+            print("\nFinished computing clusters...")
 
         # 8. Return results
         # Create model with user / default number of chosen samples along fiber
@@ -529,7 +531,7 @@ def _format_outputVTK(polyData, clusterIdx, colour, centroids, rejIdx=[]):
     return polyData
 
 def _pairwiseWeightedSimilarity(fiberTree, scalarTypeList=[],
-                                scalarWeightList=[], sigma=[10]):
+                                scalarWeightList=[], sigma=[10], n_jobs=-1):
     """ *INTERNAL FUNCTION*
     Computes and returns a single weighted similarity matrix.
     Weight list should include weight for distance and sum to 1.
@@ -540,6 +542,8 @@ def _pairwiseWeightedSimilarity(fiberTree, scalarTypeList=[],
                          measurements
         scalarWeightList - list of weights for similarity measurements
         sigma - width of Gaussian kernel; adjust to alter sensitivity
+        n_jobs - number of processes/threads (defaults to use all available
+                 resources)
 
     OUTPUT:
         wSimilarity - matrix containing the computed weighted similarity
@@ -564,7 +568,7 @@ def _pairwiseWeightedSimilarity(fiberTree, scalarTypeList=[],
             print('\nWeights given do not sum 1. Exiting...')
             exit()
 
-        wSimilarity = _pairwiseSimilarity_matrix(fiberTree, sigma[0])
+        wSimilarity = _pairwiseSimilarity_matrix(fiberTree, sigma[0], n_jobs)
         wSimilarity = wSimilarity * scalarWeightList[0]
 
         for i in range(len(scalarTypeList)):
@@ -582,7 +586,7 @@ def _pairwiseWeightedSimilarity(fiberTree, scalarTypeList=[],
     return wSimilarity
 
 def _priorWeightedSimilarity(fiberTree, priorTree, scalarTypeList=[],
-                             scalarWeightList=[], sigma=[10]):
+                             scalarWeightList=[], sigma=[10], n_jobs=-1):
     """ *INTERNAL FUNCTION*
     Computes and returns a single weighted similarity matrix.
     Weight list should include weight for distance and sum to 1.
@@ -593,6 +597,8 @@ def _priorWeightedSimilarity(fiberTree, priorTree, scalarTypeList=[],
         scalarTypeList - list of scalar type for similarity measurements
         scalarWeightList - list of weights for similarity measurements
         sigma - width of Gaussian kernel; adjust to alter sensitivity
+        n_jobs - number of processes/threads (defaults to use all available
+                 resources)
     OUTPUT:
         wSimilarity - matrix containing the computed weighted similarity
     """
@@ -617,7 +623,8 @@ def _priorWeightedSimilarity(fiberTree, priorTree, scalarTypeList=[],
             print('\nWeights given do not sum 1. Exiting...')
             exit()
 
-        wSimilarity = _priorSimilarity_matrix(fiberTree, priorTree, sigma[0])
+        wSimilarity = _priorSimilarity_matrix(fiberTree, priorTree, sigma[0],
+                                              n_jobs)
         wSimilarity = wSimilarity * scalarWeightList[0]
 
         for i in range(len(scalarTypeList)):
