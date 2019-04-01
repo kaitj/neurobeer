@@ -114,7 +114,8 @@ def fiberDistance(fiberArray1, fiberArray2=None, n_jobs=-1):
         fiberArray1 = np.asarray(fiberArray1, dtype=np.float32)
 
         # Compute distances for fiber and flipped fiber of group
-        distance1 = _fiberDistance_internal(fiberArray1, fiberArray1, n_jobs)
+        distance1 = _fiberDistance_internal(fiberArray1, fiberArray1,
+                                            n_jobs=n_jobs)
         distance2 = _fiberDistance_internal(fiberArray1, fiberArray1, flip=True,
                                             n_jobs=n_jobs)
         del fiberArray1
@@ -124,7 +125,8 @@ def fiberDistance(fiberArray1, fiberArray2=None, n_jobs=-1):
         fiberArray2 = np.asarray(fiberArray2, dtype=np.float32)
 
         # Compute distances between two fiber groups
-        distance1 = _fiberDistance_internal(fiberArray1, fiberArray2, n_jobs)
+        distance1 = _fiberDistance_internal(fiberArray1, fiberArray2,
+                                            n_jobs=n_jobs)
         distance2 = _fiberDistance_internal(fiberArray1, fiberArray2, flip=True,
                                             n_jobs=n_jobs)
         del fiberArray1, fiberArray2

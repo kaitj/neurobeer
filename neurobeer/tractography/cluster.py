@@ -271,7 +271,7 @@ def _pairwiseDistance_matrix(fiberTree, n_jobs=-1):
     """
 
     distances = distance.fiberDistance(fiberTree.getFibers(
-        range(fiberTree.no_of_fibers)), n_jobs)
+        range(fiberTree.no_of_fibers)), n_jobs=n_jobs)
 
     if np.diag(distances) != 0.0:
         print('Diagonals in distance matrix are not equal to 0')
@@ -295,7 +295,7 @@ def _pairwiseSimilarity_matrix(fiberTree, sigma, n_jobs=-1):
                      geometry
     """
 
-    similarity = _pairwiseDistance_matrix(fiberTree, n_jobs)
+    similarity = _pairwiseDistance_matrix(fiberTree, n_jobs=n_jobs)
     similarity = distance.gausKernel_similarity(similarity, sigma)
 
     # Sanity check
