@@ -15,7 +15,7 @@ import vtk
 
 def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
                        scalarWeightList=[], k_clusters=50, sigma=[10],
-                       dirpath=None, verbose=0):
+                       n_jobs=-1, dirpath=None, verbose=0):
         """
         Clustering of fibers based on pairwise fiber similarity.
         See paper: "A tutorial on spectral clustering" (von Luxburg, 2007)
@@ -35,6 +35,8 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
             scalarWeightList - list of weights for scalar measurements
             k_clusters - number of clusters via k-means clustering
             sigma - width of Gaussian kernel; adjust to alter sensitivity
+            n_jobs - number of processes/threads (defaults to use all available
+                     resources)
             dirpath - directory to store files
             verbose - verbosity of function
 
@@ -58,7 +60,7 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
 
         # 1. Compute similarty matrix
         W = _pairwiseWeightedSimilarity(fiberData, scalarTypeList,
-                                        scalarWeightList, sigma)
+                                        scalarWeightList, sigma, n_jobs)
 
         # Outlier detection
         W, rejIdx = _outlierSimDetection(W)
@@ -114,7 +116,7 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
 
 def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
                          scalarTypeList=[], scalarWeightList=[], sigma=[10],
-                         dirpath=None, verbose=0):
+                         n_jobs=-1, dirpath=None, verbose=0):
         """
         Clustering of fibers based on pairwise fiber similarity using
         previously clustered fibers via a Nystrom-like method.
@@ -137,6 +139,8 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
             scalarTypeList - list with scalar type for similarity type
             scalarWeightList - list with weights for similarity measurements;
             sigma - width of Gaussian kernel; adjust to alter sensitivity
+            n_jobs - number of processes/threads (defaults to use all available
+                     resources)
             dirpath - directory to store files
             verbose - verbosity of function
 
@@ -163,7 +167,7 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
 
         # 1. Compute similarty matrix
         W = _priorWeightedSimilarity(fiberData, priorData, scalarTypeList,
-                                     scalarWeightList, sigma)
+                                     scalarWeightList, sigma, n_jobs)
 
         W, rejIdx = _outlierSimDetection(W, pflag=1)
 
@@ -250,20 +254,22 @@ def extractCluster(inputVTK, clusterIdx, label, pts_per_fiber):
 
     return polyData
 
-def _pairwiseDistance_matrix(fiberTree):
+def _pairwiseDistance_matrix(fiberTree, n_jobs=-1):
     """ *INTERNAL FUNCTION*
     Used to compute an NxN distance matrix for all fibers (N) in the input data.
 
     INPUT:
         fiberTree - tree containing spatial and quantitative information of
                     fibers
+        n_jobs - number of processes/threads (defaults to use all available
+                 resources)
 
     OUTPUT:
         distances - NxN matrix containing distances between
     """
 
     distances = distance.fiberDistance(fiberTree.getFibers(
-        range(fiberTree.no_of_fibers)))
+        range(fiberTree.no_of_fibers)), n_jobs)
 
     if np.diag(distances).all() != 0.0:
         print('Diagonals in distance matrix are not equal to 0')
@@ -271,7 +277,7 @@ def _pairwiseDistance_matrix(fiberTree):
 
     return distances
 
-def _pairwiseSimilarity_matrix(fiberTree, sigma):
+def _pairwiseSimilarity_matrix(fiberTree, sigma, n_jobs=-1):
     """ *INTERNAL FUNCTION*
     Computes an NxN similarity matrix for all fibers (N) in the input data.
 
@@ -279,13 +285,15 @@ def _pairwiseSimilarity_matrix(fiberTree, sigma):
         fiberTree - tree containing spatial and quantitative information of
                     fibers
         sigma - width of Gaussian kernel; adjust to alter
+        n_jobs - number of processes/threads (defaults to use all available
+                 resources)
 
     OUTPUT:
         similarity - NxN matrix containing similarity between fibers based on
                      geometry
     """
 
-    similarity = _pairwiseDistance_matrix(fiberTree)
+    similarity = _pairwiseDistance_matrix(fiberTree, n_jobs)
     similarity = distance.gausKernel_similarity(similarity, sigma)
 
     # Sanity check

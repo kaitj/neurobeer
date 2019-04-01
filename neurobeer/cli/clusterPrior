@@ -41,6 +41,8 @@ def get_parser():
     g_opt.add_argument('-sig', action='store', nargs='+',
                        type=float, metavar='sigma', default=1.0,
                        help=('sigma to be used in clustering algorithm'))
+    g_opt.add_argument('-j', action='store', type=int, metavar='n_jobs',
+                       default=-1, help='number of cores to use')
     g_opt.add_argument('-v', '--verbose', action='count', default=0,
                        help='verbosity of tool')
 
@@ -109,7 +111,7 @@ def main():
                                         scalarWeightList=scalarWeightList,
                                         scalarTypeList=scalarTypeList,
                                         sigma=opts.sig, dirpath=tractdir,
-                                        verbose=opts.verbose)
+                                        n_jobs=opts.j, verbose=opts.verbose)
     del bundlePolydata, opts.prior, scalarWeightList, scalarDataList
 
     LArray = fibers.calcFiberLength(fiberData, rejIdx)
