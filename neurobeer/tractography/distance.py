@@ -52,8 +52,6 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False, n_jobs=-1):
                 np.flip(fiberMatrix1[:, i, None], axis=2), fiberMatrix2)
             for i in range(fiberMatrix1.shape[1]))
 
-        del fiberMatrix1, fiberMatrix2
-
     return distance
 
 def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2,
@@ -105,7 +103,7 @@ def fiberDistance(fiberArray1, fiberArray2=None, n_jobs=-1):
         fiberArray1 - group of fibers for comparison
         fiberArray2 - group of fibers to compare fiberArray1 to, if applicable
         n_jobs - number of processes/threads (defaults to use all available
-                 resources) 
+                 resources)
 
     OUTPUT:
         distance - minimum distance between group of fiber and single fiber
