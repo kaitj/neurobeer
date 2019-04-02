@@ -305,20 +305,22 @@ def _pairwiseSimilarity_matrix(fiberTree, sigma, n_jobs=-1):
 
     return similarity
 
-def _pairwiseQDistance_matrix(fiberTree, scalarType):
+def _pairwiseQDistance_matrix(fiberTree, scalarType, n_jobs=-1):
     """ *INTERNAL FUNCTION*
     Computes the "pairwise distance" between quantitative points along a fiber.
 
     INPUT:
         fiberTree - tree containing spatial and quantitative information of fibers
         scalarType - type of quantitative measurements to be used for computation
+        n_jobs - number of processes/threads (defaults to use all available
+                 resources)
 
     OUTPUT:
         qDistances - NxN matrix containing pairwise distances between fibers
     """
 
     qDistances = distance.scalarDistance(fiberTree.getScalars(
-        range(fiberTree.no_of_fibers), scalarType))
+        range(fiberTree.no_of_fibers), scalarType), n_jobs=n_jobs)
 
     if np.diag(qDistances).all() != 0.0:
         print("Diagonals in distance matrix are not equal to 0")
@@ -326,7 +328,7 @@ def _pairwiseQDistance_matrix(fiberTree, scalarType):
 
     return qDistances
 
-def _pairwiseQSimilarity_matrix(fiberTree, scalarType, sigma):
+def _pairwiseQSimilarity_matrix(fiberTree, scalarType, sigma, n_jobs=-1):
     """ *INTERNAL FUNCTION*
     Computes the similarity between quantitative points along a fiber.
 
@@ -336,13 +338,16 @@ def _pairwiseQSimilarity_matrix(fiberTree, scalarType, sigma):
         scalarType - type of quantitative measurements to be used for
                      computation
         sigma - width of Gaussian kernel; adjust to alter sensitivity
+        n_jobs - number of processes/threads (defaults to use all available
+                 resources)
 
     OUTPUT:
         qSimilarity - NxN matrix containing similarity of quantitative
                       measurements between fibers
     """
 
-    qSimilarity = _pairwiseQDistance_matrix(fiberTree, scalarType)
+    qSimilarity = _pairwiseQDistance_matrix(fiberTree, scalarType,
+                                            n_jobs=n_jobs)
     qSimilarity = distance.gausKernel_similarity(qSimilarity, sigma)
 
     # Sanity check
@@ -352,7 +357,7 @@ def _pairwiseQSimilarity_matrix(fiberTree, scalarType, sigma):
 
     return qSimilarity
 
-def _priorDistance_matrix(fiberTree, priorTree):
+def _priorDistance_matrix(fiberTree, priorTree, n_jobs=-1):
     """ *INTERNAL FUNCTION*
     Used to compute an distance matrix for all fibers (N) in the input data
     through comparison with previously clustered data
@@ -362,6 +367,8 @@ def _priorDistance_matrix(fiberTree, priorTree):
                     fibers
         priorTree - tree containing spatial and quantitative info from prev.
                     clustered fibers
+        n_jobs - number of processes/threads (defaults to use all available
+                 resources)
 
     OUTPUT:
         distances - matrix containing distances between fibers
@@ -369,11 +376,11 @@ def _priorDistance_matrix(fiberTree, priorTree):
 
     distances = distance.fiberDistance(fiberTree.getFibers(
         range(fiberTree.no_of_fibers)), priorTree.getFibers(
-        range(priorTree.no_of_fibers)))
+        range(priorTree.no_of_fibers)), n_jobs=n_jobs)
 
     return distances
 
-def _priorSimilarity_matrix(fiberTree, priorTree, sigma):
+def _priorSimilarity_matrix(fiberTree, priorTree, sigma, n_jobs=-1):
     """ *INTERNAL FUNCTION*
     Computes a similarity matrix for all fibers (N) in the input data to
     previously clustered fibers
@@ -384,19 +391,21 @@ def _priorSimilarity_matrix(fiberTree, priorTree, sigma):
         priorTree - tree containing spatial and quantitative info from
                     previously clustered fibers
         sigma - width of Gaussian kernel; adjust to alter
+        n_jobs - number of processes/threads (defaults to use all available
+                 resources)
 
     OUTPUT:
         similarity - matrix containing similarity between fibers based on
                      geometry
     """
 
-    similarities = _priorDistance_matrix(fiberTree, priorTree)
+    similarities = _priorDistance_matrix(fiberTree, priorTree, n_jobs=n_jobs)
     similarities = distance.gausKernel_similarity(similarities,
                         sigma)
 
     return similarities
 
-def _priorQDistance_matrix(fiberTree, priorTree, scalarType):
+def _priorQDistance_matrix(fiberTree, priorTree, scalarType, n_jobs=-1):
     """ *INTERNAL FUNCTION*
     Computes the "pairwise distance" between quantitative points along a fiber
     and previously clustered fibers
@@ -407,18 +416,21 @@ def _priorQDistance_matrix(fiberTree, priorTree, scalarType):
         priorTree - tree containing information on previously clustered fibers
         scalarType - type of quantitative measurements to be used for
                      computation
+        n_jobs - number of processes/threads (defaults to use all available
+                 resources)
 
     OUTPUT:
         qDistances - matrix containing pairwise distances between fibers
     """
 
     qDistances = distance.scalarDistance(priorTree.getScalars(
-        range(priorTree.no_of_fibers), scalarType))
+        range(priorTree.no_of_fibers), scalarType), n_jobs=n_jobs)
     qDistances = np.array(qDistances)
 
     return qDistances
 
-def _priorQSimilarity_matrix(fiberTree, priorTree, scalarType, sigma):
+def _priorQSimilarity_matrix(fiberTree, priorTree, scalarType, sigma,
+                             n_jobs=-1):
     """ *INTERNAL FUNCTION*
     Computes the similarity between quantitative points along a fiber and
     previously clustered fibers
@@ -430,13 +442,16 @@ def _priorQSimilarity_matrix(fiberTree, priorTree, scalarType, sigma):
         scalarType - type of quantitative measurements to be used for
                      computation
         sigma - width of Gaussian kernel; adjust to alter sensitivity
+        n_jobs - number of processes/threads (defaults to use all available
+                 resources)
 
     OUTPUT:
         qSimilarity - matrix containing similarity of quantitative measurements
         between fibers
     """
 
-    qDistances = _priorQDistance_matrix(fiberTree, priorTree, scalarType)
+    qDistances = _priorQDistance_matrix(fiberTree, priorTree, scalarType,
+                                        n_jobs=n_jobs)
 
     qSimilarity = distance.gausKernel_similarity(qDistances, sigma)
 
@@ -560,7 +575,8 @@ def _pairwiseWeightedSimilarity(fiberTree, scalarTypeList=[],
     elif ((((scalarWeightList == [])) and ((scalarTypeList == []))) or
     (scalarWeightList[0] == 1)):
         print("\nCalculating similarity based on geometry.")
-        wSimilarity = _pairwiseSimilarity_matrix(fiberTree, sigma[0])
+        wSimilarity = _pairwiseSimilarity_matrix(fiberTree, sigma[0],
+                                                 n_jobs=n_jobs)
         print("\nFinished calculating similarity")
 
     else:   # Calculate weighted similarity
@@ -573,7 +589,7 @@ def _pairwiseWeightedSimilarity(fiberTree, scalarTypeList=[],
 
         for i in range(len(scalarTypeList)):
             similarity = _pairwiseQSimilarity_matrix(fiberTree,
-                scalarTypeList[i], sigma[i+1])
+                scalarTypeList[i], sigma[i+1], n_jobs=n_jobs)
 
             wSimilarity += similarity * scalarWeightList[i+1]
 
@@ -614,7 +630,8 @@ def _priorWeightedSimilarity(fiberTree, priorTree, scalarTypeList=[],
     elif (((scalarWeightList == []) and (scalarTypeList == [])) or
     (scalarWeightList[0] == 1)):
         print("\nCalculating similarity based on geometry.")
-        wSimilarity = _priorSimilarity_matrix(fiberTree, priorTree, sigma[0])
+        wSimilarity = _priorSimilarity_matrix(fiberTree, priorTree, sigma[0],
+                                              n_jobs=n_jobs)
         print("\nFinished calculating similarity)")
 
     else:   # Calculate weighted similarity
@@ -624,12 +641,12 @@ def _priorWeightedSimilarity(fiberTree, priorTree, scalarTypeList=[],
             exit()
 
         wSimilarity = _priorSimilarity_matrix(fiberTree, priorTree, sigma[0],
-                                              n_jobs)
+                                              n_jobs=n_jobs)
         wSimilarity = wSimilarity * scalarWeightList[0]
 
         for i in range(len(scalarTypeList)):
             similarity = _priorQSimilarity_matrix(fiberTree, priorTree,
-                scalarTypeList[i], sigma[i+1])
+                scalarTypeList[i], sigma[i+1], n_jobs=n_jobs)
 
             wSimilarity += similarity * scalarWeightList[i+1]
 
