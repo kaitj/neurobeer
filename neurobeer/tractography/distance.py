@@ -6,8 +6,33 @@ similarity measurements.
 """
 
 import numpy as np
+from joblib import Parallel, delayed
+from joblib.pool import has_shareable_memory
 
-def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False):
+def _calcDistance(fiberMatrix1, fiberMatrix2):
+    """ *INTERNAL FUNCTION*
+    Computes average euclidean distance
+
+    INPUT:
+        fiberMatrix1 - 3D matrix containing fiber spatial infomration
+        fiberMatrix2 - 3D matrix containing fiber spatial information for
+                       comparison
+    """
+    return np.mean(np.linalg.norm(np.subtract(fiberMatrix1, fiberMatrix2),
+            axis=0), axis=1)
+
+def _calcQDistance(fiberMatrix1, fiberMatrix2):
+    """ *INTERNAL FUNCTION*
+    Computes average euclidean distance
+
+    INPUT:
+        fiberMatrix1 - 3D matrix containing fiber spatial infomration
+        fiberMatrix2 - 3D matrix containing fiber spatial information for
+                       comparison
+    """
+    return np.mean(np.linalg.norm(fiberMatrix1, fiberMatrix2), axis=1)
+
+def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False, n_jobs=-1):
     """ *INTERNAL FUNCTION*
     Computes the distance between one fiber and individual fibers within a
     group (array) of fibers.
@@ -17,48 +42,31 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False):
         fiberMatrix2 - 3D matrix containing fiber spatial information for
                        comparison
         flip - flag to flip fiber
+        n_jobs - number of processes/threads (defaults to use all available
+                 resources)
 
     OUTPUT:
         distance - Matrix containing distance between fibers
     """
 
-    distance = np.empty((fiberMatrix1.shape[1], fiberMatrix2.shape[1]),
-                         dtype=np.float32)
-
-    # Calculates the squared distance between fibers
+    # Calculates the avg Euclidean distance between fibers
     if flip is False:
-        for i in range(fiberMatrix1.shape[1]):
-            distance[i] = np.sqrt((np.linalg.norm(fiberMatrix1[0, i, :] -
-                                                  fiberMatrix2[0, :, :],
-                                                  axis=1))**2 +
-                                  (np.linalg.norm(fiberMatrix1[1, i, :] -
-                                                  fiberMatrix2[1, :, :],
-                                                  axis=1))**2 +
-                                  (np.linalg.norm(fiberMatrix1[2, i, :] -
-                                                  fiberMatrix2[2, :, :],
-                                                  axis=1))**2)
+        distance = Parallel(n_jobs=n_jobs, backend='threading')(
+            delayed(_calcDistance, has_shareable_memory)(
+                fiberMatrix1[:, i, None], fiberMatrix2)
+            for i in range(fiberMatrix1.shape[1]))
+
     # Flipped fiber
     else:
-        for i in range(fiberMatrix1.shape[1]):
-            distance[i] = np.sqrt((np.linalg.norm(
-                                   np.flip(fiberMatrix1[0, i, :], axis=0) -
-                                           fiberMatrix2[0, :, :],
-                                           axis=1))**2 +
-                                  (np.linalg.norm(
-                                   np.flip(fiberMatrix1[1, i, :], axis=0) -
-                                           fiberMatrix2[1, :, :],
-                                           axis=1))**2 +
-                                  (np.linalg.norm(
-                                   np.flip(fiberMatrix1[2, i, :], axis=0) -
-                                           fiberMatrix2[2, :, :],
-                                           axis=1))**2)
-
-        del fiberMatrix1, fiberMatrix2
+        distance = Parallel(n_jobs=n_jobs, backend='threading')(
+            delayed(_calcDistance, has_shareable_memory)(
+                np.flip(fiberMatrix1[:, i, None], axis=2), fiberMatrix2)
+            for i in range(fiberMatrix1.shape[1]))
 
     return distance
 
 def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2,
-                             flip=False):
+                             flip=False, n_jobs=-1):
     """ *INTERNAL FUNCTION*
     Computes the "distance" between the scalar values between one fiber and
     the fibers within a group (array) of fibers.
@@ -69,6 +77,8 @@ def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2,
         fiberScalarMatrix2 - array of scalar information pertaining to a group
                              of fibers for comparison
         flip - flag to flip fiber
+        n_jobs - number of processes/threads (defaults to use all available
+                 resources)
     OUTPUT:
         qDistance - computed scalar "distance" between fibers
     """
@@ -77,26 +87,23 @@ def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2,
     qDistance = np.empty((fiberScalarMatrix1.shape[0],
                          fiberScalarMatrix2.shape[0]), dtype=np.float32)
 
-    # Calculates the squared distance between fibers
+    # Calculates the mean distance between fiber metrics
     if flip is False:
-        for i in range(fiberScalarMatrix1.shape[0]):
-            qDistance[i] = np.linalg.norm(
-                                fiberScalarMatrix1[i, :] -
-                                fiberScalarMatrix2[:, :],
-                                axis=1)
+        qDistance = Parallel(n_jobs=n_jobs, backend='threading')(
+            delayed(_calcQDistance, has_shareable_memory)(
+                fiberScalarMatrix1[i, :], fiberScalarMatrix2)
+            for i in range(fiberScalarMatrix1.shape[0]))
+
     # Flip fiber
     else:
-        for i in range(fiberScalarMatrix1.shape[0]):
-            qDistance[i] = np.linalg.norm(
-                                np.flip(fiberScalarMatrix1[i, :]) -
-                                fiberScalarMatrix2[:, :],
-                                axis=1)
-
-    del fiberScalarMatrix1, fiberScalarMatrix2
+        qDistance = Parallel(n_jobs=n_jobs, backend='threading')(
+            delayed(_calcQDistance, has_shareable_memory)(
+                np.flip(fiberScalarMatrix1[i, :], fiberScalarMatrix2))
+            for i in range(fiberScalarMatrix1.shape[0]))
 
     return qDistance
 
-def fiberDistance(fiberArray1, fiberArray2=None):
+def fiberDistance(fiberArray1, fiberArray2=None, n_jobs=-1):
     """
     Computes the distance between one fiber and individual fibers within a
     group (array) of fibers. This function also handles equivalent fiber
@@ -105,6 +112,8 @@ def fiberDistance(fiberArray1, fiberArray2=None):
     INPUT:
         fiberArray1 - group of fibers for comparison
         fiberArray2 - group of fibers to compare fiberArray1 to, if applicable
+        n_jobs - number of processes/threads (defaults to use all available
+                 resources)
 
     OUTPUT:
         distance - minimum distance between group of fiber and single fiber
@@ -115,8 +124,10 @@ def fiberDistance(fiberArray1, fiberArray2=None):
         fiberArray1 = np.asarray(fiberArray1, dtype=np.float32)
 
         # Compute distances for fiber and flipped fiber of group
-        distance1 = _fiberDistance_internal(fiberArray1, fiberArray1)
-        distance2 = _fiberDistance_internal(fiberArray1, fiberArray1, flip=True)
+        distance1 = _fiberDistance_internal(fiberArray1, fiberArray1,
+                                            n_jobs=n_jobs)
+        distance2 = _fiberDistance_internal(fiberArray1, fiberArray1, flip=True,
+                                            n_jobs=n_jobs)
         del fiberArray1
 
     else:
@@ -124,8 +135,10 @@ def fiberDistance(fiberArray1, fiberArray2=None):
         fiberArray2 = np.asarray(fiberArray2, dtype=np.float32)
 
         # Compute distances between two fiber groups
-        distance1 = _fiberDistance_internal(fiberArray1, fiberArray2)
-        distance2 = _fiberDistance_internal(fiberArray1, fiberArray2, flip=True)
+        distance1 = _fiberDistance_internal(fiberArray1, fiberArray2,
+                                            n_jobs=n_jobs)
+        distance2 = _fiberDistance_internal(fiberArray1, fiberArray2, flip=True,
+                                            n_jobs=n_jobs)
         del fiberArray1, fiberArray2
 
     # Minimum distance more likely to be part of cluster; return distance
@@ -134,7 +147,7 @@ def fiberDistance(fiberArray1, fiberArray2=None):
 
     return distance
 
-def scalarDistance(fiberScalarArray1, fiberScalarArray2=None):
+def scalarDistance(fiberScalarArray1, fiberScalarArray2=None, n_jobs=-1):
     """
     Computes the distance between one fiber and individual fibers within a
     group (array) of fibers. This function also handles equivalent fiber
@@ -145,6 +158,8 @@ def scalarDistance(fiberScalarArray1, fiberScalarArray2=None):
                             fibers
         fiberScalarArray2 - array of scalar information pertaining to a group of
                             fibers if applicable
+        n_jobs - number of processes/threads (defaults to use all available
+                 resources)
 
     OUTPUT:
         distance - distance between group of fiber and single fiber
@@ -154,10 +169,10 @@ def scalarDistance(fiberScalarArray1, fiberScalarArray2=None):
 
         # Compute distances for fiber and fiber equivalent to fiber group
         distance1 = _scalarDistance_internal(fiberScalarArray1,
-                                             fiberScalarArray1)
+                                             fiberScalarArray1, n_jobs=n_jobs)
         distance2 = _scalarDistance_internal(fiberScalarArray1,
                                              fiberScalarArray1,
-                                             flip=True)
+                                             flip=True, n_jobs=n_jobs)
         del fiberScalarArray1
 
     else:
@@ -166,10 +181,10 @@ def scalarDistance(fiberScalarArray1, fiberScalarArray2=None):
 
         # Compute distances between two fiber groups
         distance1 = _scalarDistance_internal(fiberScalarArray1,
-                                             fiberScalarArray2)
+                                             fiberScalarArray2, n_jobs=n_jobs)
         distance2 = _scalarDistance_internal(fiberScalarArray1,
                                              fiberScalarArray2,
-                                             flip=True)
+                                             flip=True, n_jobs=n_jobs)
         del fiberScalarArray1, fiberScalarArray2
 
     # Minimum distance more likely to be similar; return distance
