@@ -44,6 +44,8 @@ def get_parser():
                        help=('sigma to be used in clustering algorithm'))
     g_opt.add_argument('-j', action='store', type=int, metavar='n_jobs',
                        default=-1, help='number of cores to use')
+    g_opt.add_argument('-t', action='store', type=bool, metavar='templateFlag',
+                       default=False, help='Flag for clustering template')
     g_opt.add_argument('-v', '--verbose', action='count', default=0,
                        help='verbosity of tool')
 
@@ -114,6 +116,7 @@ def main():
     outputPolydata, clusterIdx, fiberData, rejIdx = \
                                     cluster.spectralPriorCluster(
                                         uFiberTree, opts.prior,
+                                        opts.templateFlag,
                                         scalarDataList=scalarDataList,
                                         scalarWeightList=scalarWeightList,
                                         scalarTypeList=scalarTypeList,

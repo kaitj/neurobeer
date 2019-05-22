@@ -9,7 +9,7 @@ import numpy as np
 from . import fibers, tractio
 from vtk.util import numpy_support
 
-def load(priorVTKPath, verbose=0):
+def load(priorVTKPath, templateFlag=False, verbose=0):
     """
     Class used to load .vtk prior file.
 
@@ -40,15 +40,23 @@ def load(priorVTKPath, verbose=0):
     # Get cluster labels + set number of fibers
     clusterCentroids, clusterArray = _getClusterInfo(priorVTK)
 
-    # Subset fibers
-    subsetIdxes = _getSubset(clusterArray)
+    # Subset fibers - no longer used
+    if templateFlag is True:
+        subsetIdxes = _getSubset(clusterArray)
 
     # Get spatial information
-    centroidTree = priorTree.getFibers(subsetIdxes)
+    centroidTree = priorTree.getFibers(priorTree.no_of_fibers)
     centroidTree = fibers.convertFromTuple(centroidTree)
-    _getScalarInfo(priorVTK, centroidTree, subsetIdxes,
-                   centroidTree.pts_per_fiber, verbose)
-    clusterArray = _addCentroidInfo(centroidTree, subsetIdxes, clusterArray)
+    if templateFlag is True:
+        _getScalarInfo(priorVTK, centroidTree, subsetIdxes,
+                       centroidTree.pts_per_fiber, verbose)
+        clusterArray = _addCentroidInfo(centroidTree, subsetIdxes,
+                        clusterArray)
+    else:
+        _getScalarInfo(priorVTK, centroidTree, priorTree.no_of_fibers,
+                       centroidTree.pts_per_fiber, verbose)
+        clusterArray = _addCentroidInfo(centroidTree, priorTree.no_of_fibers,
+                        clusterArray)
 
     if verbose == 1:
         print('\nFinished loading prior data.')
@@ -77,7 +85,8 @@ def getFiberInfo(priorVTKPath):
 
 def _getSubset(clusterArray):
     """ *INTERNAL FUNCTION*
-    Function to extract subset of fibers from each cluster.
+    Function to extract subset of fibers from each cluster. Used to
+    subset template
 
     INPUT:
         clusterArray - Array of cluster labels for each fiber
@@ -90,11 +99,11 @@ def _getSubset(clusterArray):
 
     for cluster in np.unique(clusterArray):
         idx = np.where(clusterArray == cluster)[0]
-        subsetIdx = np.unique(np.random.choice(idx, len(idx)))
-        if len(subsetIdx) == 0:
-            subsetIdx = np.array(idx[0])
-        elif len(subsetIdx) > 100:
-            subsetIdx = np.array(idx[0:100])
+        if len(idx) > 50:
+            subsetIdx = np.array(np.unique(np.random.choice(idx, 50)))
+        else:
+            subsetIdx = np.array(idx)
+
         subsetIdxes.extend(subsetIdx)
 
     return subsetIdxes

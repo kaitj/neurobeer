@@ -116,8 +116,9 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
 
         return outputPolydata, clusterIdx, fiberData, rejIdx
 
-def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
-                         scalarTypeList=[], scalarWeightList=[], sigma=[10],
+def spectralPriorCluster(fiberData, priorVTK, templateFlag=False,
+                         scalarDataList=[], scalarTypeList=[],
+                         scalarWeightList=[], sigma=[10],
                          n_jobs=-1, dirpath=None, verbose=0):
         """
         Clustering of fibers based on pairwise fiber similarity using
@@ -155,7 +156,8 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
         if dirpath is None:
             dirpath = os.getcwd()
 
-        priorData, priorCentroids, priorLabels = prior.load(priorVTK)
+        priorData, priorCentroids, priorLabels = prior.load(priorVTK,
+                                                            templateFlag)
 
         k_clusters = len(priorCentroids)
 
