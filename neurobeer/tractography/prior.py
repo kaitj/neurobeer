@@ -45,7 +45,7 @@ def load(priorVTKPath, templateFlag=False, verbose=0):
         subsetIdxes = _getSubset(clusterArray)
 
     # Get spatial information
-    centroidTree = priorTree.getFibers(priorTree.no_of_fibers)
+    centroidTree = priorTree.getFibers(range(priorTree.no_of_fibers))
     centroidTree = fibers.convertFromTuple(centroidTree)
     if templateFlag is True:
         _getScalarInfo(priorVTK, centroidTree, subsetIdxes,
@@ -53,10 +53,10 @@ def load(priorVTKPath, templateFlag=False, verbose=0):
         clusterArray = _addCentroidInfo(centroidTree, subsetIdxes,
                         clusterArray)
     else:
-        _getScalarInfo(priorVTK, centroidTree, priorTree.no_of_fibers,
+        _getScalarInfo(priorVTK, centroidTree, range(priorTree.no_of_fibers),
                        centroidTree.pts_per_fiber, verbose)
-        clusterArray = _addCentroidInfo(centroidTree, priorTree.no_of_fibers,
-                        clusterArray)
+        clusterArray = _addCentroidInfo(centroidTree,
+                            range(priorTree.no_of_fibers), clusterArray)
 
     if verbose == 1:
         print('\nFinished loading prior data.')
