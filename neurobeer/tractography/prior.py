@@ -40,19 +40,19 @@ def load(priorVTKPath, templateFlag=False, verbose=0):
     # Get cluster labels + set number of fibers
     clusterCentroids, clusterArray = _getClusterInfo(priorVTK)
 
-    # Subset fibers - no longer used
+    # Get spatial information
     if templateFlag is True:
         subsetIdxes = _getSubset(clusterArray)
 
-    # Get spatial information
-    centroidTree = priorTree.getFibers(range(priorTree.no_of_fibers))
-    centroidTree = fibers.convertFromTuple(centroidTree)
-    if templateFlag is True:
+        centroidTree = priorTree.getFibers(subsetIdxes)
+        centroidTree = fibers.convertFromTuple(centroidTree)
         _getScalarInfo(priorVTK, centroidTree, subsetIdxes,
                        centroidTree.pts_per_fiber, verbose)
         clusterArray = _addCentroidInfo(centroidTree, subsetIdxes,
                         clusterArray)
     else:
+        centroidTree = priorTree.getFibers(range(priorTree.no_of_fibers))
+        centroidTree = fibers.convertFromTuple(centroidTree)
         _getScalarInfo(priorVTK, centroidTree, range(priorTree.no_of_fibers),
                        centroidTree.pts_per_fiber, verbose)
         clusterArray = _addCentroidInfo(centroidTree,
