@@ -73,7 +73,7 @@ def main():
 
     _, _, pts_per_fiber = prior.getFiberInfo(opts.prior)
     fiberData = fibers.FiberTree()
-    fiberData.convertFromVTK(bundlePolydata, pts_per_fiber, opts.verbose)
+    fiberData.convertFromVTK(bundlePolydata, int(pts_per_fiber), opts.verbose)
     del bundleVTK, pts_per_fiber
 
     # Handling scalar data
