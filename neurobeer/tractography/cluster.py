@@ -173,7 +173,7 @@ def spectralPriorCluster(fiberData, priorVTK, templateFlag=False,
         W = _priorWeightedSimilarity(fiberData, priorData, scalarTypeList,
                                      scalarWeightList, sigma, n_jobs)
 
-        W, rejIdx = _outlierSimDetection(W, pflag=1, tflag=templateFlag)
+        W, rejIdx = _outlierSimDetection(W, pflag=1)
 
         # 2. Identify corresponding cluster indices from similarity
         simIdx = np.argmax(W, axis=1)
@@ -682,7 +682,7 @@ def _sortLabel(centroids, clusterIdx):
 
     return newCentroids, newClusters
 
-def _outlierSimDetection(W, pflag=0, tflag=False):
+def _outlierSimDetection(W, pflag=0):
     """ * INTERNAL FUNCTION *
     Look for outliers in fibers to reject
 
@@ -707,11 +707,7 @@ def _outlierSimDetection(W, pflag=0, tflag=False):
         W = np.delete(W, rejIdx[0], axis=0)
         W = np.delete(W, rejIdx[0], axis=1)
     else:
-        if tflag is True:
-            rejIdx = np.where(W != 1.0)
-            W = np.delete(W, rejIdx[0], axis=0)
-        else:
-            W = np.delete(W, rejIdx[0], axis=0)
+        W = np.delete(W, rejIdx[0], axis=0)
 
     return W, rejIdx[0]
 
