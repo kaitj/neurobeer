@@ -79,7 +79,7 @@ def getFiberInfo(priorVTKPath):
 
     priorVTK = tractio.readVTK(priorVTKPath)
     no_of_fibers = priorVTK.GetNumberOfLines()
-    pts_per_fiber = priorVTK.GetNumberOfPoints() / no_of_fibers
+    pts_per_fiber = int(priorVTK.GetNumberOfPoints() / no_of_fibers)
 
     return priorVTK, no_of_fibers, pts_per_fiber
 
