@@ -16,11 +16,14 @@ def load(priorVTKPath, templateFlag=False, verbose=0):
     INPUT:
         priorVTKPath - absolute path to VTK file containing prior information
                        to be used
+        templateflag - flag to set for subsetting; defaults false
         verbose - verbosity of function; defaults 0
 
     OUTPUT:
         priorTree - returns prior information stored in a tree format
         sortedCentroids - codebook of centroids to be used in future clustering
+        subsetIdxes - return subset of indices; returns value only if
+                      templateFlag is true
     """
     if verbose == 1:
         print('\nLoading prior data.')
@@ -50,6 +53,12 @@ def load(priorVTKPath, templateFlag=False, verbose=0):
                        centroidTree.pts_per_fiber, verbose)
         clusterArray = _addCentroidInfo(centroidTree, subsetIdxes,
                         clusterArray)
+
+        if verbose == 1:
+            print('\nFinished loading prior data.')
+
+        del priorVTK, priorTree
+
     else:
         centroidTree = priorTree.getFibers(range(priorTree.no_of_fibers))
         centroidTree = fibers.convertFromTuple(centroidTree)
@@ -58,12 +67,14 @@ def load(priorVTKPath, templateFlag=False, verbose=0):
         clusterArray = _addCentroidInfo(centroidTree,
                             range(priorTree.no_of_fibers), clusterArray)
 
+        subsetIdxes = None
+
     if verbose == 1:
         print('\nFinished loading prior data.')
 
     del priorVTK, priorTree
 
-    return centroidTree, clusterCentroids, clusterArray
+    return centroidTree, clusterCentroids, clusterArray, subsetIdxes
 
 def getFiberInfo(priorVTKPath):
     """

@@ -156,8 +156,8 @@ def spectralPriorCluster(fiberData, priorVTK, templateFlag=False,
         if dirpath is None:
             dirpath = os.getcwd()
 
-        priorData, priorCentroids, priorLabels = prior.load(priorVTK,
-                                                            templateFlag)
+        priorData, priorCentroids, priorLabels, subsetIdxes = \
+            prior.load(priorVTK, templateFlag)
 
         k_clusters = len(priorCentroids)
 
@@ -172,8 +172,8 @@ def spectralPriorCluster(fiberData, priorVTK, templateFlag=False,
         # 1. Compute similarty matrix
         W = _priorWeightedSimilarity(fiberData, priorData, scalarTypeList,
                                      scalarWeightList, sigma, n_jobs)
-        print(templateFlag)
-        W, rejIdx = _outlierSimDetection(W, pflag=1, tflag=templateFlag)
+        W, rejIdx = _outlierSimDetection(W, pflag=1, tflag=templateFlag,
+                                         subsetIdxes=subsetIdxes)
 
         # 2. Identify corresponding cluster indices from similarity
         simIdx = np.argmax(W, axis=1)
@@ -682,13 +682,14 @@ def _sortLabel(centroids, clusterIdx):
 
     return newCentroids, newClusters
 
-def _outlierSimDetection(W, pflag=0, tflag=False):
+def _outlierSimDetection(W, pflag=0, tflag=False, subsetIdxes=None):
     """ * INTERNAL FUNCTION *
     Look for outliers in fibers to reject
 
     INPUT
         W - similarity matrix
         pflag - flag for outlier detection with priors
+        subsetIdex - subset of indices for subsetting; used with tflag
 
     OUTPUT:
         W - similarity matrix with removed outliers
@@ -708,8 +709,11 @@ def _outlierSimDetection(W, pflag=0, tflag=False):
         W = np.delete(W, rejIdx[0], axis=1)
     else:
         if tflag is True:
-            rejIdx = np.where(W != 1.0)
-            W = np.delete(W, rejIdx[0], axis=0)
+            rejIdx = [i for i in range(W.shape[0]) if i not in subsetIdxes]
+            print(rejIdx)
+            W = np.delete(W, rejIdx, axis=0)
+            W = np.delete(W, rejIdx, axis=1)
+            return W, rejIdx
         else:
             W = np.delete(W, rejIdx[0], axis=0)
     return W, rejIdx[0]
