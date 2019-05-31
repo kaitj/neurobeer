@@ -54,11 +54,6 @@ def load(priorVTKPath, templateFlag=False, verbose=0):
         clusterArray = _addCentroidInfo(centroidTree, subsetIdxes,
                         clusterArray)
 
-        if verbose == 1:
-            print('\nFinished loading prior data.')
-
-        del priorVTK, priorTree
-
     else:
         centroidTree = priorTree.getFibers(range(priorTree.no_of_fibers))
         centroidTree = fibers.convertFromTuple(centroidTree)

@@ -710,7 +710,6 @@ def _outlierSimDetection(W, pflag=0, tflag=False, subsetIdxes=None):
     else:
         if tflag is True:
             rejIdx = [i for i in range(W.shape[0]) if i not in subsetIdxes]
-            print(rejIdx)
             W = np.delete(W, rejIdx, axis=0)
             W = np.delete(W, rejIdx, axis=1)
             return W, rejIdx
