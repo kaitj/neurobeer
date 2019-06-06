@@ -68,7 +68,7 @@ def main():
 
     xfmPolydata = tractio.readVTK(xfm_tract, args.verbose)
     xfmData = fibers.FiberTree()
-    xfmData.convertFromVTK(xfmPolydata, args.p, args.verbose)
+    xfmData.convertFromVTK(xfmPolydata, priorData.pts_per_fiber, args.verbose)
 
     # Add cluster info
     xfmData.addClusterInfo(priorLabels, priorCentroids)
