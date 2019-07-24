@@ -116,8 +116,9 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
 
         return outputPolydata, clusterIdx, fiberData, rejIdx
 
-def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
-                         scalarTypeList=[], scalarWeightList=[], sigma=[10],
+def spectralPriorCluster(fiberData, priorVTK, templateFlag=False,
+                         scalarDataList=[], scalarTypeList=[],
+                         scalarWeightList=[], sigma=[10],
                          n_jobs=-1, dirpath=None, verbose=0):
         """
         Clustering of fibers based on pairwise fiber similarity using
@@ -155,7 +156,8 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
         if dirpath is None:
             dirpath = os.getcwd()
 
-        priorData, priorCentroids, priorLabels = prior.load(priorVTK)
+        priorData, priorCentroids, priorLabels, subsetIdxes = \
+            prior.load(priorVTK, templateFlag)
 
         k_clusters = len(priorCentroids)
 
@@ -170,8 +172,8 @@ def spectralPriorCluster(fiberData, priorVTK, scalarDataList=[],
         # 1. Compute similarty matrix
         W = _priorWeightedSimilarity(fiberData, priorData, scalarTypeList,
                                      scalarWeightList, sigma, n_jobs)
-
-        W, rejIdx = _outlierSimDetection(W, pflag=1)
+        W, rejIdx = _outlierSimDetection(W, pflag=1, tflag=templateFlag,
+                                         subsetIdxes=subsetIdxes)
 
         # 2. Identify corresponding cluster indices from similarity
         simIdx = np.argmax(W, axis=1)
@@ -680,13 +682,14 @@ def _sortLabel(centroids, clusterIdx):
 
     return newCentroids, newClusters
 
-def _outlierSimDetection(W, pflag=0):
+def _outlierSimDetection(W, pflag=0, tflag=False, subsetIdxes=None):
     """ * INTERNAL FUNCTION *
     Look for outliers in fibers to reject
 
     INPUT
         W - similarity matrix
         pflag - flag for outlier detection with priors
+        subsetIdex - subset of indices for subsetting; used with tflag
 
     OUTPUT:
         W - similarity matrix with removed outliers
@@ -705,8 +708,12 @@ def _outlierSimDetection(W, pflag=0):
         W = np.delete(W, rejIdx[0], axis=0)
         W = np.delete(W, rejIdx[0], axis=1)
     else:
-        W = np.delete(W, rejIdx[0], axis=0)
-
+        if tflag is True:
+            rejIdx = [i for i in range(W.shape[0]) if i not in subsetIdxes]
+            W = np.delete(W, rejIdx, axis=0)
+            return W, rejIdx
+        else:
+            W = np.delete(W, rejIdx[0], axis=0)
     return W, rejIdx[0]
 
 def _eiggap(eigval):

@@ -10,7 +10,7 @@ apt-get install -y python3-tk
 # Git
 git clone https://github.com/kaitj/neurobeer $DIR/neurobeer
 cd $DIR/neurobeer
-# git checkout khanlab # dev branch, comment for release
+git checkout dev # dev branch, comment for release
 
 # Install requirements
 pip3 install -r requirements.txt

@@ -9,18 +9,21 @@ import numpy as np
 from . import fibers, tractio
 from vtk.util import numpy_support
 
-def load(priorVTKPath, verbose=0):
+def load(priorVTKPath, templateFlag=False, verbose=0):
     """
     Class used to load .vtk prior file.
 
     INPUT:
         priorVTKPath - absolute path to VTK file containing prior information
                        to be used
+        templateflag - flag to set for subsetting; defaults false
         verbose - verbosity of function; defaults 0
 
     OUTPUT:
         priorTree - returns prior information stored in a tree format
         sortedCentroids - codebook of centroids to be used in future clustering
+        subsetIdxes - return subset of indices; returns value only if
+                      templateFlag is true
     """
     if verbose == 1:
         print('\nLoading prior data.')
@@ -40,22 +43,33 @@ def load(priorVTKPath, verbose=0):
     # Get cluster labels + set number of fibers
     clusterCentroids, clusterArray = _getClusterInfo(priorVTK)
 
-    # Subset fibers
-    subsetIdxes = _getSubset(clusterArray)
-
     # Get spatial information
-    centroidTree = priorTree.getFibers(subsetIdxes)
-    centroidTree = fibers.convertFromTuple(centroidTree)
-    _getScalarInfo(priorVTK, centroidTree, subsetIdxes,
-                   centroidTree.pts_per_fiber, verbose)
-    clusterArray = _addCentroidInfo(centroidTree, subsetIdxes, clusterArray)
+    if templateFlag is True:
+        subsetIdxes = _getSubset(clusterArray)
+
+        centroidTree = priorTree.getFibers(subsetIdxes)
+        centroidTree = fibers.convertFromTuple(centroidTree)
+        _getScalarInfo(priorVTK, centroidTree, subsetIdxes,
+                       centroidTree.pts_per_fiber, verbose)
+        clusterArray = _addCentroidInfo(centroidTree, subsetIdxes,
+                        clusterArray)
+
+    else:
+        centroidTree = priorTree.getFibers(range(priorTree.no_of_fibers))
+        centroidTree = fibers.convertFromTuple(centroidTree)
+        _getScalarInfo(priorVTK, centroidTree, range(priorTree.no_of_fibers),
+                       centroidTree.pts_per_fiber, verbose)
+        clusterArray = _addCentroidInfo(centroidTree,
+                            range(priorTree.no_of_fibers), clusterArray)
+
+        subsetIdxes = None
 
     if verbose == 1:
         print('\nFinished loading prior data.')
 
     del priorVTK, priorTree
 
-    return centroidTree, clusterCentroids, clusterArray
+    return centroidTree, clusterCentroids, clusterArray, subsetIdxes
 
 def getFiberInfo(priorVTKPath):
     """
@@ -71,13 +85,14 @@ def getFiberInfo(priorVTKPath):
 
     priorVTK = tractio.readVTK(priorVTKPath)
     no_of_fibers = priorVTK.GetNumberOfLines()
-    pts_per_fiber = priorVTK.GetNumberOfPoints() / no_of_fibers
+    pts_per_fiber = int(priorVTK.GetNumberOfPoints() / no_of_fibers)
 
     return priorVTK, no_of_fibers, pts_per_fiber
 
 def _getSubset(clusterArray):
     """ *INTERNAL FUNCTION*
-    Function to extract subset of fibers from each cluster.
+    Function to extract subset of fibers from each cluster. Used to
+    subset template
 
     INPUT:
         clusterArray - Array of cluster labels for each fiber
@@ -90,11 +105,11 @@ def _getSubset(clusterArray):
 
     for cluster in np.unique(clusterArray):
         idx = np.where(clusterArray == cluster)[0]
-        subsetIdx = np.unique(np.random.choice(idx, len(idx)))
-        if len(subsetIdx) == 0:
-            subsetIdx = np.array(idx[0])
-        elif len(subsetIdx) > 100:
-            subsetIdx = np.array(idx[0:100])
+        if len(idx) > 25:
+            subsetIdx = np.random.choice(idx, 25, replace=False)
+        else:
+            subsetIdx = np.array(idx)
+
         subsetIdxes.extend(subsetIdx)
 
     return subsetIdxes

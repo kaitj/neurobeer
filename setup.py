@@ -13,7 +13,8 @@ setup(
              'neurobeer/cli/clusterUFiber',
              'neurobeer/cli/clusterUFiberPrior',
              'neurobeer/cli/tractscalar',
-             'neurobeer/cli/vtk2nii'],
+             'neurobeer/cli/vtk2nii',
+             'neurobeer/cli/xfmData'],
 
     # Metadata
     author='Jason Kai',
