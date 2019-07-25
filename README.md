@@ -2,7 +2,7 @@
 
 The NeuroBundle Extraction and Evaluation Resource, a data-driven tractography clustering and evaluation tool.
 
-[![Docker container available](https://img.shields.io/badge/docker-NeuroBEER-brightgreen.svg?logo=docker&style=flat)](https://hub.docker.com/r/kaitj/neurobeer/tags/) 
+[![Docker container available](https://img.shields.io/badge/docker-kaitj/neurobeer-brightgreen.svg?logo=docker&style=flat)](https://hub.docker.com/r/kaitj/neurobeer/tags/) 
 [![Zenodo](https://zenodo.org/badge/198719661.svg)](https://zenodo.org/badge/latestdoi/198719661)
 
 ## Contents
