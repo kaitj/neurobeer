@@ -4,3 +4,5 @@ build/*
 neurobeer/__pycache__/*
 
 neurobeer_venv/*
+
+container/singularity_recipes/*
