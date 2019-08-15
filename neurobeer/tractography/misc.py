@@ -7,7 +7,7 @@ Module providing miscallaneous functionality
 import os.path as op
 import numpy as np
 
-def save_eig(dir_path, eigval_arr, eigvec_arr, verbose=0):
+def saveEig(dir_path, eigval_arr, eigvec_arr, verbose=0):
     """
     Function used to save eigenvalues and eigenvectors to binary file.
 

@@ -1,4 +1,4 @@
-""" io.py
+""" tractio.py
 
 Module provides input/output functionality
 
@@ -8,7 +8,7 @@ import os.path as op
 import vtk
 from . import misc
 
-def read_vtk(in_vtk, verbose=0):
+def readVTK(in_vtk, verbose=0):
     """
     Reads vtkPolyData containing tractography
 
@@ -39,7 +39,7 @@ def read_vtk(in_vtk, verbose=0):
     else:
         raise IOError("Invalid / unrecognized file format.")
 
-def write_vtk(in_data, vtk_file, verbose=0):
+def writeVTK(in_data, vtk_file, verbose=0):
     """
     Write tractography data into vtkPolyData
 
@@ -68,7 +68,7 @@ def write_vtk(in_data, vtk_file, verbose=0):
     else:
         raise IOError("Invalid file format.")
 
-def read_scalar(scalar_file, verbose=0):
+def readScalar(scalar_file, verbose=0):
     """
     Read input text file containing scalar values assocaited with tractography
 
