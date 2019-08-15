@@ -60,7 +60,7 @@ def writeVTK(in_data, vtk_file, verbose=0):
         vtk_writer = vtk.vtkPolyDataWriter()
         vtk_writer.SetFileTypeToBinary()
         vtk_writer.SetFileName(vtk_file)
-        vtk_writer.SetInputDatA(in_data)
+        vtk_writer.SetInputData(in_data)
         vtk_writer.Update()
 
         return
