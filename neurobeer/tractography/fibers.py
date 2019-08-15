@@ -8,6 +8,7 @@ information.
 import numpy as np
 import vtk
 from collections import defaultdict
+from . import misc
 
 def tree():
     """
@@ -52,11 +53,11 @@ def calcEndPointSep(fiberData, rejIdx):
     Calculates distance between end points
 
     INPUT:
-        fiberData - Fiber tree containing tractography information
-        rejIdx - Indices of outlier
+        fiberData - fiber tree containing tractography information
+        rejIdx - indices of outlier
 
     OUTPUT:
-        DArray -  Distance between end points
+        DArray -  distance between end points
     """
     endpt = fiberData.pts_per_fiber - 1
 
@@ -82,11 +83,11 @@ def calcFiberLength(fiberData, rejIdx):
     NOTE: same function as ufiber module without removing any fibers
 
     INPUT:
-        fiberData - Fiber tree containing tractography information
-        rejIdx - Indices of outlier
+        fiberData - fiber tree containing tractography information
+        rejIdx - indices of outlier
 
     OUTPUT:
-        L - length of fiberData
+        LArray - array containing length of fibers
     """
     no_of_pts = fiberData.pts_per_fiber
 
@@ -120,8 +121,9 @@ def addLDRatio(DArray, LArray, polyData):
     Calculates and adds LD Ratio to VTK
 
     INPUT:
-        DArray - Array of distances between end points for fibers
-        LArray - Array of lenghts of fibers
+        DArray - array of distances between end points for fibers
+        LArray - array of lengths of fibers
+        polyData - tractography data to add L/D ratio
 
     OUTPUT:
         none
@@ -158,11 +160,11 @@ class FiberTree:
         fiber length and desired number of points along the length.
 
         INPUT:
-            fiberLength - Number of points along a fiber
-            pts_per_fiber - Number of desired points along fiber
+            fiberLength - number of points along a fiber
+            pts_per_fiber - number of desired points along fiber
 
         OUTPUT:
-            idxList - Corresponding new indices to traverse along fiber
+            idxList - corresponding new indices to traverse along fiber
         """
 
         # Step length between points along fiber
@@ -180,10 +182,12 @@ class FiberTree:
         Value returned is of class Fiber.
 
         INPUT:
-            fiberIdx - Index of fiber to be extracted
+            fiberIdx - index of fiber to be extracted
 
         OUTPUT
-            fiber - Single fiber of class Fiber
+            fiber_x - array of "x" spatial component at each sample
+            fiber_y - array of "y" spatial component at each sample
+            fiber_z - array of "z" spatial component at each sample
         """
 
         # Fiber data
@@ -207,7 +211,12 @@ class FiberTree:
             fidxes - Indices of subset of fibers to be extracted
 
         OUTPUT:
-            fibers - Subset of fibers of class fiberArray
+            fiberArray_x - array of "x" spatial component at each sample for
+                           fiber bundle
+            fiberArray_y - array of "y" spatial component at each sample for
+                           fiber bundle
+            fiberArray_z - array of "z" spatial component at each sample for
+                           fiber bundle
         """
 
         fiberArray_x = np.zeros((len(fidxes), self.pts_per_fiber))
@@ -233,8 +242,8 @@ class FiberTree:
         Add and save cluster label to fiber tree storing tractography data.
 
         INPUT:
-            clusterLabels - Array of cluster labels sorted in fiber index order
-            centroids - Array of centroids associated with fiber clusters
+            clusterLabels - array of cluster labels sorted in fiber index order
+            centroids - array of centroids associated with fiber clusters
 
         OUTPUT:
             none
@@ -254,9 +263,9 @@ class FiberTree:
 
         INPUT:
             fiberData - fiberTree to copy data from
-            scalarTypeArray - Array of scalar types to copy
-            fidxes - Array of fiber indices to copy
-            rejIdx - Array of outlier indices to be exclused; defaults to []
+            scalarTypeArray - array of scalar types to copy
+            fidxes - array of fiber indices to copy
+            rejIdx - array of outlier indices to be exclused; defaults to []
 
         OUTPUT:
             none
@@ -289,10 +298,10 @@ class FiberTree:
         quantitative measurements as needed.
 
         INPUT:
-            inputVTK - Tractography polydata to extract corresponding indices
-            scalarData - List of scalar values to be stored
-            scalarType - Type of quantitative scalar (ie. FA, T1)
-            pts_per_fiber - Number of samples to take along fiber
+            inputVTK - tractography polydata to extract corresponding indices
+            scalarData - list of scalar values to be stored
+            scalarType - type of quantitative scalar (ie. FA, T1)
+            pts_per_fiber - number of samples to take along fiber
 
         OUTPUT:
             none
@@ -321,11 +330,11 @@ class FiberTree:
         a single fiber.
 
         INPUT:
-            fidx - Index corresponding to fiber to extract scalar information
-            scalarType - Type of quantitative scalar (ie. FA, T1)
+            fidx - index corresponding to fiber to extract scalar information
+            scalarType - type of quantitative scalar (ie. FA, T1)
 
         OUTPUT:
-            scalarList - List of scalar values indexed by point
+            scalarList - list of scalar values indexed by point
         """
 
         scalarList = np.zeros(self.pts_per_fiber)
@@ -341,12 +350,12 @@ class FiberTree:
         a group of fibers.
 
         INPUT:
-            fidxes - Indices corresponding to fibers to extract scalar
+            fidxes - indices corresponding to fibers to extract scalar
                      information from
-            scalarType - Type of quantitative scalar (ie. FA, T1)
+            scalarType - type of quantitative scalar (ie. FA, T1)
 
         OUTPUT:
-            scalarList - List of scalar values indexed by fiber and point
+            scalarList - list of scalar values indexed by fiber and point
         """
 
         scalarList = np.zeros((len(fidxes), self.pts_per_fiber))
@@ -366,9 +375,9 @@ class FiberTree:
         Convert input tractography VTK data to array form
 
         INPUT:
-            inputVTK - Tractography polydata
-            pts_per_fiber - Number of points to sample along a fiber
-            verbose - Verbosity of function; 1 to print messages to user.
+            inputVTK - tractography polydata
+            pts_per_fiber - number of points to sample along a fiber
+            verbose - verbosity of function; 1 to print messages to user.
 
         OUTPUT:
             none
@@ -377,10 +386,11 @@ class FiberTree:
         self.no_of_fibers = inputVTK.GetNumberOfLines()
         self.pts_per_fiber = pts_per_fiber
 
-        if verbose == 1:
-            print("\n<fibers.py> Converting polydata to array representation.")
-            print("Fibers:", self.no_of_fibers)
-            print("Points sampled along fiber:", self.pts_per_fiber)
+
+        misc.vprint("Converting polydata to array representation.", verbose)
+        misc.vprint("Fibers: %d" % int(self.no_of_fibers), verbose)
+        misc.vprint("Points sampled along fiber: %d" % int(self.pts_per_fiber),
+                     verbose)
 
         # Loop over all fibers
         inputVTK.GetLines().InitTraversal()
@@ -411,10 +421,10 @@ class FiberTree:
         Convert fibers in array form to VTK polydata.
 
         INPUT:
-            rejIdx - Indices of fibers considered outliers; defaults to []
+            rejIdx - indices of fibers considered outliers; defaults to []
 
         OUTPUT:
-            outVTK - Tractography polydata in VTK form
+            outVTK - tractography polydata in VTK form
         """
 
         outVTK = vtk.vtkPolyData()

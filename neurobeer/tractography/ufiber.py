@@ -14,12 +14,12 @@ def findUFiber(fiberData):
     Identifies U-fibers from tractography
 
     INPUT:
-        fiberData - Fiber tree containing tractography data
+        fiberData - fiber tree containing tractography data
 
     OUTPUT:
-        uArray - Array containing indices of all u-shaped fibers
-        LArray -Array containing lengths of all u-shaped fibers
-        DArray - Array containing end point seperation distance
+        uArray - array containing indices of all u-shaped fibers
+        LArray - array containing lengths of all u-shaped fibers
+        DArray - array containing end point seperation distance
     """
     # Array storing indices of u-shaped fibers
     uArray = []
@@ -101,11 +101,11 @@ def extractUFiber(fiberData, uArray):
     Extracts u-shaped fibers of class FiberTree
 
     INPUT:
-        fiberData - Fiber tree containing tractography information
-        uArray - Array of indices containing u-shaped fibers
+        fiberData - fiber tree containing tractography information
+        uArray - array of indices containing u-shaped fibers
 
     OUTPUT:
-        uFiberTree - Fiber tree instance containing only u-shaped fibers
+        uFiberTree - fiber tree instance containing only u-shaped fibers
     """
 
     uFiberTree = fiberData.getFibers(uArray)
@@ -191,17 +191,16 @@ def _calcFiberLength(fiberData, fidx):
     Calculates the fiber length via arc length
 
     INPUT:
-        fiberData - Fiber tree containing tractography information
-        fidx - Fiber index
+        fiberData - fiber tree containing tractography information
+        fidx - fiber index
 
     OUTPUT:
-        L - Length of fiber
+        L - fength of fiber
     """
     no_of_pts = fiberData.pts_per_fiber
 
     if no_of_pts < 2:
-        print("Not enough samples to determine length of fiber")
-        raise ValueError
+        raise ValueError("Not enough samples to determine length of fiber")
 
     L = 0
 
@@ -228,11 +227,11 @@ def _calcEndPointSep(fiberData, fidx):
     Calculates distance between end points
 
     INPUT:
-        fiberData - Fiber tree containing tractography information
-        fidx - Fiber index
+        fiberData - fiber tree containing tractography information
+        fidx - fiber index
 
     OUTPUT:
-        D - Distance between end points
+        D - distance between end points
     """
     endpt = fiberData.pts_per_fiber - 1
 

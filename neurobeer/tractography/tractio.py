@@ -6,32 +6,32 @@ Module provides input/output functionality
 
 import os.path as op
 import vtk
-from .misc import vprint
+from . import misc
 
 def read_vtk(in_vtk, verbose=0):
     """
     Reads vtkPolyData containing tractography
 
     INPUT:
-        in_vtk - Input file of .vtk type containing tractography
-        verbose - Verbosity of function; defaults 0
+        in_vtk - input file of .vtk type containing tractography
+        verbose - verbosity of function; defaults 0
 
     OUTPUT:
-        out_data - Polydata stored within .vtk file
+        out_data - polydata stored within .vtk file
     """
 
     filename, ext = op.splittext(in_vtk)
 
     if (ext == ".vtk"):
-        vprint("Reading %s..." % in_vtk, verbose)
+        misc.vprint("Reading %s..." % in_vtk, verbose)
 
         vtk_reader = vtk.vtkPolyDataReader()
         vtk_reader.SetFileName(in_vtk)
         vtk_reader.Update()
         out_data = vtk_reader.GetOutput()
 
-        vprint("Finished reading %s." % in_vtk, verbose)
-        vprint("Number of fibers found: %d." % int(out_data.GetNumberOfLines()),
+        misc.vprint("Finished reading %s." % in_vtk, verbose)
+        misc.vprint("Number of fibers found: %d." % int(out_data.GetNumberOfLines()),
         verbose)
 
         return out_data
@@ -44,18 +44,18 @@ def write_vtk(in_data, vtk_file, verbose=0):
     Write tractography data into vtkPolyData
 
     INPUT:
-        in_data - Tractography data to be written to file
-        vtk_file - Name of file to be written
-        verbose - Verbosity of function; defaults 0
+        in_data - tractography data to be written to file
+        vtk_file - name of file to be written
+        verbose - verbosity of function; defaults 0
 
     OUTPUT:
-        None
+        none
     """
 
     filename, ext = op.splittext(vtk_file)
 
     if (ext == ".vtk"):
-        vprint("Writing %s ..." % vtk_file, verbose)
+        misc.vprint("Writing %s ..." % vtk_file, verbose)
 
         vtk_writer = vtk.vtkPolyDataWriter()
         vtk_writer.SetFileTypeToBinary()
@@ -73,18 +73,18 @@ def read_scalar(scalar_file, verbose=0):
     Read input text file containing scalar values assocaited with tractography
 
     INPUT:
-        scalar_file - Text file containing quantitative scalar information
-        verbose - Verbosity of function; defaults 0
+        scalar_file - text file containing quantitative scalar information
+        verbose - verbosity of function; defaults 0
 
     OUTPUT:
-        scalar_data - List of scalar values from file
-        scalar_type - Type of scalar information (eg. FA, MD, T1)
+        scalar_data - list of scalar values from file
+        scalar_type - type of scalar information (eg. FA, MD, T1)
     """
 
     scalar_type, ext = op.splittext(scalar_file)
 
     if (ext == '.txt'):
-        vprint("Reading %s..." % scalar_file, verbose)
+        misc.vprint("Reading %s..." % scalar_file, verbose)
 
         file_reader = open(scalar_file, 'rU')
         scalar_data = file_reader.readlines()
@@ -95,7 +95,7 @@ def read_scalar(scalar_file, verbose=0):
 
         scalar_type = scalar_type.split('_', -1)[-1]
 
-        vprint("Finished reading %s." % scalar_file, verbose)
+        misc.vprint("Finished reading %s." % scalar_file, verbose)
 
         return scalar_data, scalar_type
 

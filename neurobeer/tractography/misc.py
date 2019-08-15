@@ -12,12 +12,12 @@ def save_eig(dir_path, eigval_arr, eigvec_arr, verbose=0):
     Function used to save eigenvalues and eigenvectors to binary file.
 
     INPUT:
-        dir_path - Directory path for storing files
-        eigval_arr - Array of eigenvalues
-        eigvec_arr - Matrix of eigenvectors
+        dir_path - directory path for storing files
+        eigval_arr - array of eigenvalues
+        eigvec_arr - matrix of eigenvectors
 
     OUTPUT:
-        None
+        none
     """
     # Paths to save
     eigval_path = op.join(op.realpath(dir_path), "eigval.npy")
@@ -37,11 +37,11 @@ def vprint(txt, verbose):
     Function used to print verbose statements
 
     INPUT:
-        txt - Message to return
-        verbose - Verbosity
+        txt - message to return
+        verbose - verbosity
 
     OUTPUT:
-        None
+        none
     """
     if verbose != 0:
         print(txt)

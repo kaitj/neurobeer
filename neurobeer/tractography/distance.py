@@ -11,24 +11,30 @@ from joblib.pool import has_shareable_memory
 
 def _calcDistance(fiberMatrix1, fiberMatrix2):
     """ *INTERNAL FUNCTION*
-    Computes average euclidean distance
+    Computes average Euclidean distance
 
     INPUT:
         fiberMatrix1 - 3D matrix containing fiber spatial infomration
         fiberMatrix2 - 3D matrix containing fiber spatial information for
                        comparison
+
+    OUTPUT:
+        Average Euclidean distance of sample points
     """
     return np.mean(np.linalg.norm(np.subtract(fiberMatrix1, fiberMatrix2),
             axis=0), axis=1)
 
 def _calcQDistance(fiberMatrix1, fiberMatrix2):
     """ *INTERNAL FUNCTION*
-    Computes average euclidean distance
+    Computes average Euclidean distance
 
     INPUT:
-        fiberMatrix1 - 3D matrix containing fiber spatial infomration
-        fiberMatrix2 - 3D matrix containing fiber spatial information for
+        fiberMatrix1 - 3D matrix containing fiber quantitative infomration
+        fiberMatrix2 - 3D matrix containing fiber quantitative information for
                        comparison
+
+    OUTPUT:
+        Average "Euclidean" distance of quantitative values
     """
     return np.mean(np.linalg.norm(fiberMatrix1, fiberMatrix2), axis=1)
 
@@ -79,6 +85,7 @@ def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2,
         flip - flag to flip fiber
         n_jobs - number of processes/threads (defaults to use all available
                  resources)
+
     OUTPUT:
         qDistance - computed scalar "distance" between fibers
     """
