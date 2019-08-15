@@ -19,5 +19,5 @@ setup(
     # Metadata
     author='Jason Kai',
     author_email='tkai@uwo.ca',
-    url='https://github.com/kaitj/neurobeer',
+    url='https://github.com/khanlabs/neurobeer',
 )
