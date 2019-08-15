@@ -48,7 +48,7 @@ def main():
     """
     import os.path as op
 
-    from neurobeer.tractography import cluster, fibers, prior, tractio
+    from neurobeer.tractography import cluster, fibers, prior, tractio, misc
 
     args = get_parser().parse_args()
     # Required inputs
@@ -56,10 +56,10 @@ def main():
     xfm_tract = args.xfm_tract
 
     if not op.isfile(in_tract) or not op.isfile(xfm_tract):
-        print("\nOne of the provided tractography files is not found...")
+        raise IOError("One of the provided tractography files is not found...")
 
-    if args.verbose != 0:
-        print("\nCopying data over to transformed clustered tractography")
+    misc.vprint("Copying data over to transformed clustered tractography",
+                args.verbose)
 
     # Load input tractography datas
     priorData, priorCentroids, priorLabels, _ = prior.load(in_tract,
