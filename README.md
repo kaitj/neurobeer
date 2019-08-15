@@ -2,7 +2,7 @@
 
 The NeuroBundle Extraction and Evaluation Resource, a data-driven tractography clustering and evaluation tool.
 
-[![Docker container available](https://img.shields.io/badge/docker-kaitj/neurobeer-brightgreen.svg?logo=docker&style=flat)](https://hub.docker.com/r/kaitj/neurobeer/tags/) 
+[![Docker container available](https://img.shields.io/badge/docker-kaitj/neurobeer-brightgreen.svg?logo=docker&style=flat)](https://hub.docker.com/r/kaitj/neurobeer/tags/)
 [![Zenodo](https://zenodo.org/badge/198719661.svg)](https://zenodo.org/badge/latestdoi/198719661)
 
 ## Contents
@@ -11,10 +11,6 @@ The NeuroBundle Extraction and Evaluation Resource, a data-driven tractography c
     * [Support and communication](#support)
 * [Installation](#installation)
     * [Containerized package](#container)
-* [Running tractography tool](#runmain)
-    * [Command line interface](#cli)
-        * [Required arguments](#reqarg)
-        * [Optional arguments](#optarg)
 * [Workflow](#workflow)
 * [References](#references)
 
@@ -26,16 +22,14 @@ The NeuroBundle Extraction and Evaluation Resource aims to cluster white matter 
 No claims are made regarding the correctness of returned output. Results should be interpreted with caution.
 
 ### Support and communication <a name="support"></a>
-This module has been tested on Ubuntu 16.04.
-
-All bugs, concerns, and requests for features can be requested via the github repository found [here](https://github.com/kaitj/neurobeer/issues).
+All bugs, concerns, and requests for features can be requested via the github repository found [here](https://github.com/khanlab/neurobeer/issues).
 
 ## Installation <a name="installation"></a>
-The development of this project was written in Python2 and has been tested with both Python2 and Python3.
+The development of this project was originally written in Python2 and has since been ported to Python3 as of 2019. This package has been tested with both Python2 and Python3.
 
-In order to use the package's library and/or command line interfaces, the latest version of the NeuroBundle Extraction and Evaluation Resource can be downloaded by from the github repostiry or via git using the following command:
+In order to use the package's library and/or command line interfaces, the latest version of the NeuroBundle Extraction and Evaluation Resource can be downloaded by from the github repository or via git using the following command:
 
-`git clone https://github.com/kaitj/neurobeer`
+`git clone https://github.com/khanlab/neurobeer`
 
 To install the depedencies needed to use the tool, run the following command:
 
@@ -53,40 +47,14 @@ To use the Docker container, run the following command:
 
 `docker pull kaitj/neurobeer`
 
-To use the Singularity container, users will have to build the container from the recipe found in the container directory. To do so, run the following command:
+To use the Singularity container, users should pull the container from Docker Hub. To do so, run the following command:
 
-`singularity build neurobeer_0.0.2.img Singularity.0.0.2`
+`singularity pull docker://kaitj/neurobeer`
 
 _Note: `sudo` may be required to pull or build container._
 
 ## Running tractography tool <a name="runmain"></a>
 The NeuroBundle Extraction and Evaluation Resource can be used via command line or as a Python library to be used in Python scripts.
-
-### Command line interface <a name="cli"></a>
-Shown is an example of how to run the command line interface with required arguments.
-```
-Usage: clusterSingle --indir <in_dir> --outdir <out_dir> --subjid <subjid> --bundle <bundle_name> --outdir <out_dir>
-```
-
-#### Required arguments <a name="reqarg"></a>
-```
---indir     Directory where input data set is stored
---outdir    Directory where output data will be stored
---subjid    Subject id/label
---bundle    Tractography model to cluster
-```
-
-#### Optional arguments <a name="optarg"></a>
-
-```
--a          One or more quantitative scalar files to be used in clustering
--w          One or more weights to be used for clustering data
--p          Number of samples along a fiber
--k          Number of clusters
--sig        Sigma to be used for Gaussian kernel
--v          Verbosity of tool
--h          Display help documentation
-```
 
 ## Workflow <a name="workflow"></a>
 To use the tool, tractography streamlines should be generated and converted to both .vtk format (for clustering) and .bfloat format (for tracking of scalar quantities along fiber length via Camino<sup>3</sup>).
