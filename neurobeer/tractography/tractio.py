@@ -81,7 +81,7 @@ def readScalar(scalar_file, verbose=0):
         scalar_type - type of scalar information (eg. FA, MD, T1)
     """
 
-    scalar_type, ext = op.splittext(scalar_file)
+    scalar_type, ext = op.splitext(scalar_file)
 
     if (ext == '.txt'):
         misc.vprint("Reading %s..." % scalar_file, verbose)
