@@ -20,7 +20,7 @@ def readVTK(in_vtk, verbose=0):
         out_data - polydata stored within .vtk file
     """
 
-    filename, ext = op.splittext(in_vtk)
+    filename, ext = op.splitext(in_vtk)
 
     if (ext == ".vtk"):
         misc.vprint("Reading %s..." % in_vtk, verbose)
@@ -52,7 +52,7 @@ def writeVTK(in_data, vtk_file, verbose=0):
         none
     """
 
-    filename, ext = op.splittext(vtk_file)
+    filename, ext = op.splitext(vtk_file)
 
     if (ext == ".vtk"):
         misc.vprint("Writing %s ..." % vtk_file, verbose)
@@ -81,7 +81,7 @@ def readScalar(scalar_file, verbose=0):
         scalar_type - type of scalar information (eg. FA, MD, T1)
     """
 
-    scalar_type, ext = op.splittext(scalar_file)
+    scalar_type, ext = op.splitext(scalar_file)
 
     if (ext == '.txt'):
         misc.vprint("Reading %s..." % scalar_file, verbose)
