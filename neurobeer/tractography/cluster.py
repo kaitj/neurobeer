@@ -164,7 +164,7 @@ def spectralPriorCluster(fiberData, priorVTK, templateFlag=False,
 
         misc.vprint("Starting clustering...", verbose)
         misc.vprint("No. of fibers: %d" % int(fiberData.no_of_fibers), verbose)
-        misc.vprint("No. of clusters: %d", int(k_clusters), verbose)
+        misc.vprint("No. of clusters: %d" % int(k_clusters), verbose)
 
         # 1. Compute similarty matrix
         W = _priorWeightedSimilarity(fiberData, priorData, scalarTypeList,
