@@ -386,7 +386,6 @@ class FiberTree:
         self.no_of_fibers = inputVTK.GetNumberOfLines()
         self.pts_per_fiber = pts_per_fiber
 
-
         misc.vprint("Converting polydata to array representation.", verbose)
         misc.vprint("Fibers: %d" % int(self.no_of_fibers), verbose)
         misc.vprint("Points sampled along fiber: %d" % int(self.pts_per_fiber),
