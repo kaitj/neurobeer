@@ -77,7 +77,7 @@ def calcEndPointSep(fiberData, rejIdx):
 
     return DArray
 
-def calcFiberLength(fiberData, rejIdx):
+def calcFiberLength(fiberData, rejIdx=[]):
     """
     Calculates the fiber length via arc length
     NOTE: same function as ufiber module without removing any fibers
@@ -228,12 +228,13 @@ class FiberTree:
         for fidx in fidxes:
             if fidx in rejIdx:
                 continue
-            for pidx in range(0, self.pts_per_fiber):
-                fiberArray_x[idx][pidx] = float(self.fiberTree[fidx][pidx]['x'])
-                fiberArray_y[idx][pidx] = float(self.fiberTree[fidx][pidx]['y'])
-                fiberArray_z[idx][pidx] = float(self.fiberTree[fidx][pidx]['z'])
+            else:
+                for pidx in range(0, self.pts_per_fiber):
+                    fiberArray_x[idx][pidx] = float(self.fiberTree[fidx][pidx]['x'])
+                    fiberArray_y[idx][pidx] = float(self.fiberTree[fidx][pidx]['y'])
+                    fiberArray_z[idx][pidx] = float(self.fiberTree[fidx][pidx]['z'])
 
-            idx += 1
+                idx += 1
 
         return fiberArray_x, fiberArray_y, fiberArray_z
 
@@ -279,17 +280,19 @@ class FiberTree:
                 for fidx in fidxes:
                     if fidx in rejIdx:
                         continue
-                    for pidx in range(fiberData.pts_per_fiber):
-                        self.fiberTree[idx][pidx][Type] = float(fiberData.fiberTree[fidx][pidx][Type])
-                    idx += 1
+                    else:
+                        for pidx in range(fiberData.pts_per_fiber):
+                            self.fiberTree[idx][pidx][Type] = float(fiberData.fiberTree[fidx][pidx][Type])
+                        idx += 1
             # Copy scalars of all fibers
             else:
                 for fidx in range(fiberData.no_of_fibers):
                     if fidx in rejIdx:
                         continue
-                    for pidx in range(fiberData.pts_per_fiber):
-                        self.fiberTree[idx][pidx][Type] = float(fiberData.fiberTree[fidx][pidx][Type])
-                    idx += 1
+                    else:
+                        for pidx in range(fiberData.pts_per_fiber):
+                            self.fiberTree[idx][pidx][Type] = float(fiberData.fiberTree[fidx][pidx][Type])
+                        idx += 1
 
     def addScalar(self, inputVTK, scalarData, scalarType, pts_per_fiber=20):
         """
