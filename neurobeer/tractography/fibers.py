@@ -219,9 +219,9 @@ class FiberTree:
                            fiber bundle
         """
 
-        fiberArray_x = np.zeros((len(fidxes), self.pts_per_fiber))
-        fiberArray_y = np.zeros((len(fidxes), self.pts_per_fiber))
-        fiberArray_z = np.zeros((len(fidxes), self.pts_per_fiber))
+        fiberArray_x = np.zeros((len(fidxes)-len(rejIdx), self.pts_per_fiber))
+        fiberArray_y = np.zeros((len(fidxes)-len(rejIdx), self.pts_per_fiber))
+        fiberArray_z = np.zeros((len(fidxes)-len(rejIdx), self.pts_per_fiber))
 
         # Fiber data
         idx = 0
