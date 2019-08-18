@@ -166,7 +166,7 @@ def spectralPriorCluster(fiberData, priorVTK, templateFlag=False,
         misc.vprint("No. of fibers: %d" % int(fiberData.no_of_fibers), verbose)
         misc.vprint("No. of clusters: %d" % int(k_clusters), verbose)
 
-        # 1. Compute similarty matrix
+        # 1. Compute similarity matrix
         W = _priorWeightedSimilarity(fiberData, priorData, scalarTypeList,
                                      scalarWeightList, sigma, n_jobs)
         W, rejIdx = _outlierSimDetection(W, pflag=1, tflag=templateFlag,
@@ -215,16 +215,18 @@ def addScalarToVTK(polyData, fiberTree, scalarType, fidxes=None, rejIdx=[]):
         for fidx in range(0, fiberTree.no_of_fibers):
             if fidx in rejIdx:
                 continue
-            for pidx in range(0, fiberTree.pts_per_fiber):
-                scalarValue = fiberTree.fiberTree[fidx][pidx][scalarType]
-                data.InsertNextValue(scalarValue)
+            else:
+                for pidx in range(0, fiberTree.pts_per_fiber):
+                    scalarValue = fiberTree.fiberTree[fidx][pidx][scalarType]
+                    data.InsertNextValue(scalarValue)
     else:
-        idx = 0
         for fidx in fidxes:
-            for pidx in range(0, fiberTree.pts_per_fiber):
-                scalarValue = fiberTree.fiberTree[idx][pidx][scalarType]
-                data.InsertNextValue(float(scalarValue))
-            idx += 1
+            if fidx in rejIdx:
+                continue
+            else:
+                for pidx in range(0, fiberTree.pts_per_fiber):
+                    scalarValue = fiberTree.fiberTree[fidx][pidx][scalarType]
+                    data.InsertNextValue(float(scalarValue))
 
     del scalarValue
 
@@ -675,7 +677,8 @@ def _outlierSimDetection(W, pflag=0, tflag=False, subsetIdxes=None):
     INPUT
         W - similarity matrix
         pflag - flag for outlier detection with priors
-        subsetIdex - subset of indices for subsetting; used with tflag
+        tflag - flag for indicating subsetting
+        subsetIdxes - subset of indices for subsetting; used with tflag
 
     OUTPUT:
         W - similarity matrix with removed outliers
