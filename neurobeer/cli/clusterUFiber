@@ -136,7 +136,7 @@ def main():
 
     for label in np.unique(clusterIdx):
         idxes = np.where(clusterIdx == label)[0]
-        bundle = clusterData.getFibers(idxes, rejIdx)
+        bundle = clusterData.getFibers(idxes)
         bundle = fibers.convertFromTuple(bundle)
         polyData = bundle.convertToVTK()
         statsSuffix = 'stats_%i' % label
@@ -151,7 +151,7 @@ def main():
 
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, clusterData, Type,
-                                              idxes, rejIdx)
+                                              idxes)
             stats.plotStats(fiberData, Type, idxes, dirpath=labeldir)
             stats.writeCSV(label, fiberData, Type, idxes, dirpath=statsdir)
 
