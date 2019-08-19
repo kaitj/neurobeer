@@ -7,7 +7,7 @@ streamlines
 **NOTE**
 REQUIRES INSTALLATION OF CAMINO AND ABILITY TO CONVERT FROM TCK TO BFLOAT
 WORKS WITH SINGULARITY CONTAINER (RECIPE CAN BE FOUND IN GIT REPO:
-https://github.com/kaitj/neurobeer)
+https://github.com/khanlab/neurobeer)
 
 """
 def getBIDS(bids_layout, subjid, scalar_img):
@@ -67,6 +67,7 @@ def main():
     import subprocess
 
     from bids.grabbids import BIDSLayout
+    from neurobeer.tractography import misc
 
     args = get_parser().parse_args()
     # Required inputs
@@ -90,8 +91,7 @@ def main():
     layout = BIDSLayout(bids_dir)
     tck, scalar = getBIDS(layout, subjid, scalar_img)
 
-    if args.verbose != 0:
-        print("\nConverting streamlines from .tck to .bfloat...")
+    misc.vprint("Converting streamlines from .tck to .bfloat...", args.verbose)
 
     tck_str = '"{}"'.format(tck)
     # Convert to bfloat
@@ -107,11 +107,9 @@ def main():
                                  stdout=open(os.devnull, 'wb')).communicate()
 
     if conv_proc[0] is not None or not op.exists(bfloat):
-        print("\nError converting .tck to .bfloat")
-        exit()
+        raise RuntimeError("\nError converting .tck to .bfloat")
 
-    if args.verbose != 0:
-        print("\nTracking scalar to streamlines...")
+    misc.vprint("\nTracking scalar to streamlines...", args.verbose)
 
     # Tract scalar and write to Bdouble
     filename = scalar.split('.', -1)
@@ -129,11 +127,9 @@ def main():
                                        stdin=bfloat_proc.stdout).communicate()
 
     if tractstats_proc[0] is not None or not op.exists(bdouble):
-        print("\nError tracking scalar to streamlines")
-        exit()
+        raise RuntimeError("\nError tracking scalar to streamlines")
 
-    if args.verbose != 0:
-        print("\nWriting tracked scalar to text file...")
+    misc.vprint("Writing tracked scalar to text file...", args.verbose)
 
     # Convert to text file
     filename, _ = op.splitext(bdouble)
@@ -146,19 +142,16 @@ def main():
                                  stdin=bdouble_proc.stdout).communicate()
 
     if txt_proc[0] is not None or not op.exists(txt):
-        print("\nError writing scalars to text file")
-        exit()
+        raise RuntimeError("Error writing scalars to text file.")
 
-    if args.verbose != 0:
-        print("\nCleaning up files")
+    misc.vprint("Cleaning up files", args.verbose)
 
     # Clean up files
     cmd = proc_cmd("rm -f %s %s" % (bfloat, bdouble))
     rm_proc = subprocess.Popen(cmd, stdout=open(os.devnull, "wb")).communicate()
 
     if rm_proc[0] is not None:
-        print("\nError removing %s and %s" % (bfloat, bdouble))
-        exit()
+        raise RuntimeError("Error removing %s and %s" % (bfloat, bdouble))
 
     filename = txt.split('/', -1)[-1]
     out_file = op.join(out_dir, filename)
@@ -166,8 +159,7 @@ def main():
     mv_proc = subprocess.Popen(cmd, stdout=open(os.devnull, "wb")).communicate()
 
     if mv_proc[0] is not None or not op.exists(out_file):
-        print("\nError moving %s" % (txt))
-        exit()
+        raise RuntimeError("Error moving %s" % (txt))
 
 
 if __name__ == '__main__':

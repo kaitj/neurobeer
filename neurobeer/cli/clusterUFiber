@@ -151,7 +151,7 @@ def main():
 
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, clusterData, Type,
-                                              idxes, [])
+                                              idxes)
             stats.plotStats(fiberData, Type, idxes, dirpath=labeldir)
             stats.writeCSV(label, fiberData, Type, idxes, dirpath=statsdir)
 

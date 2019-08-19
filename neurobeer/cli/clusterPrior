@@ -127,12 +127,7 @@ def main():
 
     clusterData = fiberData.getFibers(range(fiberData.no_of_fibers), rejIdx)
     clusterData = fibers.convertFromTuple(clusterData)
-    clusterData.copyScalar(fiberData, scalarTypeList, fidxes=[], rejIdx=rejIdx)
-
-    # NOT USED - SUPPOSE TO EXTRACT STATS FOR COMBINED
-    # NEEDS TO BE FIXED FOR USE (IF WANTED/NEEDED)
-    # for Type in scalarTypeList:
-    #    stats.plotStats(fiberData, Type, dirpath=os.path.join(outdir + '/stats/stats_Clustered'))
+    clusterData.copyScalar(fiberData, scalarTypeList, rejIdx=rejIdx)
 
     # Extract individual clusters
     statsdir = os.path.join(tractdir, 'stats')
@@ -144,7 +139,7 @@ def main():
         bundle = clusterData.getFibers(idxes)
         bundle = fibers.convertFromTuple(bundle)
         polyData = bundle.convertToVTK()
-        LArray = fibers.calcFiberLength(clusterData, [])
+        LArray = fibers.calcFiberLength(bundle)
         LMean, LStd, fiberCount = stats.calcGeoStats(LArray)
         stats.writeGeoCSV(label, LMean, LStd, bundle.no_of_fibers,
                           dirpath=statsdir)
@@ -153,7 +148,7 @@ def main():
 
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, clusterData, Type,
-                                              idxes, [])
+                                              idxes)
             stats.plotStats(clusterData, Type, idxes, dirpath=labeldir)
             stats.writeCSV(label, clusterData, Type, idxes, dirpath=statsdir)
 

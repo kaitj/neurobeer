@@ -6,7 +6,7 @@ Module containing classes and functions pertaining to use of previously clustere
 
 import os
 import numpy as np
-from . import fibers, tractio
+from . import fibers, tractio, misc
 from vtk.util import numpy_support
 
 def load(priorVTKPath, templateFlag=False, verbose=0):
@@ -25,13 +25,11 @@ def load(priorVTKPath, templateFlag=False, verbose=0):
         subsetIdxes - return subset of indices; returns value only if
                       templateFlag is true
     """
-    if verbose == 1:
-        print('\nLoading prior data.')
-        print('\nPlease wait...')
+    misc.vprint("Loading prior data.", verbose)
+    misc.vprint("Please wait...", verbose)
 
     if not os.path.exists(priorVTKPath):
-        print('Error: Prior data', priorVTKPath, 'does not exist.')
-        raise IOError
+        raise IOError("Error: Prior data %s does not exist" % priorVTKPath)
 
     # Prior information
 
@@ -64,8 +62,7 @@ def load(priorVTKPath, templateFlag=False, verbose=0):
 
         subsetIdxes = None
 
-    if verbose == 1:
-        print('\nFinished loading prior data.')
+    misc.vprint("Finishined loading prior data.", verbose)
 
     del priorVTK, priorTree
 
@@ -95,10 +92,10 @@ def _getSubset(clusterArray):
     subset template
 
     INPUT:
-        clusterArray - Array of cluster labels for each fiber
+        clusterArray - array of cluster labels for each fiber
 
     OUTPUT:
-        subsetIdxes - Array of indices with subset from each fiber
+        subsetIdxes - array of indices with subset from each fiber
     """
 
     subsetIdxes = []
@@ -182,8 +179,8 @@ def _getScalarInfo(priorVTK, centroidTree, subsetIdx, pts_per_fiber=20,
 
     for i in range(priorVTK.GetPointData().GetNumberOfArrays()):
         scalarType = priorVTK.GetPointData().GetArray(i).GetName()
-        if verbose == 1:
-            print("\nAdding %s to fiber data" % scalarType)
+
+        misc.vprint("Adding %s to fiber data" % scalarType, verbose)
 
         fidx = 0
         for idx in subsetIdx:

@@ -8,7 +8,6 @@ parameters pertaining to clusters.
 import numpy as np
 import scipy.cluster, scipy.linalg
 import os
-from sys import exit
 
 from . import fibers, distance, misc, prior
 import vtk
@@ -40,7 +39,6 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
             dirpath - directory to store files
             verbose - verbosity of function
 
-
         OUTPUT:
             outputPolydata - polydata containing information from clustering
             clusterIdx - cluster labels of fibers
@@ -51,12 +49,11 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
             dirpath = os.getcwd()
 
         if fiberData.no_of_fibers == 0:
-            print("\nERROR: Input data has 0 fibers!")
-            raise ValueError
-        elif verbose == 1:
-            print("\nStarting clustering...")
-            print("No. of fibers:", fiberData.no_of_fibers)
-            print("No. of clusters:", k_clusters)
+            raise ValueError("Input has 0 fibers!")
+
+        misc.vprint("Starting clustering...", verbose)
+        misc.vprint("No. of fibers: %d" % int(fiberData.no_of_fibers), verbose)
+        misc.vprint("No. of clusters: %d" % int(k_clusters), verbose)
 
         # 1. Compute similarty matrix
         W = _pairwiseWeightedSimilarity(fiberData, scalarTypeList,
@@ -89,8 +86,9 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
         gap_idx = _eiggap(eigval)
         emvec = eigvec[:, 1:gap_idx + 1]
 
-        if (k_clusters < gap_idx + 1) and (verbose != 0):
-            print("\nWarning: k clusters chosen may end in undesirable results")
+        if (k_clusters < gap_idx + 1):
+            misc.vprint("WARNING: k-clusters chosen may produce undesirable results",
+                        verbose)
 
         del eigval, eigvec, gap_idx
 
@@ -100,8 +98,8 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
                                                          minit='points')
         centroids, clusterIdx = _sortLabel(centroids, clusterIdx)
         colour = _cluster_to_rgb(centroids)
-        if verbose == 1:
-            print("\nFinished computing clusters...")
+
+        misc.vprint("Finished computing clusters...", verbose)
 
         # 8. Return results
         # Create model with user / default number of chosen samples along fiber
@@ -159,17 +157,16 @@ def spectralPriorCluster(fiberData, priorVTK, templateFlag=False,
         priorData, priorCentroids, priorLabels, subsetIdxes = \
             prior.load(priorVTK, templateFlag)
 
+        if (fiberData.no_of_fibers == 0) or (int(priorData.no_of_fibers) == 0):
+            raise ValueError("Input data(s) has 0 fibers!")
+
         k_clusters = len(priorCentroids)
 
-        if fiberData.no_of_fibers == 0 or int(priorData.no_of_fibers) == 0:
-            print("\nERROR: Input data(s) has 0 fibers!")
-            raise ValueError
-        elif verbose != 0:
-            print("\nStarting clustering...")
-            print("No. of fibers:", fiberData.no_of_fibers)
-            print("No. of clusters:", k_clusters)
+        misc.vprint("Starting clustering...", verbose)
+        misc.vprint("No. of fibers: %d" % int(fiberData.no_of_fibers), verbose)
+        misc.vprint("No. of clusters: %d" % int(k_clusters), verbose)
 
-        # 1. Compute similarty matrix
+        # 1. Compute similarity matrix
         W = _priorWeightedSimilarity(fiberData, priorData, scalarTypeList,
                                      scalarWeightList, sigma, n_jobs)
         W, rejIdx = _outlierSimDetection(W, pflag=1, tflag=templateFlag,
@@ -218,16 +215,18 @@ def addScalarToVTK(polyData, fiberTree, scalarType, fidxes=None, rejIdx=[]):
         for fidx in range(0, fiberTree.no_of_fibers):
             if fidx in rejIdx:
                 continue
-            for pidx in range(0, fiberTree.pts_per_fiber):
-                scalarValue = fiberTree.fiberTree[fidx][pidx][scalarType]
-                data.InsertNextValue(scalarValue)
+            else:
+                for pidx in range(0, fiberTree.pts_per_fiber):
+                    scalarValue = fiberTree.fiberTree[fidx][pidx][scalarType]
+                    data.InsertNextValue(scalarValue)
     else:
-        idx = 0
         for fidx in fidxes:
-            for pidx in range(0, fiberTree.pts_per_fiber):
-                scalarValue = fiberTree.fiberTree[idx][pidx][scalarType]
-                data.InsertNextValue(float(scalarValue))
-            idx += 1
+            if fidx in rejIdx:
+                continue
+            else:
+                for pidx in range(0, fiberTree.pts_per_fiber):
+                    scalarValue = fiberTree.fiberTree[fidx][pidx][scalarType]
+                    data.InsertNextValue(float(scalarValue))
 
     del scalarValue
 
@@ -276,8 +275,7 @@ def _pairwiseDistance_matrix(fiberTree, n_jobs=-1):
         range(fiberTree.no_of_fibers)), n_jobs=n_jobs)
 
     if np.diag(distances).all() != 0.0:
-        print('Diagonals in distance matrix are not equal to 0')
-        exit()
+        raise ValueError("Diagonals in distance matrix are not equal to 0")
 
     return distances
 
@@ -302,8 +300,7 @@ def _pairwiseSimilarity_matrix(fiberTree, sigma, n_jobs=-1):
 
     # Sanity check
     if np.diag(similarity).all() != 1.0:
-        print('Diagonals in similarity matrix are not equal to 1')
-        exit()
+        raise ValueError("Diagonals in similarity matrix are not equal to 1")
 
     return similarity
 
@@ -325,8 +322,7 @@ def _pairwiseQDistance_matrix(fiberTree, scalarType, n_jobs=-1):
         range(fiberTree.no_of_fibers), scalarType), n_jobs=n_jobs)
 
     if np.diag(qDistances).all() != 0.0:
-        print("Diagonals in distance matrix are not equal to 0")
-        exit()
+        raise ValueError("Diagonals in distance matrix are not equal to 0")
 
     return qDistances
 
@@ -354,8 +350,7 @@ def _pairwiseQSimilarity_matrix(fiberTree, scalarType, sigma, n_jobs=-1):
 
     # Sanity check
     if np.diag(qSimilarity).all() != 1.0:
-        print("Diagonals in similarity marix are not equal to 1")
-        exit()
+        raise ValueError("Diagonals in similarity marix are not equal to 1")
 
     return qSimilarity
 
@@ -567,12 +562,10 @@ def _pairwiseWeightedSimilarity(fiberTree, scalarTypeList=[],
     """
 
     if ((scalarWeightList == []) and (scalarTypeList != [])):
-        print("\nNo weights given for provided measurements! Exiting...")
-        exit()
+        raise ValueError("No weights given for provided measurements!")
 
     elif ((scalarWeightList != []) and (scalarTypeList == [])):
-        print("\nPlease also specify measurement(s) type. Exiting...")
-        exit()
+        raise ValueError("Please also specify measurement(s) type!")
 
     elif ((((scalarWeightList == [])) and ((scalarTypeList == []))) or
     (scalarWeightList[0] == 1)):
@@ -583,8 +576,7 @@ def _pairwiseWeightedSimilarity(fiberTree, scalarTypeList=[],
 
     else:   # Calculate weighted similarity
         if np.sum(scalarWeightList) != 1.0:
-            print('\nWeights given do not sum 1. Exiting...')
-            exit()
+            raise ValueError("Weights given do not sum 1!")
 
         wSimilarity = _pairwiseSimilarity_matrix(fiberTree, sigma[0], n_jobs)
         wSimilarity = wSimilarity * scalarWeightList[0]
@@ -598,8 +590,7 @@ def _pairwiseWeightedSimilarity(fiberTree, scalarTypeList=[],
         del similarity
 
     if np.diag(wSimilarity).all() != 1.0:
-        print("Diagonals of weighted similarity are not equal to 1")
-        exit()
+        raise ValueError("Diagonals of weighted similarity are not equal to 1")
 
     return wSimilarity
 
@@ -622,25 +613,22 @@ def _priorWeightedSimilarity(fiberTree, priorTree, scalarTypeList=[],
     """
 
     if ((scalarWeightList == []) and (scalarTypeList != [])):
-        print("\nNo weights given for provided measurements! Exiting...")
-        exit()
+        raise ValueError("No weights given for provided measurements!")
 
     elif ((scalarWeightList != []) and (scalarTypeList == [])):
-        print("\nPlease also specify measurement(s) type. Exiting...")
-        exit()
+        raise ValueError("Please also specify measurement(s) type!")
 
     elif (((scalarWeightList == []) and (scalarTypeList == [])) or
     (scalarWeightList[0] == 1)):
         print("\nCalculating similarity based on geometry.")
         wSimilarity = _priorSimilarity_matrix(fiberTree, priorTree, sigma[0],
                                               n_jobs=n_jobs)
-        print("\nFinished calculating similarity)")
+        print("\nFinished calculating similarity")
 
     else:   # Calculate weighted similarity
 
         if np.sum(scalarWeightList) != 1.0:
-            print('\nWeights given do not sum 1. Exiting...')
-            exit()
+            raise ValueError("Weights given do not sum 1.")
 
         wSimilarity = _priorSimilarity_matrix(fiberTree, priorTree, sigma[0],
                                               n_jobs=n_jobs)
@@ -689,7 +677,8 @@ def _outlierSimDetection(W, pflag=0, tflag=False, subsetIdxes=None):
     INPUT
         W - similarity matrix
         pflag - flag for outlier detection with priors
-        subsetIdex - subset of indices for subsetting; used with tflag
+        tflag - flag for indicating subsetting
+        subsetIdxes - subset of indices for subsetting; used with tflag
 
     OUTPUT:
         W - similarity matrix with removed outliers

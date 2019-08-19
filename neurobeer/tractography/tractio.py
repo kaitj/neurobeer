@@ -1,112 +1,103 @@
 """ tractio.py
 
-Module provides input and output functionality for VTK tractography files.
+Module provides input/output functionality
 
 """
 
-import os
+import os.path as op
 import vtk
+from . import misc
 
-def readVTK(vtkfile, verbose=0):
+def readVTK(in_vtk, verbose=0):
     """
-    Reads tractography .vtk file (vtkPolyData).
+    Reads vtkPolyData containing tractography
 
     INPUT:
-        vtkfile - file of .vtk type containing tractogrpahy polydata
+        in_vtk - input file of .vtk type containing tractography
         verbose - verbosity of function; defaults 0
 
     OUTPUT:
-        outData - polydata stored within the .vtk file
+        out_data - polydata stored within .vtk file
     """
-    if verbose == 1:
-        print("\nReading", vtkfile, "...")
 
-    filename, ext = os.path.splitext(vtkfile)
+    filename, ext = op.splitext(in_vtk)
 
-    if (ext == '.vtk'):
-        vtkReader = vtk.vtkPolyDataReader()
+    if (ext == ".vtk"):
+        misc.vprint("Reading %s..." % in_vtk, verbose)
+
+        vtk_reader = vtk.vtkPolyDataReader()
+        vtk_reader.SetFileName(in_vtk)
+        vtk_reader.Update()
+        out_data = vtk_reader.GetOutput()
+
+        misc.vprint("Finished reading %s." % in_vtk, verbose)
+        misc.vprint("Number of fibers found: %d." % int(out_data.GetNumberOfLines()),
+        verbose)
+
+        return out_data
+
     else:
-        print("File format invalid / not recognized.")
-        return None
+        raise IOError("Invalid / unrecognized file format.")
 
-    vtkReader.SetFileName(vtkfile)
-    vtkReader.Update()
-    outData = vtkReader.GetOutput()
-
-    del vtkReader
-
-    if verbose == 1:
-        print("Finished reading tractography data...")
-        print("Number of fibers found:", outData.GetNumberOfLines())
-
-    return outData
-
-def writeVTK(data, vtkfile, verbose=0):
+def writeVTK(in_data, vtk_file, verbose=0):
     """
-    Write tractography data to .vtk file (vtkPolyData).
+    Write tractography data into vtkPolyData
 
     INPUT:
-        data - vtkPolydata to be written to file
-        vtkfile - name of file to be written
+        in_data - tractography data to be written to file
+        vtk_file - name of file to be written
         verbose - verbosity of function; defaults 0
 
     OUTPUT:
         none
     """
 
-    if verbose == 1:
-        print("Writing", vtkfile, "...")
+    filename, ext = op.splitext(vtk_file)
 
-    filename, ext = os.path.splitext(vtkfile)
+    if (ext == ".vtk"):
+        misc.vprint("Writing %s ..." % vtk_file, verbose)
 
-    if (ext == '.vtk'):
-        vtkWriter = vtk.vtkPolyDataWriter()
-        vtkWriter.SetFileTypeToBinary()
+        vtk_writer = vtk.vtkPolyDataWriter()
+        vtk_writer.SetFileTypeToBinary()
+        vtk_writer.SetFileName(vtk_file)
+        vtk_writer.SetInputData(in_data)
+        vtk_writer.Update()
+
+        return
+
     else:
-        print("Invalid file format")
-        return None
+        raise IOError("Invalid file format.")
 
-    vtkWriter.SetFileName(vtkfile)
-    vtkWriter.SetInputData(data)
-    vtkWriter.Update()
-
-    del vtkWriter
-
-    if verbose == 1:
-        print("Finished writing data to ", filename, "\n")
-
-def readScalar(scalarfile, verbose=0):
+def readScalar(scalar_file, verbose=0):
     """
-    Read input a text file (.txt) containing scalar values pertaining to
-    tractography.
+    Read input text file containing scalar values assocaited with tractography
 
     INPUT:
-        scalarfile - text file containing quantitative scalar information
+        scalar_file - text file containing quantitative scalar information
         verbose - verbosity of function; defaults 0
 
     OUTPUT:
-        scalarData - list of scalar values from file
-        scalarType - type of scalar information (ie. FA, T1)
+        scalar_data - list of scalar values from file
+        scalar_type - type of scalar information (eg. FA, MD, T1)
     """
-    if verbose == 1:
-        print("\nReading", scalarfile, "...")
 
-    scalarType, ext = os.path.splitext(scalarfile)
-    scalarType = scalarType.split('_', -1)[-1]
+    scalar_type, ext = op.splitext(scalar_file)
 
     if (ext == '.txt'):
-        fileReader = open(scalarfile, 'rU')
+        misc.vprint("Reading %s..." % scalar_file, verbose)
+
+        file_reader = open(scalar_file, 'rU')
+        scalar_data = file_reader.readlines()
+        file_reader.close()
+
+        for i in range(len(scalar_data)):
+            scalar_data[i] = scalar_data[i].rstrip('\n')
+
+        scalar_type = scalar_type.split('_', -1)[-1]
+
+        misc.vprint("Finished reading %s." % scalar_file, verbose)
+
+        return scalar_data, scalar_type
+
     else:
-        print("File format invalid / not recognized.")
-        return None
-
-    scalarData = fileReader.readlines()
-    fileReader.close()
-
-    for i in range(len(scalarData)):
-        scalarData[i] = scalarData[i].rstrip('\n')
-
-    if verbose == 1:
-        print("Finished reading scalar data...")
-
-    return scalarData, scalarType
+        raise IOError("Invalid / unreognized file.")

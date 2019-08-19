@@ -1,69 +1,49 @@
 """ misc.py
 
-Module containing miscallaneous functions used in the library. These functions do not fit
-in with other modules.
+Module providing miscallaneous functionality
 
 """
 
+import os.path as op
 import numpy as np
 
-def saveEig(dirpath, eigvalArray, eigvecArray):
+def saveEig(dir_path, eigval_arr, eigvec_arr, verbose=0):
     """
-    Function used to save eigenvalues and eigenvectors to binary file):
+    Function used to save eigenvalues and eigenvectors to binary file.
 
     INPUT:
-        dirpath - Directory path for storing eigenvalues & eigenvectors
-        eigvalArray - Array of eigenvalues to be saved
-        eigvecArray - Matrix of eigenvectos to be saved
+        dir_path - directory path for storing files
+        eigval_arr - array of eigenvalues
+        eigvec_arr - matrix of eigenvectors
 
     OUTPUT:
         none
     """
-    # Paths for files to be saved
-    eigvalPath = dirpath + '/eigval.npy'
-    eigvecPath = dirpath + '/eigvec.npy'
+    # Paths to save
+    eigval_path = op.join(op.realpath(dir_path), "eigval.npy")
+    eigvec_path = op.join(op.realpath(dir_path), "eigvec.npy")
 
-    # Save to file
-    np.save(eigvalPath, eigvalArray)
-    np.save(eigvecPath, eigvecArray)
+    # Save file
+    np.save(eigval_path, eigval_arr)
+    np.save(eigvec_path, eigvec_arr)
 
-###############################
-# SAVE MATRIX CODE DEPRECATED #
-###############################
-# def saveMatrix(dirpath, matrix, matrixType):
-#     """
-#     Function used to save similarity matrices.
-#     NOTE: Matplotlib not memory-friendly, save matrix to textfile
-#
-#     INPUT:
-#         dirpath - Directory path for storing matrix images
-#         matrix - Similarity matrix to be saved
-#         matrixType - Type of similarity matrix (ie. weighted, FA, T1)
-#
-#     OUTPUT:
-#         none
-#     """
-#
-#     fname = (dirpath + matrixType + '_Similarity.txt')
-#
-#     np.savetxt(fname, matrix)
-#
-#     OLD CODE FOR PLOTTING FIGURE
-#     f = plt.figure(figsize=(10, 10))
-#     matrix = plt.imshow(matrix, cmap='viridis', interpolation='none')
-#     plt.title((matrixType + ' Similarity'), fontsize=16)
-#
-#     ax = plt.gca()
-#     ax.tick_params(axis='both', labelsize=14)
-#     for axis in [ax.xaxis, ax.yaxis]:
-#         axis.set_major_locator(ticker.MaxNLocator(integer=True))
-#     div = make_axes_locatable(ax)
-#     cax = div.append_axes('right', size='5%', pad=0.25)
-#     cax.tick_params(labelsize=14)
-#     plt.colorbar(matrix, cax)
-#     plt.tight_layout()
-#
-#     plt.savefig(dirpath + '/' + matrixType + '_Similarity.png')
-#     plt.close(f)
-#
-#     del matrix
+    vprint("Saved eigenvalues & eigenvectors to %s" % op.realpath(dir_path),
+            verbose)
+
+    return
+
+def vprint(txt, verbose):
+    """
+    Function used to print verbose statements
+
+    INPUT:
+        txt - message to return
+        verbose - verbosity
+
+    OUTPUT:
+        none
+    """
+    if verbose != 0:
+        print(txt)
+
+    return
