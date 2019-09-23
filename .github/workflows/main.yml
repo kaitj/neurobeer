@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Git Branch - Dev
     - uses: actions/checkout@v1
-    run: |
-      git branch
+    - name: Check branch
+      run: |
+        git branch
 
 
 
