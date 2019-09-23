@@ -23,7 +23,7 @@ jobs:
 
     # Build and deploy docker image
     - name: Build & deploy Docker dev image
-      if: ${{ github.ref }} == 'dev'
+      if: github.event_name == 'push'
       env:
         DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
         DOCKER_HUB_KEY: ${{ secrets.DOCKER_HUB_KEY }}
