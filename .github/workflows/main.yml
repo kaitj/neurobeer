@@ -2,26 +2,28 @@ name: Neurobeer CI
 
 on:
   push:
-    branches: 
+    branches:
     - dev
   pull_request:
     branches:
     - master
-    
+
 jobs:
 
   build:
- 
+
     runs-on: ubuntu-latest
- 
+
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@master
+      with:
+        ref: dev
+      if: github.event == 'push'
     - name: Build the Docker dev image
-      if: github.event == 'push' 
       env:
         DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
         DOCKER_HUB_KEY: ${{ secrets.DOCKER_HUB_KEY }}
-      run: | 
+      run: |
         echo 'Docker login'
         docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_KEY
         echo 'Building docker image...'
