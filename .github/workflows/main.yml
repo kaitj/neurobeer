@@ -4,9 +4,6 @@ on:
   push:
     branches:
     - dev
-  pull_request:
-    branches:
-    - master
 
 jobs:
 
@@ -24,9 +21,9 @@ jobs:
         DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
         DOCKER_HUB_KEY: ${{ secrets.DOCKER_HUB_KEY }}
       run: |
-        echo `ls -l`
+        echo '`ls -l`'
         echo ""
-        echo `ls -l ../`
+        echo '`ls -l ../`'
         echo 'Docker login'
         docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_KEY
         echo 'Building docker image...'
