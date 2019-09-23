@@ -11,6 +11,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+      with:
+          ref: ${{ github.ref }}
+    # - name: Reattach HEAD STATE # Workaround for github actions checkout
+    #   run: |
+    #     git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/kaitj/neurobeer
     - name: Check branch
       run: |
         git branch
