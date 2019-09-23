@@ -24,10 +24,11 @@ jobs:
         DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
         DOCKER_HUB_KEY: ${{ secrets.DOCKER_HUB_KEY }}
       run: |
+        echo `pwd`
         echo 'Docker login'
         docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_KEY
         echo 'Building docker image...'
-        docker build . --file container/Dockerfile --tag kaitj/neurobeer:dev
+        docker build . --file ../container/Dockerfile --tag kaitj/neurobeer:dev
         echo 'Pushing docker image...'
         docker push kaitj/neurobeer:dev
         echo 'Finished deploying docker image!'
