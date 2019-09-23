@@ -23,17 +23,22 @@ jobs:
 
     # Build and deploy docker image
     - name: Build & deploy Docker dev image
+      if: github.event_name == 'push' && ${{ github.ref }} == 'dev'
       env:
         DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
         DOCKER_HUB_KEY: ${{ secrets.DOCKER_HUB_KEY }}
       run: |
-        echo `ls -l`
-        echo ''
         echo 'Docker login'
+        echo ''
         docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_KEY
+        echo ''
         echo 'Building docker image...'
+        echo ''
         cd container
         docker build . --tag kaitj/neurobeer:dev
+        echo ''
         echo 'Pushing docker image...'
+        echo ''
         docker push kaitj/neurobeer:dev
+        echo ''
         echo 'Finished deploying docker image!'
