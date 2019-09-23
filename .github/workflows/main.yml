@@ -13,30 +13,23 @@ jobs:
     - uses: actions/checkout@master
       with:
           ref: ${{ github.ref }}
-    # - name: Reattach HEAD STATE # Workaround for github actions checkout
-    #   run: |
-    #     git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/kaitj/neurobeer
     - name: Check branch
       run: |
         git branch
-
-
-
-    #   if: github.event == 'push'
-    #   repository: neurobeer
-    #   ref: dev
-    # - name: Build the Docker dev image
-    #   env:
-    #     DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
-    #     DOCKER_HUB_KEY: ${{ secrets.DOCKER_HUB_KEY }}
-    #   run: |
-    #     echo '`ls -l`'
-    #     echo ""
-    #     echo '`ls -l ../`'
-    #     echo 'Docker login'
-    #     docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_KEY
-    #     echo 'Building docker image...'
-    #     docker build . --file ../container/Dockerfile --tag kaitj/neurobeer:dev
-    #     echo 'Pushing docker image...'
-    #     docker push kaitj/neurobeer:dev
-    #     echo 'Finished deploying docker image!'
+        echo 'If HEAD is detached, not an issue'
+    - name: Build & deploy Docker dev image
+      if: github.event == 'push'
+      env:
+        DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
+        DOCKER_HUB_KEY: ${{ secrets.DOCKER_HUB_KEY }}
+      run: |
+        echo '`ls -l`'
+        echo ""
+        echo '`ls -l ../`'
+        echo 'Docker login'
+        docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_KEY
+        echo 'Building docker image...'
+        docker build . --file ../container/Dockerfile --tag kaitj/neurobeer:dev
+        echo 'Pushing docker image...'
+        docker push kaitj/neurobeer:dev
+        echo 'Finished deploying docker image!'
