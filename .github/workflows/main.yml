@@ -10,22 +10,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@master
+    # Checkout correct branch
+    - uses: actions/checkout@v1
       with:
           ref: ${{ github.ref }}
+
+    # Double check branch - mainly for debugging purposes
     - name: Check branch
       run: |
         git branch
         echo 'If HEAD is detached, not an issue'
+
+    # Build and deploy docker image
     - name: Build & deploy Docker dev image
       if: github.event == 'push'
       env:
         DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
         DOCKER_HUB_KEY: ${{ secrets.DOCKER_HUB_KEY }}
       run: |
-        echo '`ls -l`'
-        echo ""
-        echo '`ls -l ../`'
+        echo `ls -l`
+        echo ''
         echo 'Docker login'
         docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_KEY
         echo 'Building docker image...'
