@@ -16,7 +16,7 @@ jobs:
     steps:
     # Checkout correct branch
     - uses: actions/checkout@master
-      if: github.event == 'push'
+      if: github.event_name == 'push'
         with:
             ref: ${{ github.ref }}
       else:
