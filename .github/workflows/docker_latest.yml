@@ -1,4 +1,4 @@
-name: Neurobeer Dev Deployment
+name: Neurobeer Latest Deployment
 
 on:
   pull_request:
