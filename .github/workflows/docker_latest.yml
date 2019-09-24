@@ -17,7 +17,7 @@ jobs:
         ref: refs/heads/master
 
     # Build and deploy docker dev image
-    - name: Build & deploy Docker dev image
+    - name: Build & deploy Docker latest image
       if: github.event.pull_request.merged == true
       env:
         DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
