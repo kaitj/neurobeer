@@ -16,8 +16,12 @@ jobs:
     steps:
     # Checkout correct branch
     - uses: actions/checkout@master
-      with:
-          ref: ${{ github.ref }}
+      if: github.ref == 'refs/head/dev'
+        with:
+            ref: ${{ github.ref }}
+      else:
+        with:
+            ref: /refs/head/master
 
     # Double check branch - mainly for debugging purposes
     - name: Check branch
