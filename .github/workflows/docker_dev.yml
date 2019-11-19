@@ -29,10 +29,10 @@ jobs:
         echo 'Building docker image...'
         echo ''
         cd container
-        docker build . --tag kaitj/neurobeer:dev
+        docker build . --tag $DOCKER_HUB_USER/neurobeer:dev
         echo ''
         echo 'Pushing docker image...'
         echo ''
-        docker push kaitj/neurobeer:dev
+        docker push $DOCKER_HUB_USER/neurobeer:dev
         echo ''
         echo 'Finished deploying docker image!'
