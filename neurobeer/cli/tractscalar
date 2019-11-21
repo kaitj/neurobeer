@@ -34,7 +34,8 @@ def get_parser():
     from neurobeer._version import __version__
 
     parser = ArgumentParser(description=('Tracks scalar information to vtk '
-                                         'polydata and returns text file'),
+                                         'polydata and returns vtk with mapped'
+                                         'scalars.'),
                             formatter_class=RawTextHelpFormatter)
 
     # Version option
