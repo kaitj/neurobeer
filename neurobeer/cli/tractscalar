@@ -10,13 +10,13 @@ WORKS WITH SINGULARITY CONTAINER (RECIPE CAN BE FOUND IN GIT REPO:
 https://github.com/khanlab/neurobeer)
 
 """
-def getBIDS(bids_layout, subjid, scalar_img):
+def getBIDS(bids_layout, subjid, scalar_img, space):
     subjid = subjid.lstrip('sub-')
 
     # Grab necessary files
-    tck = bids_layout.get(subject=subjid, type='tractography',
+    tck = bids_layout.get(subject=subjid, space=space, type='tractography',
                           return_type='file', extensions=['tck'])
-    scalar = bids_layout.get(subject=subjid, type=scalar_img,
+    scalar = bids_layout.get(subject=subjid, space=space, type=scalar_img,
                              return_type='file', extensions=['nii', 'nii.gz'])
 
     return tck[0], scalar[0]
@@ -53,6 +53,9 @@ def get_parser():
     g_opt.add_argument('-o', '--out_dir', dest="out_dir",
                                           help="Output directory. Defaults to "
                                             "<bids_dir>/derivatives/neurobeer ")
+    g_opt.add_argument('-s', '--space', dest="space", default=None,
+                                        help="Set space data is in. Defaults "
+                                             "none")
     g_opt.add_argument('-v', '--verbose', action='count', default=0,
                        help='verbosity of tool')
 
@@ -75,6 +78,9 @@ def main():
     subjid = args.subjid
     scalar_img = args.scalar_img
 
+    # Optional outputs
+    space = args.space
+
     # Set output directory
     if args.out_dir:
         out_dir = op.realpath(args.out_dir)
@@ -89,7 +95,7 @@ def main():
 
     # Grab necessary files
     layout = BIDSLayout(bids_dir)
-    tck, scalar = getBIDS(layout, subjid, scalar_img)
+    tck, scalar = getBIDS(layout, subjid, scalar_img, space)
 
     misc.vprint("Converting streamlines from .tck to .bfloat...", args.verbose)
 
