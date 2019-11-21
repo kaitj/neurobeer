@@ -14,9 +14,9 @@ def getBIDS(bids_layout, subjid, scalar_img, space):
     subjid = subjid.lstrip('sub-')
 
     # Grab necessary files
-    tck = bids_layout.get(subject=subjid, space=space, type='tractography',
+    tck = bids_layout.get(subject=subjid, space=space, suffixe='tractography',
                           return_type='file', extensions=['tck'])
-    scalar = bids_layout.get(subject=subjid, space=space, type=scalar_img,
+    scalar = bids_layout.get(subject=subjid, space=space, suffix=scalar_img,
                              return_type='file', extensions=['nii', 'nii.gz'])
 
     return tck[0], scalar[0]
@@ -70,7 +70,7 @@ def main():
     import os.path as op
     import subprocess
 
-    from bids.grabbids import BIDSLayout
+    from bids.layout import BIDSLayout
     from neurobeer.tractography import misc
 
     args = get_parser().parse_args()
@@ -95,7 +95,7 @@ def main():
         os.makedirs(out_dir)
 
     # Grab necessary files
-    layout = BIDSLayout(bids_dir)
+    layout = BIDSLayout(bids_dir, validate=False)
     tck, scalar = getBIDS(layout, subjid, scalar_img, space)
 
     misc.vprint("Converting streamlines from .tck to .bfloat...", args.verbose)
