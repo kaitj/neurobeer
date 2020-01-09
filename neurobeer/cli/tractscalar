@@ -14,7 +14,7 @@ def getBIDS(bids_layout, subjid, scalar_img, space):
     subjid = subjid.lstrip('sub-')
 
     # Grab necessary files
-    tck = bids_layout.get(subject=subjid, space=space, suffixe='tractography',
+    tck = bids_layout.get(subject=subjid, space=space, suffix='tractography',
                           return_type='file', extensions=['tck'])
     scalar = bids_layout.get(subject=subjid, space=space, suffix=scalar_img,
                              return_type='file', extensions=['nii', 'nii.gz'])
