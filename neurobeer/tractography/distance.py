@@ -38,7 +38,8 @@ def _calcQDistance(fiberMatrix1, fiberMatrix2):
     """
     return np.mean(np.linalg.norm(fiberMatrix1, fiberMatrix2), axis=1)
 
-def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False, n_jobs=-1):
+def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False,
+                            pflag=False, n_jobs=-1):
     """ *INTERNAL FUNCTION*
     Computes the distance between one fiber and individual fibers within a
     group (array) of fibers.
@@ -48,6 +49,7 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False, n_jobs=-1):
         fiberMatrix2 - 3D matrix containing fiber spatial information for
                        comparison
         flip - flag to flip fiber
+        pflag - flag to indicate if clustering is performed with priors
         n_jobs - number of processes/threads (defaults to use all available
                  resources)
 
@@ -69,10 +71,14 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False, n_jobs=-1):
                 np.flip(fiberMatrix1[:, i, None], axis=2), fiberMatrix2)
             for i in range(fiberMatrix1.shape[1]))
 
-    return distance
+    if pflag is False:
+        return distance, None
+    else:
+        label = np.argmin(distance, axis=0)
+        return distance[label], label
 
 def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2,
-                             flip=False, n_jobs=-1):
+                             flip=False, pflag=False, n_jobs=-1):
     """ *INTERNAL FUNCTION*
     Computes the "distance" between the scalar values between one fiber and
     the fibers within a group (array) of fibers.
@@ -83,6 +89,7 @@ def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2,
         fiberScalarMatrix2 - array of scalar information pertaining to a group
                              of fibers for comparison
         flip - flag to flip fiber
+        pflag - flag to indicate if clustering is performed with priors
         n_jobs - number of processes/threads (defaults to use all available
                  resources)
 
@@ -108,9 +115,13 @@ def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2,
                 np.flip(fiberScalarMatrix1[i, :], fiberScalarMatrix2))
             for i in range(fiberScalarMatrix1.shape[0]))
 
-    return qDistance
+    if pflag is False:
+        return qDistance, None
+    else:
+        label = np.argmin(qDistance, axis=0)
+        return qDistance[label], label
 
-def fiberDistance(fiberArray1, fiberArray2=None, n_jobs=-1):
+def fiberDistance(fiberArray1, fiberArray2=None, pflag=False, n_jobs=-1):
     """
     Computes the distance between one fiber and individual fibers within a
     group (array) of fibers. This function also handles equivalent fiber
@@ -119,6 +130,7 @@ def fiberDistance(fiberArray1, fiberArray2=None, n_jobs=-1):
     INPUT:
         fiberArray1 - group of fibers for comparison
         fiberArray2 - group of fibers to compare fiberArray1 to, if applicable
+        pflag - flag to indicate if clustering is performed with priors
         n_jobs - number of processes/threads (defaults to use all available
                  resources)
 
@@ -131,10 +143,11 @@ def fiberDistance(fiberArray1, fiberArray2=None, n_jobs=-1):
         fiberArray1 = np.asarray(fiberArray1, dtype=np.float32)
 
         # Compute distances for fiber and flipped fiber of group
-        distance1 = _fiberDistance_internal(fiberArray1, fiberArray1,
-                                            n_jobs=n_jobs)
-        distance2 = _fiberDistance_internal(fiberArray1, fiberArray1, flip=True,
-                                            n_jobs=n_jobs)
+        distance1, label1 = _fiberDistance_internal(fiberArray1, fiberArray1,
+                                                    pflag=pflag, n_jobs=n_jobs)
+        distance2, label2 = _fiberDistance_internal(fiberArray1, fiberArray1,
+                                                    flip=True, pflag=pflag,
+                                                    n_jobs=n_jobs)
         del fiberArray1
 
     else:
@@ -142,19 +155,26 @@ def fiberDistance(fiberArray1, fiberArray2=None, n_jobs=-1):
         fiberArray2 = np.asarray(fiberArray2, dtype=np.float32)
 
         # Compute distances between two fiber groups
-        distance1 = _fiberDistance_internal(fiberArray1, fiberArray2,
-                                            n_jobs=n_jobs)
-        distance2 = _fiberDistance_internal(fiberArray1, fiberArray2, flip=True,
-                                            n_jobs=n_jobs)
+        distance1, label1 = _fiberDistance_internal(fiberArray1, fiberArray2,
+                                                    pflag=pflag, n_jobs=n_jobs)
+        distance2, label2 = _fiberDistance_internal(fiberArray1, fiberArray2,
+                                                    flip=True, pflag=pflag,
+                                                    n_jobs=n_jobs)
         del fiberArray1, fiberArray2
 
     # Minimum distance more likely to be part of cluster; return distance
     distance = np.minimum(distance1, distance2)
-    del distance1, distance2
+    if distance == distance1:
+        label = label1
+    else:
+        label = label2
 
-    return distance
+    del distance1, distance2,
 
-def scalarDistance(fiberScalarArray1, fiberScalarArray2=None, n_jobs=-1):
+    return distance, label
+
+def scalarDistance(fiberScalarArray1, fiberScalarArray2=None, pflag=False,
+                   n_jobs=-1):
     """
     Computes the distance between one fiber and individual fibers within a
     group (array) of fibers. This function also handles equivalent fiber
@@ -165,6 +185,7 @@ def scalarDistance(fiberScalarArray1, fiberScalarArray2=None, n_jobs=-1):
                             fibers
         fiberScalarArray2 - array of scalar information pertaining to a group of
                             fibers if applicable
+        pflag - flag to indicate if clustering is performed with priors
         n_jobs - number of processes/threads (defaults to use all available
                  resources)
 
@@ -175,11 +196,13 @@ def scalarDistance(fiberScalarArray1, fiberScalarArray2=None, n_jobs=-1):
         fiberScalarArray1 = np.asarray(fiberScalarArray1, dtype=np.float32)
 
         # Compute distances for fiber and fiber equivalent to fiber group
-        distance1 = _scalarDistance_internal(fiberScalarArray1,
-                                             fiberScalarArray1, n_jobs=n_jobs)
-        distance2 = _scalarDistance_internal(fiberScalarArray1,
-                                             fiberScalarArray1,
-                                             flip=True, n_jobs=n_jobs)
+        distance1, label1 = _scalarDistance_internal(fiberScalarArray1,
+                                                     fiberScalarArray1,
+                                                     pflag=pflag, n_jobs=n_jobs)
+        distance2, label2 = _scalarDistance_internal(fiberScalarArray1,
+                                                     fiberScalarArray1,
+                                                     flip=True, pflag=pflag,
+                                                     n_jobs=n_jobs)
         del fiberScalarArray1
 
     else:
@@ -187,18 +210,25 @@ def scalarDistance(fiberScalarArray1, fiberScalarArray2=None, n_jobs=-1):
         fiberScalarArray2 = np.asarray(fiberScalarArray2, dtype=np.float32)
 
         # Compute distances between two fiber groups
-        distance1 = _scalarDistance_internal(fiberScalarArray1,
-                                             fiberScalarArray2, n_jobs=n_jobs)
-        distance2 = _scalarDistance_internal(fiberScalarArray1,
-                                             fiberScalarArray2,
-                                             flip=True, n_jobs=n_jobs)
+        distance1, label1 = _scalarDistance_internal(fiberScalarArray1,
+                                                     fiberScalarArray2,
+                                                     pflag=pflag, n_jobs=n_jobs)
+        distance2, label2 = _scalarDistance_internal(fiberScalarArray1,
+                                                     fiberScalarArray2,
+                                                     flip=True, pflag=pflag,
+                                                     n_jobs=n_jobs)
         del fiberScalarArray1, fiberScalarArray2
 
     # Minimum distance more likely to be similar; return distance
     distance = np.minimum(distance1, distance2)
+    if distance == distance1:
+        label = label1
+    else:
+        label = label2
+
     del distance1, distance2
 
-    return distance
+    return distance, label
 
 def gausKernel_similarity(distance, sigma):
     """
