@@ -417,7 +417,9 @@ class FiberTree:
                 pidx += 1
 
             del ptIds
-        gc.collect()  # Garbage collection at end of each for loop
+
+        if (fidx % 25000) == 0:
+            gc.collect()  # Garbage collection at end of each for loop
 
     def convertToVTK(self, rejIdx=[]):
         """
