@@ -416,6 +416,8 @@ class FiberTree:
                 self.fiberTree[fidx][pidx]['y'] = pt[1]
                 self.fiberTree[fidx][pidx]['z'] = pt[2]
 
+                del ptidx, pt
+
                 pidx += 1
 
     def convertToVTK(self, rejIdx=[]):
