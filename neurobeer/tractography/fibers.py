@@ -409,14 +409,17 @@ class FiberTree:
                                                     self.pts_per_fiber):
 
                 # Perform NN interpolation
-                ptidx = ptIds.GetId(int(round(lineIdx)))
-                pt = inputPts.GetPoint(ptidx)
+                ptidx = vtk.vtkIdList().GetId(int(round(lineIdx)))
+                # ptidx = ptIds.GetId(int(round(lineIdx)))
+                # pt = inputPts.GetPoint(ptidx)
 
-                self.fiberTree[fidx][pidx]['x'] = pt[0]
-                self.fiberTree[fidx][pidx]['y'] = pt[1]
-                self.fiberTree[fidx][pidx]['z'] = pt[2]
-
-                del ptidx, pt
+                # self.fiberTree[fidx][pidx]['x'] = pt[0]
+                # self.fiberTree[fidx][pidx]['y'] = pt[1]
+                # self.fiberTree[fidx][pidx]['z'] = pt[2]
+                self.fiberTree[fidx][pidx]['x'] = inputVTK.GetPoint(ptidx)[0]
+                self.fiberTree[fidx][pidx]['y'] = inputVTK.GetPoint(ptidx)[1]
+                self.fiberTree[fidx][pidx]['z'] = inputVTK.GetPoint(ptidx)[2]
+                del inputVTK.GetPoint(ptIdx)
 
                 pidx += 1
 
