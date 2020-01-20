@@ -415,6 +415,8 @@ class FiberTree:
 
                 pidx += 1
 
+            del ptIds
+
     def convertToVTK(self, rejIdx=[]):
         """
         Convert fibers in array form to VTK polydata.
