@@ -419,6 +419,7 @@ class FiberTree:
             del ptIds
 
         if (fidx % 25000) == 0:
+            misc.vprint("Performing collection of unused data...", verbose)
             gc.collect()  # Garbage collection at end of each for loop
 
     def convertToVTK(self, rejIdx=[]):
