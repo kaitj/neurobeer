@@ -397,7 +397,7 @@ class FiberTree:
         # Loop over all fibers
         inputVTK.GetLines().InitTraversal()
         ptIds = vtk.vtkIdList()
-        inputPts = inputVTK.GetPoints()
+        # inputPts = inputVTK.GetPoints()
 
         for fidx in range(0, self.no_of_fibers):
             inputVTK.GetLines().GetNextCell(ptIds)
@@ -409,8 +409,7 @@ class FiberTree:
                                                     self.pts_per_fiber):
 
                 # Perform NN interpolation
-                ptidx = vtk.vtkIdList().GetId(int(round(lineIdx)))
-                # ptidx = ptIds.GetId(int(round(lineIdx)))
+                ptidx = ptIds.GetId(int(round(lineIdx)))
                 # pt = inputPts.GetPoint(ptidx)
 
                 # self.fiberTree[fidx][pidx]['x'] = pt[0]
@@ -419,7 +418,6 @@ class FiberTree:
                 self.fiberTree[fidx][pidx]['x'] = inputVTK.GetPoint(ptidx)[0]
                 self.fiberTree[fidx][pidx]['y'] = inputVTK.GetPoint(ptidx)[1]
                 self.fiberTree[fidx][pidx]['z'] = inputVTK.GetPoint(ptidx)[2]
-                del inputVTK.GetPoint(ptIdx)
 
                 pidx += 1
 
