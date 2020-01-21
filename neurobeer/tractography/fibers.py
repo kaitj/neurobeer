@@ -419,7 +419,7 @@ class FiberTree:
             del ptIds
 
             gc.collect()
-            if (fidx % 25000) == 0:
+            if (fidx > 0) and ((fidx % 25000) == 0):
                 misc.vprint("...", verbose)
 
     def convertToVTK(self, rejIdx=[]):
