@@ -417,7 +417,7 @@ class FiberTree:
                 pidx += 1
 
             del ptIds
-            # gc.collect()
+            gc.collect()
             if (fidx > 0) and ((fidx % 25000) == 0):
                 misc.vprint("...", verbose)
 

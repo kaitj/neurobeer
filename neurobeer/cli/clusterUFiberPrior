@@ -78,7 +78,6 @@ def main():
     fiberData = fibers.FiberTree()
     fiberData.convertFromVTK(bundlePolydata, pts_per_fiber, opts.verbose)
     del bundleVTK
-    gc.collect()
 
     # Handling scalar data
     scalarDataList, scalarWeightList, scalarTypeList = [], [], []
