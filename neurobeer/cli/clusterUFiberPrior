@@ -57,6 +57,7 @@ def main():
     """
     import os
     import numpy as np
+    import gc
     from neurobeer.tractography import (cluster, fibers, prior, stats, tractio,
                                        ufiber)
 
@@ -77,6 +78,7 @@ def main():
     fiberData = fibers.FiberTree()
     fiberData.convertFromVTK(bundlePolydata, pts_per_fiber, opts.verbose)
     del bundleVTK
+    gc.collect()
 
     # Handling scalar data
     scalarDataList, scalarWeightList, scalarTypeList = [], [], []
