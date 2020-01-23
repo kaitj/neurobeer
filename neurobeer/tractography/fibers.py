@@ -311,8 +311,6 @@ class FiberTree:
             none
         """
         inputVTK.GetLines().InitTraversal()
-        vtk_data = inputVTK.GetPoints().GetData()
-        vtk_data = numpy_support.vtk_to_numpy(vtk_data)
 
         temp = []
         rm_count = 0
@@ -336,12 +334,12 @@ class FiberTree:
                 pidx += 1
 
                 # Sanity check + memory clearance
-                if (fidx > 0) and ((fidx % 10000) == 0):
-                    vtk_data = np.delete(vtk_data, temp, axis=0)
+                if (fidx > 0) and ((fidx % 25000) == 0):
+                    scalarData = np.delete(scalarData, temp, axis=0)
                     rm_count += len(temp)
                     temp = []
 
-        del vtk_data, rm_count, temp
+        del scalarData, rm_count, temp
 
     def getScalar(self, fidx, scalarType):
         """
