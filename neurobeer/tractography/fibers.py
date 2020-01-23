@@ -338,7 +338,7 @@ class FiberTree:
                 # Sanity check + memory clearance
                 if (fidx > 0) and ((fidx % 50000) == 0):
                     vtk_data = np.delete(vtk_data, temp, axis=0)
-                    rm_count = len(temp)
+                    rm_count += len(temp)
                     temp = []
 
         del vtk_data, rm_count, temp
@@ -439,7 +439,7 @@ class FiberTree:
             # Sanity check message + remove copied points (for memory purposes)
             if (fidx > 0) and ((fidx % 50000) == 0):
                 vtk_data = np.delete(vtk_data, temp, axis=0)
-                rm_count = len(temp)
+                rm_count += len(temp)
                 temp = []
                 misc.vprint("...", verbose)
 
