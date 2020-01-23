@@ -331,12 +331,11 @@ class FiberTree:
             for idx in lineIdx:
                 # Find point index
                 tidx = int(ptIds.GetId(idx)) - rm_count
-                temp.append(tidx)
                 self.fiberTree[fidx][pidx][scalarType] = float(scalarData[tidx])
                 pidx += 1
 
                 # Sanity check + memory clearance
-                if (fidx > 0) and ((fidx % 50000) == 0):
+                if (fidx > 0) and ((fidx % 10000) == 0):
                     vtk_data = np.delete(vtk_data, temp, axis=0)
                     rm_count += len(temp)
                     temp = []
@@ -437,7 +436,7 @@ class FiberTree:
                 pidx += 1
 
             # Sanity check message + remove copied points (for memory purposes)
-            if (fidx > 0) and ((fidx % 50000) == 0):
+            if (fidx > 0) and ((fidx % 25000) == 0):
                 vtk_data = np.delete(vtk_data, temp, axis=0)
                 rm_count += len(temp)
                 temp = []
