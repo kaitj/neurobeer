@@ -331,6 +331,7 @@ class FiberTree:
             for idx in lineIdx:
                 # Find point index
                 tidx = int(ptIds.GetId(idx)) - rm_count
+                temp.append(tidx)
                 self.fiberTree[fidx][pidx][scalarType] = float(scalarData[tidx])
                 pidx += 1
 
