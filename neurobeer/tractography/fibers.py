@@ -5,9 +5,9 @@ information.
 
 """
 
-import gc
 import numpy as np
 import vtk
+from vtk.util import numpy_support
 from collections import defaultdict
 from . import misc
 
@@ -397,7 +397,10 @@ class FiberTree:
 
         # Loop over all fibers
         inputVTK.GetLines().InitTraversal()
+        vtk_data = inputVTK.GetPoints().GetData()
+        vtk_data = numpy_support.vtk_to_numpy(vtk_data)
 
+        rm_count = 0
         for fidx in range(0, self.no_of_fibers):
             ptIds = vtk.vtkIdList()
             inputVTK.GetLines().GetNextCell(ptIds)
@@ -405,21 +408,25 @@ class FiberTree:
 
             # Loop over pts for ea. fiber
             pidx = 0
-            for lineIdx in self._calc_fiber_indices(fiberLength,
-                                                    self.pts_per_fiber):
+            lineIdx = self._calc_fiber_indices(fiberLength, self.pts_per_fiber)
+            lineIdx = [int(round(idx)) for idx in lineIdx]
 
+            for idx in lineIdx:
                 # Perform NN interpolation
-                ptidx = ptIds.GetId(int(round(lineIdx)))
-                self.fiberTree[fidx][pidx]['x'] = inputVTK.GetPoint(ptidx)[0]
-                self.fiberTree[fidx][pidx]['y'] = inputVTK.GetPoint(ptidx)[1]
-                self.fiberTree[fidx][pidx]['z'] = inputVTK.GetPoint(ptidx)[2]
-
+                self.fiberTree[fidx][pidx]['x'] = vtk_data[ptIds.GetId(idx - rm_count)][0]
+                self.fiberTree[fidx][pidx]['y'] = vtk_data[ptIds.GetId(idx - rm_count)][1]
+                self.fiberTree[fidx][pidx]['z'] = vtk_data[ptIds.GetId(idx - rm_count)][2]
                 pidx += 1
 
-            del ptIds
-            gc.collect()
+            # Remove copied points and retain count (for memory purposes)
+            vtk_data = np.delete(vtk_data, lineIdx, axis=0)
+            rm_count += pts_per_fiber
+
+            # Sanity check message
             if (fidx > 0) and ((fidx % 25000) == 0):
                 misc.vprint("...", verbose)
+
+        del vtk_data, rm_count
 
     def convertToVTK(self, rejIdx=[]):
         """
