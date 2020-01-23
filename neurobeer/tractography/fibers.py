@@ -330,7 +330,7 @@ class FiberTree:
 
             for idx in lineIdx:
                 # Find point index
-                tidx = int(ptIds.GetId(idx))
+                tidx = int(ptIds.GetId(idx)) - rm_count
                 temp.append(tidx)
                 self.fiberTree[fidx][pidx][scalarType] = float(scalarData[tidx])
                 pidx += 1
@@ -429,11 +429,11 @@ class FiberTree:
 
             for idx in lineIdx:
                 # Perform NN interpolation
-                tidx = int(ptIds.GetId(idx))
+                tidx = int(ptIds.GetId(idx)) - rm_count
                 temp.append(tidx)  # Retain indices accessed
-                self.fiberTree[fidx][pidx]['x'] = vtk_data[tidx - rm_count][0]
-                self.fiberTree[fidx][pidx]['y'] = vtk_data[tidx - rm_count][1]
-                self.fiberTree[fidx][pidx]['z'] = vtk_data[tidx - rm_count][2]
+                self.fiberTree[fidx][pidx]['x'] = vtk_data[tidx][0]
+                self.fiberTree[fidx][pidx]['y'] = vtk_data[tidx][1]
+                self.fiberTree[fidx][pidx]['z'] = vtk_data[tidx][2]
                 pidx += 1
 
             # Sanity check message + remove copied points (for memory purposes)
