@@ -72,7 +72,7 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False,
             for i in range(fiberMatrix1.shape[1]))
 
     if pflag is False:
-        return distance, None
+        return distance
     else:
         label = np.argmin(distance, axis=0)
         return distance[label], label
