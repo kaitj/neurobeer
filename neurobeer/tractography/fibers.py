@@ -333,11 +333,11 @@ class FiberTree:
                 self.fiberTree[fidx][pidx][scalarType] = float(scalarData[tidx])
                 pidx += 1
 
-                # Sanity check + memory clearance
-                if (fidx > 0) and ((fidx % 25000) == 0):
-                    scalarData = np.delete(scalarData, temp, axis=0)
-                    rm_count += len(temp)
-                    temp = []
+            # Sanity check + memory clearance
+            if (fidx > 0) and ((fidx % 25000) == 0):
+                scalarData = np.delete(scalarData, temp, axis=0)
+                rm_count += len(temp)
+                temp = []
 
         del scalarData, rm_count, temp
 
