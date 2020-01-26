@@ -75,7 +75,7 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False,
         return distance
     else:
         label = np.argmin(distance, axis=0)
-        return distance[label], label
+        return np.asarray(distance)[label.astype(int)], label
 
 def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2,
                              flip=False, pflag=False, n_jobs=-1):
@@ -119,7 +119,7 @@ def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2,
         return qDistance, None
     else:
         label = np.argmin(qDistance, axis=0)
-        return qDistance[label], label
+        return np.assaray(qDistance)[label.astype(int)], label
 
 def fiberDistance(fiberArray1, fiberArray2=None, pflag=False, n_jobs=-1):
     """
@@ -164,7 +164,7 @@ def fiberDistance(fiberArray1, fiberArray2=None, pflag=False, n_jobs=-1):
 
     # Minimum distance more likely to be part of cluster; return distance
     distance = np.minimum(distance1, distance2)
-    if distance == distance1:
+    if np.allclose(distance, distance1):
         label = label1
     else:
         label = label2
@@ -221,7 +221,7 @@ def scalarDistance(fiberScalarArray1, fiberScalarArray2=None, pflag=False,
 
     # Minimum distance more likely to be similar; return distance
     distance = np.minimum(distance1, distance2)
-    if distance == distance1:
+    if np.allclose(distance, distance1):
         label = label1
     else:
         label = label2
