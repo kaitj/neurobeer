@@ -276,7 +276,7 @@ def _pairwiseDistance_matrix(fiberTree, n_jobs=-1):
         distances - NxN matrix containing distances between
     """
 
-    distances = distance.fiberDistance(fiberTree.getFibers(
+    distances, _ = distance.fiberDistance(fiberTree.getFibers(
         range(fiberTree.no_of_fibers)), n_jobs=n_jobs)
 
     if np.diag(distances).all() != 0.0:
@@ -661,7 +661,7 @@ def _priorWeightedSimilarity(fiberTree, priorTree, scalarTypeList=[],
 
         del similarity
 
-    return wSimilarity
+    return wSimilarity, labels
 
 def _sortLabel(centroids, clusterIdx):
     """ *INTERNAL FUNCTION*
