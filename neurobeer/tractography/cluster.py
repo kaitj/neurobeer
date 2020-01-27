@@ -183,7 +183,7 @@ def spectralPriorCluster(fiberData, priorVTK, templateFlag=False,
         # del W, simIdx
 
         # outputData = fiberData.convertToVTK(rejIdx)
-        outputData = fiberData.converttoVTK()
+        outputData = fiberData.convertToVTK()
         outputPolydata = _format_outputVTK(outputData, clusterIdx, colour,
                                            priorCentroids)
 
