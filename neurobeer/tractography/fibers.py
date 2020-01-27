@@ -311,13 +311,10 @@ class FiberTree:
             none
         """
         inputVTK.GetLines().InitTraversal()
-
-        temp = []
-        rm_count = 0
+        ptIds = vtk.vtkIdList()
 
         # Loop over all fibers
         for fidx in range(0, self.no_of_fibers):
-            ptIds = vtk.vtkIdList()
             inputVTK.GetLines().GetNextCell(ptIds)
             fiberLength = ptIds.GetNumberOfIds()
 
@@ -328,18 +325,9 @@ class FiberTree:
 
             for idx in lineIdx:
                 # Find point index
-                tidx = int(ptIds.GetId(idx) - rm_count)
-                temp.append(tidx)
+                tidx = int(ptIds.GetId(idx))
                 self.fiberTree[fidx][pidx][scalarType] = float(scalarData[tidx])
                 pidx += 1
-
-            # Sanity check + memory clearance
-            if (fidx > 0) and ((fidx % 25000) == 0):
-                scalarData = np.delete(scalarData, temp, axis=0)
-                rm_count += len(temp)
-                temp = []
-
-        del scalarData, rm_count, temp
 
     def getScalar(self, fidx, scalarType):
         """
@@ -410,13 +398,10 @@ class FiberTree:
 
         # Loop over all fibers
         inputVTK.GetLines().InitTraversal()
-        vtk_data = inputVTK.GetPoints().GetData()
-        vtk_data = numpy_support.vtk_to_numpy(vtk_data)
+        inputPts = inputVTK.GetPoints()
+        ptIds = vtk.vtkIdList()
 
-        temp = []
-        rm_count = 0
         for fidx in range(0, self.no_of_fibers):
-            ptIds = vtk.vtkIdList()
             inputVTK.GetLines().GetNextCell(ptIds)
             fiberLength = ptIds.GetNumberOfIds()
 
@@ -427,21 +412,15 @@ class FiberTree:
 
             for idx in lineIdx:
                 # Perform NN interpolation
-                tidx = int(ptIds.GetId(idx) - rm_count)
-                temp.append(tidx)  # Retain indices accessed
-                self.fiberTree[fidx][pidx]['x'] = vtk_data[tidx][0]
-                self.fiberTree[fidx][pidx]['y'] = vtk_data[tidx][1]
-                self.fiberTree[fidx][pidx]['z'] = vtk_data[tidx][2]
+                tidx = int(ptIds.GetId(idx))
+                self.fiberTree[fidx][pidx]['x'] = inputPts.GetPoint(tidx)[0]
+                self.fiberTree[fidx][pidx]['y'] = inputPts.GetPoint(tidx)[1]
+                self.fiberTree[fidx][pidx]['z'] = inputPts.GetPoint(tidx)[2]
                 pidx += 1
 
             # Sanity check message + remove copied points (for memory purposes)
             if (fidx > 0) and ((fidx % 25000) == 0):
-                vtk_data = np.delete(vtk_data, temp, axis=0)
-                rm_count += len(temp)
-                temp = []
                 misc.vprint("...", verbose)
-
-        del vtk_data, rm_count, temp
 
     def convertToVTK(self, rejIdx=[]):
         """
