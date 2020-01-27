@@ -74,7 +74,7 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False,
     if pflag is False:
         return distance
     else:
-        label = np.argmin(distance, axis=0)
+        label = np.argmin(distance, axis=1)
         return np.asarray(distance)[label.astype(int)], label
 
 def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2,
@@ -118,7 +118,7 @@ def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2,
     if pflag is False:
         return qDistance, None
     else:
-        label = np.argmin(qDistance, axis=0)
+        label = np.argmin(qDistance, axis=1)
         return np.assaray(qDistance)[label.astype(int)], label
 
 def fiberDistance(fiberArray1, fiberArray2=None, pflag=False, n_jobs=-1):
