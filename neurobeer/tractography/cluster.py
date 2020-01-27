@@ -171,6 +171,7 @@ def spectralPriorCluster(fiberData, priorVTK, templateFlag=False,
         W, labels = _priorWeightedSimilarity(fiberData, priorData,
                                              scalarTypeList, scalarWeightList,
                                              sigma, pflag, n_jobs)
+        rejIdx = [] # Temp variable to deal with rejIdx related error
         # W, rejIdx = _outlierSimDetection(W, pflag=1, tflag=templateFlag,
         #                                  subsetIdxes=subsetIdxes)
 
@@ -194,7 +195,7 @@ def spectralPriorCluster(fiberData, priorVTK, templateFlag=False,
             # outputPolydata = addScalarToVTK(outputPolydata, fiberData,
             #                                 scalarTypeList[i], rejIdx=rejIdx)
 
-        return outputPolydata, clusterIdx, fiberData, None  # rejIdx
+        return outputPolydata, clusterIdx, fiberData, rejIdx 
 
 def addScalarToVTK(polyData, fiberTree, scalarType, fidxes=None, rejIdx=[]):
     """
