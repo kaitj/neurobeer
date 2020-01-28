@@ -89,9 +89,12 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False,
 
         label, distance = [], []
         for i in range(mapDistance.shape[1]):
-            label.append(np.argmin(mapDistance[i, :], axis=0))
-            distance.append(mapDistance[label[-1].astype(int)])
+            label.append(np.argmin(mapDistance[i, :]))
+            distance.append(mapDistance[i, label[-1].astype(int)])
         # label = np.argmin(np.asarray(distance), axis=1)
+        del mapDistance
+        os.delete(rFileName)  # Remove temporary file
+
         return np.asarray(distance), label
 
 def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2,
