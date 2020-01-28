@@ -8,6 +8,7 @@ similarity measurements.
 import numpy as np
 import random, string  # Libraries for generating temp file for mem mapping
 import os
+import gc
 from joblib import Parallel, delayed
 from joblib.pool import has_shareable_memory
 
@@ -38,7 +39,7 @@ def _calcQDistance(fiberMatrix1, fiberMatrix2):
     OUTPUT:
         Average "Euclidean" distance of quantitative values
     """
-    return np.mean(np.linalg.norm(fiberMatrix1, fiberMatrix2), axis=1)
+    return np.asarray(np.mean(np.linalg.norm(fiberMatrix1, fiberMatrix2), axis=1))
 
 def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False,
                             pflag=False, n_jobs=-1):
@@ -65,7 +66,7 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False,
             delayed(_calcDistance, has_shareable_memory)(
                 fiberMatrix1[:, i, None], fiberMatrix2)
             for i in range(fiberMatrix1.shape[1]))
-        distance = np.asarray(distance)
+        # distance = np.asarray(distance)
 
     # Flipped fiber
     else:
@@ -73,7 +74,7 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False,
             delayed(_calcDistance, has_shareable_memory)(
                 np.flip(fiberMatrix1[:, i, None], axis=2), fiberMatrix2)
             for i in range(fiberMatrix1.shape[1]))
-        distance = np.asarray(distance)
+        # distance = np.asarray(distance)
 
     if pflag is False:
         return distance
