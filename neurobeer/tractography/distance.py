@@ -74,9 +74,7 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False,
     if pflag is False:
         return distance
     else:
-        print(type(distance))
-        print(distance.shape)
-        label = np.argmin(distance, axis=1)
+        label = np.argmin(np.asarray(distance), axis=1)
         return np.asarray(distance)[label.astype(int)], label
 
 def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2,
