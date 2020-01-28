@@ -7,7 +7,6 @@ information.
 
 import numpy as np
 import vtk
-from vtk.util import numpy_support
 from collections import defaultdict
 from . import misc
 
