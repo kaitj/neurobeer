@@ -80,7 +80,7 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False,
         return distance
     else:
         # Write matrix for memory mapping
-        rFileName = ''.join(random.choice(string.ascii_lowercase) for i in 30)
+        rFileName = ''.join(random.choice(string.ascii_lowercase) for i in range(30))
         rFileName = os.path.join(os.getcwd(), rFileName + ".npz")
         np.savez_compressed(rFileName, distance)
 
