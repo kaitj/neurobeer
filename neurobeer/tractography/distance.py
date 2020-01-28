@@ -63,6 +63,7 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False,
             delayed(_calcDistance, has_shareable_memory)(
                 fiberMatrix1[:, i, None], fiberMatrix2)
             for i in range(fiberMatrix1.shape[1]))
+        distance = np.asarray(distance)
 
     # Flipped fiber
     else:
@@ -70,12 +71,19 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False,
             delayed(_calcDistance, has_shareable_memory)(
                 np.flip(fiberMatrix1[:, i, None], axis=2), fiberMatrix2)
             for i in range(fiberMatrix1.shape[1]))
+        distance = np.asarray(distance)
 
     if pflag is False:
         return distance
     else:
-        label = np.argmin(np.asarray(distance), axis=1)
-        return np.asarray(distance)[label.astype(int)], label
+        label = []
+        temp = []
+        for i in range(fiberMatrix1.shape[1]):
+            label.append(np.argmin(distance[0]))
+            temp = distance[label.astype(int)]
+            distance = np.delete(distance, 0, axis=0)
+        # label = np.argmin(np.asarray(distance), axis=1)
+        return np.asarray(temp), label
 
 def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2,
                              flip=False, pflag=False, n_jobs=-1):
