@@ -6,6 +6,8 @@ similarity measurements.
 """
 
 import numpy as np
+import random, string  # Libraries for generating temp file for mem mapping
+import os
 from joblib import Parallel, delayed
 from joblib.pool import has_shareable_memory
 
@@ -76,14 +78,21 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False,
     if pflag is False:
         return distance
     else:
-        label = []
-        temp = []
-        for i in range(fiberMatrix1.shape[1]):
-            label.append(np.argmin(distance[0]))
-            temp = distance[label.astype(int)]
-            distance = np.delete(distance, 0, axis=0)
+        # Write matrix for memory mapping
+        rFileName = ''.join(random.choice(string.ascii_lowercase) for i in 30)
+        rFileName = os.path.join(os.getcwd(), rFileName + ".npz")
+        np.savez_compressed(rFileName, distance)
+
+        del distance
+
+        mapDistance = np.load(rFileName, mmap_mode="r")
+
+        label, distance = [], []
+        for i in range(mapDistance.shape[1]):
+            label.append(np.argmin(mapDistance[i, :], axis=0))
+            distance.append(mapDistance[label[-1].astype(int)])
         # label = np.argmin(np.asarray(distance), axis=1)
-        return np.asarray(temp), label
+        return np.asarray(distance), label
 
 def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2,
                              flip=False, pflag=False, n_jobs=-1):
@@ -127,7 +136,7 @@ def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2,
         return qDistance, None
     else:
         label = np.argmin(qDistance, axis=1)
-        return np.assaray(qDistance)[label.astype(int)], label
+        return np.asarray(qDistance)[label.astype(int)], label
 
 def fiberDistance(fiberArray1, fiberArray2=None, pflag=False, n_jobs=-1):
     """
