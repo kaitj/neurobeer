@@ -6,9 +6,6 @@ similarity measurements.
 """
 
 import numpy as np
-import random, string  # Libraries for generating temp file for mem mapping
-import os
-import gc
 from joblib import Parallel, delayed
 from joblib.pool import has_shareable_memory
 
@@ -59,18 +56,12 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False,
     OUTPUT:
         distance - Matrix containing distance between fibers
     """
-
-    # Use mem-mapping
-    rFileName = ''.join(random.choice(string.ascii_lowercase) for i in range(30))
-    rFileName = os.path.join(os.getcwd(), rFileName + ".dat")
-
     # Calculates the avg Euclidean distance between fibers
     if flip is False:
         distance = Parallel(n_jobs=n_jobs, backend='threading')(
             delayed(_calcDistance, has_shareable_memory)(
                 fiberMatrix1[:, i, None], fiberMatrix2)
             for i in range(fiberMatrix1.shape[1]))
-        # distance = np.asarray(distance)
 
     # Flipped fiber
     else:
@@ -78,37 +69,18 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False,
             delayed(_calcDistance, has_shareable_memory)(
                 np.flip(fiberMatrix1[:, i, None], axis=2), fiberMatrix2)
             for i in range(fiberMatrix1.shape[1]))
-        # distance = np.asarray(distance)
 
     if pflag is False:
         return distance
     else:
-        # Write matrix for memory mapping
-        # rFileName = ''.join(random.choice(string.ascii_lowercase) for i in range(30))
-        # rFileName = os.path.join(os.getcwd(), rFileName + ".npz")
-        # np.savez_compressed(rFileName, distance)
-        #
-        # del distance
-
-        # label, distance = [], []
-        # for i in range(fiberMatrix1.shape[1]):
-        #     mapDistance = np.load(rFileName, mmap_mode="r")
-        #     label.append(np.argmin(mapDistance[i, :]))
-        #     print(label.shape)
-        #     distance.append(mapDistance[i, label[-1].astype(int)])
-        #     print(distance[-1])
-        #     del mapDistance
-        # # label = np.argmin(np.asarray(distance), axis=1)
-        # os.delete(rFileName)  # Remove temporary file
-        #
-        # return np.asarray(distance), label
-
         label, minDist = [], []
         for i in range(fiberMatrix1.shape[1]):
-            label.append(int(np.argmin(distance[0])))
+            idx = int(np.argmin(distance[i]))
+            label.append(idx)
             print(label[-1])
-            minDist.append(distance[0, label[-1]])
-            distance = np.delete(distance, 0, axis=0)
+            minDist.append(distance[0][label[-1]])
+
+        del distance
 
         return minDist, label
 
