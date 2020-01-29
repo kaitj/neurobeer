@@ -171,17 +171,16 @@ def spectralPriorCluster(fiberData, priorVTK, templateFlag=False,
         W, labels = _priorWeightedSimilarity(fiberData, priorData,
                                              scalarTypeList, scalarWeightList,
                                              sigma, pflag, n_jobs)
-        rejIdx = [] # Temp variable to deal with rejIdx related error
-        # W, rejIdx = _outlierSimDetection(W, pflag=1, tflag=templateFlag,
-        #                                  subsetIdxes=subsetIdxes)
+        W, rejIdx = _outlierSimDetection(W, labels=labels, tflag=templateFlag,
+                                        subsetIdxes=subsetIdxes)
 
         # 2. Identify corresponding cluster indices from similarity
-        # simIdx = np.argmax(W, axis=1)
+        labels = np.delete(labels, rejIdx)
         clusterIdx = priorLabels[labels]
         fiberData.addClusterInfo(clusterIdx, priorCentroids)
         colour = _cluster_to_rgb(priorCentroids)
 
-        # del W, simIdx
+        del W
 
         # outputData = fiberData.convertToVTK(rejIdx)
         outputData = fiberData.convertToVTK()
@@ -195,7 +194,7 @@ def spectralPriorCluster(fiberData, priorVTK, templateFlag=False,
             # outputPolydata = addScalarToVTK(outputPolydata, fiberData,
             #                                 scalarTypeList[i], rejIdx=rejIdx)
 
-        return outputPolydata, clusterIdx, fiberData, rejIdx 
+        return outputPolydata, clusterIdx, fiberData, rejIdx
 
 def addScalarToVTK(polyData, fiberTree, scalarType, fidxes=None, rejIdx=[]):
     """
@@ -690,15 +689,16 @@ def _sortLabel(centroids, clusterIdx):
 
     return newCentroids, newClusters
 
-def _outlierSimDetection(W, pflag=0, tflag=False, subsetIdxes=None):
+def _outlierSimDetection(W, labels=None, tflag=False, subsetIdxes=None):
     """ * INTERNAL FUNCTION *
     Look for outliers in fibers to reject
 
     INPUT
         W - similarity matrix
-        pflag - flag for outlier detection with priors
+        labels - indices of most similar streamlines for grouping
         tflag - flag for indicating subsetting
         subsetIdxes - subset of indices for subsetting; used with tflag
+        labels - labels if using priors
 
     OUTPUT:
         W - similarity matrix with removed outliers
@@ -707,23 +707,37 @@ def _outlierSimDetection(W, pflag=0, tflag=False, subsetIdxes=None):
     """
 
     # Reject fibers that is 1 standard deviations from mean
-    W_rowsum = np.nansum(W, 1)
-    W_outlierthr = np.mean(W_rowsum) - 1 * np.std(W_rowsum)
+    if labels is None:
+        if tflag is False:
+            W_rowsum = np.nansum(W, 1)
+            W_outlierthr = np.mean(W_rowsum) - 1 * np.std(W_rowsum)
 
-    rejIdx = np.where(W_rowsum < W_outlierthr)
+            rejIdx = np.where(W_rowsum < W_outlierthr)
 
-    # Remove outliers from matrix
-    if pflag == 0:
-        W = np.delete(W, rejIdx[0], axis=0)
-        W = np.delete(W, rejIdx[0], axis=1)
-    else:
-        if tflag is True:
-            rejIdx = [i for i in range(W.shape[0]) if i not in subsetIdxes]
-            W = np.delete(W, rejIdx, axis=0)
+            # Remove outliers from matrix
+            W = np.delete(W, rejIdx[0], axis=0)
+            W = np.delete(W, rejIdx[0], axis=1)
+
             return W, rejIdx
         else:
-            W = np.delete(W, rejIdx[0], axis=0)
-    return W, rejIdx[0]
+            rejIdx = [i for i in range(W.shape[0]) if i not in subsetIdxes]
+            W = np.delete(W, rejIdx, axis=0)
+
+            return W, rejIdx[0]
+
+    else:
+        rejIdx = []
+        for label in np.unique(labels):
+            temp = np.where(labels == label)
+            W_outlierthr = np.mean(W[temp]) - np.std(W[temp])
+            tempRejIdx = np.where(W < W_outlierthr)
+
+            # Remove outliers
+            W = np.delete(W, tempRejIdx)
+
+            rejIdx.append(tempRejIdx)
+
+        return W, rejIdx
 
 def _eiggap(eigval):
     """ * INTERNAL FUNCTION*
