@@ -60,6 +60,10 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False,
         distance - Matrix containing distance between fibers
     """
 
+    # Use mem-mapping
+    rFileName = ''.join(random.choice(string.ascii_lowercase) for i in range(30))
+    rFileName = os.path.join(os.getcwd(), rFileName + ".dat")
+
     # Calculates the avg Euclidean distance between fibers
     if flip is False:
         distance = Parallel(n_jobs=n_jobs, backend='threading')(
@@ -80,24 +84,32 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False,
         return distance
     else:
         # Write matrix for memory mapping
-        rFileName = ''.join(random.choice(string.ascii_lowercase) for i in range(30))
-        rFileName = os.path.join(os.getcwd(), rFileName + ".npz")
-        np.savez_compressed(rFileName, distance)
+        # rFileName = ''.join(random.choice(string.ascii_lowercase) for i in range(30))
+        # rFileName = os.path.join(os.getcwd(), rFileName + ".npz")
+        # np.savez_compressed(rFileName, distance)
+        #
+        # del distance
 
-        del distance
+        # label, distance = [], []
+        # for i in range(fiberMatrix1.shape[1]):
+        #     mapDistance = np.load(rFileName, mmap_mode="r")
+        #     label.append(np.argmin(mapDistance[i, :]))
+        #     print(label.shape)
+        #     distance.append(mapDistance[i, label[-1].astype(int)])
+        #     print(distance[-1])
+        #     del mapDistance
+        # # label = np.argmin(np.asarray(distance), axis=1)
+        # os.delete(rFileName)  # Remove temporary file
+        #
+        # return np.asarray(distance), label
 
-        label, distance = [], []
+        label, minDist = [], []
         for i in range(fiberMatrix1.shape[1]):
-            mapDistance = np.load(rFileName, mmap_mode="r")
-            label.append(np.argmin(mapDistance[i, :]))
-            print(label.shape)
-            distance.append(mapDistance[i, label[-1].astype(int)])
-            print(distance[-1])
-            del mapDistance
-        # label = np.argmin(np.asarray(distance), axis=1)
-        os.delete(rFileName)  # Remove temporary file
+            label.append(np.argmin(distance[0]))
+            minDist.append(distance[0, label.astype(int)])
+            distance = np.delete(distance, 0, axis=0)
 
-        return np.asarray(distance), label
+        return minDist, label
 
 def _scalarDistance_internal(fiberScalarMatrix1, fiberScalarMatrix2,
                              flip=False, pflag=False, n_jobs=-1):
