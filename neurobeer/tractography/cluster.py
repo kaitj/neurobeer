@@ -171,6 +171,8 @@ def spectralPriorCluster(fiberData, priorVTK, templateFlag=False,
         W, labels = _priorWeightedSimilarity(fiberData, priorData,
                                              scalarTypeList, scalarWeightList,
                                              sigma, pflag, n_jobs)
+
+        misc.vprint("Performing outlier removal...", verbose)
         W, rejIdx = _outlierSimDetection(W, labels=labels, tflag=templateFlag,
                                         subsetIdxes=subsetIdxes)
 
@@ -182,17 +184,16 @@ def spectralPriorCluster(fiberData, priorVTK, templateFlag=False,
 
         del W
 
-        # outputData = fiberData.convertToVTK(rejIdx)
-        outputData = fiberData.convertToVTK()
+        misc.vprint("Finished clustering...", verbose)
+        outputData = fiberData.convertToVTK(rejIdx)
         outputPolydata = _format_outputVTK(outputData, clusterIdx, colour,
                                            priorCentroids)
 
+        misc.vprint("Mapping scalar data if applicable...", verbose)
         # 3. Also add measurements from those used to cluster
         for i in range(len(scalarTypeList)):
             outputPolydata = addScalarToVTK(outputPolydata, fiberData,
-                                            scalarTypeList[i])
-            # outputPolydata = addScalarToVTK(outputPolydata, fiberData,
-            #                                 scalarTypeList[i], rejIdx=rejIdx)
+                                            scalarTypeList[i], rejIdx=rejIdx)
 
         return outputPolydata, clusterIdx, fiberData, rejIdx
 
@@ -698,12 +699,10 @@ def _outlierSimDetection(W, labels=None, tflag=False, subsetIdxes=None):
         labels - indices of most similar streamlines for grouping
         tflag - flag for indicating subsetting
         subsetIdxes - subset of indices for subsetting; used with tflag
-        labels - labels if using priors
 
     OUTPUT:
         W - similarity matrix with removed outliers
         rejIdx - indices of fibers considered outliers
-
     """
 
     # Reject fibers that is 1 standard deviations from mean
@@ -730,12 +729,14 @@ def _outlierSimDetection(W, labels=None, tflag=False, subsetIdxes=None):
         for label in np.unique(labels):
             temp = np.where(labels == label)
             W_outlierthr = np.mean(W[temp]) - np.std(W[temp])
-            tempRejIdx = np.where(W < W_outlierthr)
+            for idx in temp[0]:
+                if W[idx] < W_outlierthr:
+                    rejIdx.append(idx)
+                else:
+                    continue
+            print(label)
 
-            # Remove outliers
-            W = np.delete(W, tempRejIdx)
-
-            rejIdx.append(tempRejIdx)
+        W = np.delete(W, rejIdx)
 
         return W, rejIdx
 
