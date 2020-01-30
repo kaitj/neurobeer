@@ -32,18 +32,21 @@ def saveEig(dir_path, eigval_arr, eigvec_arr, verbose=0):
 
     return
 
-def vprint(txt, verbose):
+def vprint(txt, verbose, debug=False):
     """
     Function used to print verbose statements
 
     INPUT:
         txt - message to return
         verbose - verbosity
+        debug - flag to indicate if message should be a debug message
 
     OUTPUT:
         none
     """
-    if verbose != 0:
+    if verbose == 1:
         print(txt)
+    elif verbose == 3 and debug is True:
+        print("DEBUG: %s" % txt)
 
     return
