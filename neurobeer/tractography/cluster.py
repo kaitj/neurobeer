@@ -173,8 +173,9 @@ def spectralPriorCluster(fiberData, priorVTK, templateFlag=False,
                                              sigma, pflag, n_jobs)
 
         misc.vprint("Performing outlier removal...", verbose)
-        W, rejIdx = _outlierSimDetection(W, labels=labels, tflag=templateFlag,
-                                        subsetIdxes=subsetIdxes)
+        W, rejIdx = _outlierSimDetection(W, labels=priorLabels[labels],
+                                         tflag=templateFlag, 
+                                         subsetIdxes=subsetIdxes)
 
         # 2. Identify corresponding cluster indices from similarity
         labels = np.delete(labels, rejIdx)
