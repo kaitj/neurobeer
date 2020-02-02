@@ -439,17 +439,17 @@ class FiberTree:
         outFibers.InitTraversal()
 
         # Get fiber information to convert to VTK form
-        for fidx in range(0, self.no_of_fibers):
-            if fidx not in rejIdx:
-                ptIds = vtk.vtkIdList()
+        fidxes = [i for i in range(self.no_of_fibers) if i not in rejIdx]
+        for fidx in fidxes:
+            ptIds = vtk.vtkIdList()
 
-                for pidx in range(0, self.pts_per_fiber):
-                    idx = outPts.InsertNextPoint(self.fiberTree[fidx][pidx]['x'],
-                                                 self.fiberTree[fidx][pidx]['y'],
-                                                 self.fiberTree[fidx][pidx]['z'])
-                    ptIds.InsertNextId(idx)
+            for pidx in range(0, self.pts_per_fiber):
+                idx = outPts.InsertNextPoint(self.fiberTree[fidx][pidx]['x'],
+                                             self.fiberTree[fidx][pidx]['y'],
+                                             self.fiberTree[fidx][pidx]['z'])
+                ptIds.InsertNextId(idx)
 
-                outFibers.InsertNextCell(ptIds)
+            outFibers.InsertNextCell(ptIds)
 
         # Group data into VTK format
         outVTK.SetLines(outFibers)
