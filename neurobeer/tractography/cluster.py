@@ -736,12 +736,12 @@ def _outlierSimDetection(W, labels=None, tflag=False, subsetIdxes=None):
                 else:
                     continue
 
-        rejIdx = np.unique(rejIdx)
+        rejIdx = np.unique(rejIdx, return_inverse=True)
 
         W = np.delete(W, rejIdx)
 
         return W, rejIdx
-        
+
 def _eiggap(eigval):
     """ * INTERNAL FUNCTION*
     Automatically identify eigengap for stable embedding vector
