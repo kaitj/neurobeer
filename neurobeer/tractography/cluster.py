@@ -219,21 +219,28 @@ def addScalarToVTK(polyData, fiberTree, scalarType, fidxes=None, rejIdx=[]):
     data.SetName(scalarType.split('/', -1)[-1])
 
     if fidxes is None:
-        for fidx in range(0, fiberTree.no_of_fibers):
-            if fidx in rejIdx:
-                continue
-            else:
-                for pidx in range(0, fiberTree.pts_per_fiber):
-                    scalarValue = fiberTree.fiberTree[fidx][pidx][scalarType]
-                    data.InsertNextValue(scalarValue)
-    else:
+        fidxes = [i for i in range(fiberTree.no_of_fibers)]
+
+        rejIdx.reverse()
+        for i in rejIdx:
+            del fidxes[i]
+
         for fidx in fidxes:
-            if fidx in rejIdx:
+            for pidx in range(0, fiberTree.pts_per_fiber):
+                scalarValue = fiberTree.fiberTree[fidx][pidx][scalarType]
+                data.InsertNextValue(scalarValue)
+    else:
+        rejIdx.reverse()
+        for i in rejIdx:
+            if rejIdx > (len(fidxes) -1):
                 continue
             else:
-                for pidx in range(0, fiberTree.pts_per_fiber):
-                    scalarValue = fiberTree.fiberTree[fidx][pidx][scalarType]
-                    data.InsertNextValue(float(scalarValue))
+                del fidxes[i]
+
+        for fidx in fidxes:
+            for pidx in range(0, fiberTree.pts_per_fiber):
+                scalarValue = fiberTree.fiberTree[fidx][pidx][scalarType]
+                data.InsertNextValue(float(scalarValue))
 
     del scalarValue
 
