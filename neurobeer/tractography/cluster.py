@@ -736,7 +736,7 @@ def _outlierSimDetection(W, labels=None, tflag=False, subsetIdxes=None):
                 else:
                     continue
 
-        rejIdx = np.unique(rejIdx, return_inverse=True)
+        rejIdx = list(np.unique(rejIdx))
 
         W = np.delete(W, rejIdx)
 

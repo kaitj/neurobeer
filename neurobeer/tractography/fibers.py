@@ -438,8 +438,13 @@ class FiberTree:
 
         outFibers.InitTraversal()
 
+        # Remove outliers
+        fidxes = [i for i in range(self.no_of_fibers)]
+        rejIdx.reverse()
+        for i in rejIdx:
+            del fidxes[i]
+
         # Get fiber information to convert to VTK form
-        fidxes = [i for i in range(self.no_of_fibers) if i not in rejIdx]
         for fidx in fidxes:
             ptIds = vtk.vtkIdList()
 
