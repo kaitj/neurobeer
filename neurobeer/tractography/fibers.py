@@ -450,6 +450,7 @@ class FiberTree:
                 ptIds.InsertNextId(idx)
 
             outFibers.InsertNextCell(ptIds)
+            print(fidx)
 
         # Group data into VTK format
         outVTK.SetLines(outFibers)
