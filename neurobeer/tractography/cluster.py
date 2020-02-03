@@ -229,6 +229,7 @@ def addScalarToVTK(polyData, fiberTree, scalarType, fidxes=None, rejIdx=[]):
             for pidx in range(0, fiberTree.pts_per_fiber):
                 scalarValue = fiberTree.fiberTree[fidx][pidx][scalarType]
                 data.InsertNextValue(scalarValue)
+
     else:
         rejIdx.reverse()
         for i in rejIdx:
