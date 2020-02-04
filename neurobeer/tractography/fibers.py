@@ -62,18 +62,22 @@ def calcEndPointSep(fiberData, rejIdx):
     endpt = fiberData.pts_per_fiber - 1
 
     DArray = []
-    for fidx in range(fiberData.no_of_fibers):
-        if fidx in rejIdx:
-            continue
-        else:
-            x1 = fiberData.fiberTree[fidx][0]['x']
-            x2 = fiberData.fiberTree[fidx][endpt]['x']
-            y1 = fiberData.fiberTree[fidx][0]['y']
-            y2 = fiberData.fiberTree[fidx][endpt]['y']
-            z1 = fiberData.fiberTree[fidx][0]['z']
-            z2 = fiberData.fiberTree[fidx][endpt]['z']
 
-            DArray.append(np.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2))
+    fidxes = [i for i in range(fiberData.no_of_fibers)]
+
+    rejIdx.reverse()
+    for i in rejIdx:
+        del fidxes[i]
+
+    for fidx in fidxes:
+        x1 = fiberData.fiberTree[fidx][0]['x']
+        x2 = fiberData.fiberTree[fidx][endpt]['x']
+        y1 = fiberData.fiberTree[fidx][0]['y']
+        y2 = fiberData.fiberTree[fidx][endpt]['y']
+        z1 = fiberData.fiberTree[fidx][0]['z']
+        z2 = fiberData.fiberTree[fidx][endpt]['z']
+
+        DArray.append(np.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2))
 
     return DArray
 
@@ -97,22 +101,26 @@ def calcFiberLength(fiberData, rejIdx=[]):
 
     LArray = []
 
-    for fidx in range(fiberData.no_of_fibers):
+    fidxes = [i for i in range(fiberData.no_of_fibers)]
+
+    rejIdx.reverse()
+    for i in rejIdx:
+        del fidxes[i]
+
+    for fidx in fidxes:
         L = 0
-        if fidx in rejIdx:
-            continue
-        else:
-            for idx in range(1, no_of_pts):
-                x1 = fiberData.fiberTree[fidx][idx]['x']
-                x2 = fiberData.fiberTree[fidx][idx - 1]['x']
-                y1 = fiberData.fiberTree[fidx][idx]['y']
-                y2 = fiberData.fiberTree[fidx][idx - 1]['y']
-                z1 = fiberData.fiberTree[fidx][idx]['z']
-                z2 = fiberData.fiberTree[fidx][idx - 1]['z']
 
-                L = L + np.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
+        for idx in range(1, no_of_pts):
+            x1 = fiberData.fiberTree[fidx][idx]['x']
+            x2 = fiberData.fiberTree[fidx][idx - 1]['x']
+            y1 = fiberData.fiberTree[fidx][idx]['y']
+            y2 = fiberData.fiberTree[fidx][idx - 1]['y']
+            z1 = fiberData.fiberTree[fidx][idx]['z']
+            z2 = fiberData.fiberTree[fidx][idx - 1]['z']
 
-            LArray.append(L)
+            L = L + np.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
+
+        LArray.append(L)
 
     return LArray
 
