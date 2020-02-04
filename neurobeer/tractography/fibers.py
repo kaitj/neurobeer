@@ -232,7 +232,7 @@ class FiberTree:
 
         if len(rejIdx) is not 0:
             for i in rejIdx:
-                if rejIdx > (len(fidxes) - 1):
+                if i > (len(fidxes) - 1):
                     continue
                 else:
                     del fidxes[i]
