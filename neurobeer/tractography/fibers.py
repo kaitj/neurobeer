@@ -64,8 +64,6 @@ def calcEndPointSep(fiberData, rejIdx):
     DArray = []
 
     fidxes = [i for i in range(fiberData.no_of_fibers)]
-
-    rejIdx.reverse()
     for i in rejIdx:
         del fidxes[i]
 
@@ -102,8 +100,6 @@ def calcFiberLength(fiberData, rejIdx=[]):
     LArray = []
 
     fidxes = [i for i in range(fiberData.no_of_fibers)]
-
-    rejIdx.reverse()
     for i in rejIdx:
         del fidxes[i]
 
@@ -448,7 +444,6 @@ class FiberTree:
 
         # Remove outliers
         fidxes = [i for i in range(self.no_of_fibers)]
-        rejIdx.reverse()
         for i in rejIdx:
             del fidxes[i]
 
@@ -463,7 +458,6 @@ class FiberTree:
                 ptIds.InsertNextId(idx)
 
             outFibers.InsertNextCell(ptIds)
-            print(fidx)
 
         # Group data into VTK format
         outVTK.SetLines(outFibers)

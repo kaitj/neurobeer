@@ -221,7 +221,6 @@ def addScalarToVTK(polyData, fiberTree, scalarType, fidxes=None, rejIdx=[]):
     if fidxes is None:
         fidxes = [i for i in range(fiberTree.no_of_fibers)]
 
-        rejIdx.reverse()
         for i in rejIdx:
             del fidxes[i]
 
@@ -231,7 +230,6 @@ def addScalarToVTK(polyData, fiberTree, scalarType, fidxes=None, rejIdx=[]):
                 data.InsertNextValue(scalarValue)
 
     else:
-        rejIdx.reverse()
         for i in rejIdx:
             if rejIdx > (len(fidxes) -1):
                 continue
@@ -745,6 +743,7 @@ def _outlierSimDetection(W, labels=None, tflag=False, subsetIdxes=None):
                     continue
 
         rejIdx = list(np.unique(rejIdx))
+        rejIdx.reverse()
 
         W = np.delete(W, rejIdx)
 
