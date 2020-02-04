@@ -229,16 +229,21 @@ class FiberTree:
 
         # Fiber data
         idx = 0
-        for fidx in fidxes:
-            if fidx in rejIdx:
-                continue
-            else:
-                for pidx in range(0, self.pts_per_fiber):
-                    fiberArray_x[idx][pidx] = float(self.fiberTree[fidx][pidx]['x'])
-                    fiberArray_y[idx][pidx] = float(self.fiberTree[fidx][pidx]['y'])
-                    fiberArray_z[idx][pidx] = float(self.fiberTree[fidx][pidx]['z'])
 
-                idx += 1
+        if len(rejIdx) is not 0:
+            for i in rejIdx:
+                if rejIdx > (len(fidxes) - 1):
+                    continue
+                else:
+                    del fidxes[i]
+
+        for fidx in fidxes:
+            for pidx in range(0, self.pts_per_fiber):
+                fiberArray_x[idx][pidx] = float(self.fiberTree[fidx][pidx]['x'])
+                fiberArray_y[idx][pidx] = float(self.fiberTree[fidx][pidx]['y'])
+                fiberArray_z[idx][pidx] = float(self.fiberTree[fidx][pidx]['z'])
+
+            idx += 1
 
         return fiberArray_x, fiberArray_y, fiberArray_z
 
