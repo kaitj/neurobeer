@@ -282,6 +282,12 @@ class FiberTree:
         OUTPUT:
             none
         """
+        if len(fidxes) is not 0:
+            for i in rejIdx:
+                if i > len(fidxes) - 1:
+                    continue
+                else:
+                    del fidxes[i]
 
         for Type in scalarTypeArray:
             idx = 0
@@ -289,21 +295,20 @@ class FiberTree:
             # Copy scalars of provided fiber indices
             if fidxes != []:
                 for fidx in fidxes:
-                    if fidx in rejIdx:
-                        continue
-                    else:
-                        for pidx in range(fiberData.pts_per_fiber):
-                            self.fiberTree[idx][pidx][Type] = float(fiberData.fiberTree[fidx][pidx][Type])
-                        idx += 1
+                    for pidx in range(fiberData.pts_per_fiber):
+                        self.fiberTree[idx][pidx][Type] = float(fiberData.fiberTree[fidx][pidx][Type])
+                    idx += 1
             # Copy scalars of all fibers
             else:
-                for fidx in range(fiberData.no_of_fibers):
-                    if fidx in rejIdx:
-                        continue
-                    else:
-                        for pidx in range(fiberData.pts_per_fiber):
-                            self.fiberTree[idx][pidx][Type] = float(fiberData.fiberTree[fidx][pidx][Type])
-                        idx += 1
+                fidxes = [i for i in range(fiberData.no_of_fibers)]
+
+                for i in rejIdx:
+                    del fidxes[i]
+
+                for fidx in fidxes:
+                    for pidx in range(fiberData.pts_per_fiber):
+                        self.fiberTree[idx][pidx][Type] = float(fiberData.fiberTree[fidx][pidx][Type])
+                    idx += 1
 
     def addScalar(self, inputVTK, scalarData, scalarType, pts_per_fiber=20):
         """
