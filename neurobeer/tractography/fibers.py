@@ -230,6 +230,8 @@ class FiberTree:
         # Fiber data
         idx = 0
 
+        fidxes = list(fidxes)
+
         if len(rejIdx) is not 0:
             for i in rejIdx:
                 if i > (len(fidxes) - 1):
