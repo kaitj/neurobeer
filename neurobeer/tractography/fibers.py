@@ -62,18 +62,20 @@ def calcEndPointSep(fiberData, rejIdx):
     endpt = fiberData.pts_per_fiber - 1
 
     DArray = []
-    for fidx in range(fiberData.no_of_fibers):
-        if fidx in rejIdx:
-            continue
-        else:
-            x1 = fiberData.fiberTree[fidx][0]['x']
-            x2 = fiberData.fiberTree[fidx][endpt]['x']
-            y1 = fiberData.fiberTree[fidx][0]['y']
-            y2 = fiberData.fiberTree[fidx][endpt]['y']
-            z1 = fiberData.fiberTree[fidx][0]['z']
-            z2 = fiberData.fiberTree[fidx][endpt]['z']
 
-            DArray.append(np.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2))
+    fidxes = [i for i in range(fiberData.no_of_fibers)]
+    for i in rejIdx:
+        del fidxes[i]
+
+    for fidx in fidxes:
+        x1 = fiberData.fiberTree[fidx][0]['x']
+        x2 = fiberData.fiberTree[fidx][endpt]['x']
+        y1 = fiberData.fiberTree[fidx][0]['y']
+        y2 = fiberData.fiberTree[fidx][endpt]['y']
+        z1 = fiberData.fiberTree[fidx][0]['z']
+        z2 = fiberData.fiberTree[fidx][endpt]['z']
+
+        DArray.append(np.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2))
 
     return DArray
 
@@ -97,22 +99,24 @@ def calcFiberLength(fiberData, rejIdx=[]):
 
     LArray = []
 
-    for fidx in range(fiberData.no_of_fibers):
+    fidxes = [i for i in range(fiberData.no_of_fibers)]
+    for i in rejIdx:
+        del fidxes[i]
+
+    for fidx in fidxes:
         L = 0
-        if fidx in rejIdx:
-            continue
-        else:
-            for idx in range(1, no_of_pts):
-                x1 = fiberData.fiberTree[fidx][idx]['x']
-                x2 = fiberData.fiberTree[fidx][idx - 1]['x']
-                y1 = fiberData.fiberTree[fidx][idx]['y']
-                y2 = fiberData.fiberTree[fidx][idx - 1]['y']
-                z1 = fiberData.fiberTree[fidx][idx]['z']
-                z2 = fiberData.fiberTree[fidx][idx - 1]['z']
 
-                L = L + np.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
+        for idx in range(1, no_of_pts):
+            x1 = fiberData.fiberTree[fidx][idx]['x']
+            x2 = fiberData.fiberTree[fidx][idx - 1]['x']
+            y1 = fiberData.fiberTree[fidx][idx]['y']
+            y2 = fiberData.fiberTree[fidx][idx - 1]['y']
+            z1 = fiberData.fiberTree[fidx][idx]['z']
+            z2 = fiberData.fiberTree[fidx][idx - 1]['z']
 
-            LArray.append(L)
+            L = L + np.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
+
+        LArray.append(L)
 
     return LArray
 
@@ -225,16 +229,23 @@ class FiberTree:
 
         # Fiber data
         idx = 0
-        for fidx in fidxes:
-            if fidx in rejIdx:
-                continue
-            else:
-                for pidx in range(0, self.pts_per_fiber):
-                    fiberArray_x[idx][pidx] = float(self.fiberTree[fidx][pidx]['x'])
-                    fiberArray_y[idx][pidx] = float(self.fiberTree[fidx][pidx]['y'])
-                    fiberArray_z[idx][pidx] = float(self.fiberTree[fidx][pidx]['z'])
 
-                idx += 1
+        fidxes = list(fidxes)
+
+        if len(rejIdx) is not 0:
+            for i in rejIdx:
+                if i > (len(fidxes) - 1):
+                    continue
+                else:
+                    del fidxes[i]
+
+        for fidx in fidxes:
+            for pidx in range(0, self.pts_per_fiber):
+                fiberArray_x[idx][pidx] = float(self.fiberTree[fidx][pidx]['x'])
+                fiberArray_y[idx][pidx] = float(self.fiberTree[fidx][pidx]['y'])
+                fiberArray_z[idx][pidx] = float(self.fiberTree[fidx][pidx]['z'])
+
+            idx += 1
 
         return fiberArray_x, fiberArray_y, fiberArray_z
 
@@ -271,6 +282,12 @@ class FiberTree:
         OUTPUT:
             none
         """
+        if len(fidxes) is not 0:
+            for i in rejIdx:
+                if i > len(fidxes) - 1:
+                    continue
+                else:
+                    del fidxes[i]
 
         for Type in scalarTypeArray:
             idx = 0
@@ -278,21 +295,20 @@ class FiberTree:
             # Copy scalars of provided fiber indices
             if fidxes != []:
                 for fidx in fidxes:
-                    if fidx in rejIdx:
-                        continue
-                    else:
-                        for pidx in range(fiberData.pts_per_fiber):
-                            self.fiberTree[idx][pidx][Type] = float(fiberData.fiberTree[fidx][pidx][Type])
-                        idx += 1
+                    for pidx in range(fiberData.pts_per_fiber):
+                        self.fiberTree[idx][pidx][Type] = float(fiberData.fiberTree[fidx][pidx][Type])
+                    idx += 1
             # Copy scalars of all fibers
             else:
-                for fidx in range(fiberData.no_of_fibers):
-                    if fidx in rejIdx:
-                        continue
-                    else:
-                        for pidx in range(fiberData.pts_per_fiber):
-                            self.fiberTree[idx][pidx][Type] = float(fiberData.fiberTree[fidx][pidx][Type])
-                        idx += 1
+                fidxes = [i for i in range(fiberData.no_of_fibers)]
+
+                for i in rejIdx:
+                    del fidxes[i]
+
+                for fidx in fidxes:
+                    for pidx in range(fiberData.pts_per_fiber):
+                        self.fiberTree[idx][pidx][Type] = float(fiberData.fiberTree[fidx][pidx][Type])
+                    idx += 1
 
     def addScalar(self, inputVTK, scalarData, scalarType, pts_per_fiber=20):
         """
@@ -319,12 +335,13 @@ class FiberTree:
 
             # Loop over pts for ea. fiber
             pidx = 0
-            for lineIdx in self._calc_fiber_indices(fiberLength, pts_per_fiber):
+            lineIdx = self._calc_fiber_indices(fiberLength, pts_per_fiber)
+            lineIdx = [int(round(idx)) for idx in lineIdx]
 
+            for idx in lineIdx:
                 # Find point index
-                ptidx = ptIds.GetId(int(round(lineIdx)))
-                self.fiberTree[fidx][pidx][scalarType] = float(scalarData[ptidx])
-
+                tidx = int(ptIds.GetId(idx))
+                self.fiberTree[fidx][pidx][scalarType] = float(scalarData[tidx])
                 pidx += 1
 
     def getScalar(self, fidx, scalarType):
@@ -396,8 +413,8 @@ class FiberTree:
 
         # Loop over all fibers
         inputVTK.GetLines().InitTraversal()
-        ptIds = vtk.vtkIdList()
         inputPts = inputVTK.GetPoints()
+        ptIds = vtk.vtkIdList()
 
         for fidx in range(0, self.no_of_fibers):
             inputVTK.GetLines().GetNextCell(ptIds)
@@ -405,18 +422,20 @@ class FiberTree:
 
             # Loop over pts for ea. fiber
             pidx = 0
-            for lineIdx in self._calc_fiber_indices(fiberLength,
-                                                    self.pts_per_fiber):
+            lineIdx = self._calc_fiber_indices(fiberLength, self.pts_per_fiber)
+            lineIdx = [int(round(idx)) for idx in lineIdx]
 
+            for idx in lineIdx:
                 # Perform NN interpolation
-                ptidx = ptIds.GetId(int(round(lineIdx)))
-                pt = inputPts.GetPoint(ptidx)
-
-                self.fiberTree[fidx][pidx]['x'] = pt[0]
-                self.fiberTree[fidx][pidx]['y'] = pt[1]
-                self.fiberTree[fidx][pidx]['z'] = pt[2]
-
+                tidx = int(ptIds.GetId(idx))
+                self.fiberTree[fidx][pidx]['x'] = inputPts.GetPoint(tidx)[0]
+                self.fiberTree[fidx][pidx]['y'] = inputPts.GetPoint(tidx)[1]
+                self.fiberTree[fidx][pidx]['z'] = inputPts.GetPoint(tidx)[2]
                 pidx += 1
+
+            # Sanity check message + remove copied points (for memory purposes)
+            if (fidx > 0) and ((fidx % 25000) == 0):
+                misc.vprint("...", verbose)
 
     def convertToVTK(self, rejIdx=[]):
         """
@@ -435,10 +454,13 @@ class FiberTree:
 
         outFibers.InitTraversal()
 
+        # Remove outliers
+        fidxes = [i for i in range(self.no_of_fibers)]
+        for i in rejIdx:
+            del fidxes[i]
+
         # Get fiber information to convert to VTK form
-        for fidx in range(0, self.no_of_fibers):
-            if fidx in rejIdx:
-                continue
+        for fidx in fidxes:
             ptIds = vtk.vtkIdList()
 
             for pidx in range(0, self.pts_per_fiber):

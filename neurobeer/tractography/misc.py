@@ -20,30 +20,33 @@ def saveEig(dir_path, eigval_arr, eigvec_arr, verbose=0):
         none
     """
     # Paths to save
-    eigval_path = op.join(op.realpath(dir_path), "eigval.npy")
-    eigvec_path = op.join(op.realpath(dir_path), "eigvec.npy")
+    eigval_path = op.join(op.realpath(dir_path), "eigval.npz")
+    eigvec_path = op.join(op.realpath(dir_path), "eigvec.npz")
 
     # Save file
-    np.save(eigval_path, eigval_arr)
-    np.save(eigvec_path, eigvec_arr)
+    np.savez_compressed(eigval_path, eigval_arr)
+    np.savez_compressed(eigvec_path, eigvec_arr)
 
     vprint("Saved eigenvalues & eigenvectors to %s" % op.realpath(dir_path),
             verbose)
 
     return
 
-def vprint(txt, verbose):
+def vprint(txt, verbose, debug=False):
     """
     Function used to print verbose statements
 
     INPUT:
         txt - message to return
         verbose - verbosity
+        debug - flag to indicate if message should be a debug message
 
     OUTPUT:
         none
     """
-    if verbose != 0:
+    if verbose == 1:
         print(txt)
+    elif verbose == 3 and debug is True:
+        print("DEBUG: %s" % txt)
 
     return

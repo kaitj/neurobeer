@@ -196,21 +196,21 @@ def _getScalarInfo(priorVTK, centroidTree, subsetIdx, pts_per_fiber=20,
 
             fidx += 1
 
-def loadEig(dirpath, eigvalFile, eigvecFile):
-    """ WARNING: TO BE DEPRECATED
-    Loads eigenvalue and eigenvector arrays from previously clustered data
-
-    INPUT:
-        dirpath - Directory path where eigenvalues & eigenvectors are stored
-        eigvalArray - Array of eigenvalues to be loaded
-        eigvecArray - Matrix of eigenvectos to be loaded
-
-    OUTPUT:
-        priorEigval - Numpy array of eigenvalues
-        priorEigvec - Numpy array of eigenvectors
-    """
-
-    priorEigval = np.load(dirpath + '/' + eigvalFile)
-    priorEigvec = np.load(dirpath + '/' + eigvecFile)
-
-    return priorEigval, priorEigvec
+# def loadEig(dirpath, eigvalFile, eigvecFile):
+#     """ WARNING: TO BE DEPRECATED
+#     Loads eigenvalue and eigenvector arrays from previously clustered data
+#
+#     INPUT:
+#         dirpath - Directory path where eigenvalues & eigenvectors are stored
+#         eigvalArray - Array of eigenvalues to be loaded
+#         eigvecArray - Matrix of eigenvectos to be loaded
+#
+#     OUTPUT:
+#         priorEigval - Numpy array of eigenvalues
+#         priorEigvec - Numpy array of eigenvectors
+#     """
+#
+#     priorEigval = np.load(dirpath + '/' + eigvalFile)
+#     priorEigvec = np.load(dirpath + '/' + eigvecFile)
+#
+#     return priorEigval, priorEigvec

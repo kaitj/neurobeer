@@ -15,8 +15,8 @@ def getBIDS(bids_layout, subjid, ref_img):
     subjid = subjid.lstrip('sub-')
 
     # Grab necessary files
-    nii = bids_layout.get(subject=subjid, type=ref_img,
-                             return_type='file', extensions=['nii', 'nii.gz'])
+    nii = bids_layout.get(subject=subjid, suffix=ref_img,
+                          return_type='file', extensions=['nii', 'nii.gz'])
 
     return nii[0]
 
@@ -76,7 +76,7 @@ def main():
     import os.path as op
     import subprocess
 
-    from bids.grabbids import BIDSLayout
+    from bids.layout import BIDSLayout
     from neurobeer.tractograhy import misc
 
     args = get_parser().parse_args()
@@ -112,7 +112,7 @@ def main():
     filename = filename.split('/', -1)[-1]
 
     # Grab necessary files
-    layout = BIDSLayout(nii_dir)
+    layout = BIDSLayout(nii_dir, validate=False)
     nii = getBIDS(layout, subjid, ref_img)
 
     # Read vtk and convert to bfloat

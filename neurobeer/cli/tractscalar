@@ -10,13 +10,13 @@ WORKS WITH SINGULARITY CONTAINER (RECIPE CAN BE FOUND IN GIT REPO:
 https://github.com/khanlab/neurobeer)
 
 """
-def getBIDS(bids_layout, subjid, scalar_img):
+def getBIDS(bids_layout, subjid, scalar_img, space):
     subjid = subjid.lstrip('sub-')
 
     # Grab necessary files
-    tck = bids_layout.get(subject=subjid, type='tractography',
+    tck = bids_layout.get(subject=subjid, space=space, suffix='tractography',
                           return_type='file', extensions=['tck'])
-    scalar = bids_layout.get(subject=subjid, type=scalar_img,
+    scalar = bids_layout.get(subject=subjid, space=space, suffix=scalar_img,
                              return_type='file', extensions=['nii', 'nii.gz'])
 
     return tck[0], scalar[0]
@@ -34,7 +34,8 @@ def get_parser():
     from neurobeer._version import __version__
 
     parser = ArgumentParser(description=('Tracks scalar information to vtk '
-                                         'polydata and returns text file'),
+                                         'polydata and returns text file with '
+                                         'scalar mapping'),
                             formatter_class=RawTextHelpFormatter)
 
     # Version option
@@ -53,6 +54,9 @@ def get_parser():
     g_opt.add_argument('-o', '--out_dir', dest="out_dir",
                                           help="Output directory. Defaults to "
                                             "<bids_dir>/derivatives/neurobeer ")
+    g_opt.add_argument('-s', '--space', dest="space", default=None,
+                                        help="Set space data is in. Defaults "
+                                             "Template")
     g_opt.add_argument('-v', '--verbose', action='count', default=0,
                        help='verbosity of tool')
 
@@ -66,7 +70,7 @@ def main():
     import os.path as op
     import subprocess
 
-    from bids.grabbids import BIDSLayout
+    from bids.layout import BIDSLayout
     from neurobeer.tractography import misc
 
     args = get_parser().parse_args()
@@ -74,6 +78,9 @@ def main():
     bids_dir = args.bids_dir
     subjid = args.subjid
     scalar_img = args.scalar_img
+
+    # Optional outputs
+    space = args.space
 
     # Set output directory
     if args.out_dir:
@@ -88,8 +95,8 @@ def main():
         os.makedirs(out_dir)
 
     # Grab necessary files
-    layout = BIDSLayout(bids_dir)
-    tck, scalar = getBIDS(layout, subjid, scalar_img)
+    layout = BIDSLayout(bids_dir, validate=False)
+    tck, scalar = getBIDS(layout, subjid, scalar_img, space)
 
     misc.vprint("Converting streamlines from .tck to .bfloat...", args.verbose)
 
