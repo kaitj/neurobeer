@@ -144,14 +144,10 @@ def main():
         LArray = fibers.calcFiberLength(bundle)
         LMean, LStd, fiberCount = stats.calcGeoStats(LArray)
         stats.writeGeoCSV(label, LMean, LStd, fiberCount, dirpath=statsdir)
-        statsSuffix = 'stats_%i' % label
-        labeldir = os.path.join(statsdir, statsSuffix)
 
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, clusterData, Type,
                                               idxes)
-            stats.plotStats(fiberData, Type, idxes, dirpath=labeldir)
-            stats.writeCSV(label, fiberData, Type, idxes, dirpath=statsdir)
 
         bundleSuffix = '_Cluster%i.vtk' % label
         bundleName = opts.bundle[:-4] + bundleSuffix

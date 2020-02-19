@@ -58,7 +58,7 @@ def main():
     """
     import os
     import numpy as np
-    from neurobeer.tractography import cluster, fibers, stats, tractio, ufiber
+    from neurobeer.tractography import cluster, fibers, tractio, ufiber
 
     # Run parser
     opts = get_parser().parse_args()
@@ -139,8 +139,6 @@ def main():
         bundle = clusterData.getFibers(idxes)
         bundle = fibers.convertFromTuple(bundle)
         polyData = bundle.convertToVTK()
-        statsSuffix = 'stats_%i' % label
-        labeldir = os.path.join(statsdir, statsSuffix)
         LMean, LStd, DMean, DStd = ufiber.uFiberStats(L, D, idxes)
         ufiber.writeCSV(label, LMean, LStd, DMean, DStd, bundle.no_of_fibers,
                         dirpath=statsdir)
@@ -152,8 +150,6 @@ def main():
         for Type in scalarTypeList:
             polyData = cluster.addScalarToVTK(polyData, clusterData, Type,
                                               idxes)
-            stats.plotStats(fiberData, Type, idxes, dirpath=labeldir)
-            stats.writeCSV(label, fiberData, Type, idxes, dirpath=statsdir)
 
         bundleSuffix = '_uFibers_Cluster%i.vtk' % label
         bundleName = opts.bundle[:-4] + bundleSuffix
