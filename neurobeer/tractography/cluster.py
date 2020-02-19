@@ -172,7 +172,8 @@ def spectralPriorCluster(fiberData, priorVTK, templateFlag=False,
                                              sigma, pflag, n_jobs)
 
         misc.vprint("Performing outlier removal...", verbose)
-        W, rejIdx = _outlierSimDetection(W, labels=labels,
+        W, rejIdx = _outlierSimDetection(W, priorLabels=priorLabels,
+                                         labels=labels,
                                          tflag=templateFlag,
                                          subsetIdxes=subsetIdxes)
 
@@ -696,12 +697,14 @@ def _sortLabel(centroids, clusterIdx):
 
     return newCentroids, newClusters
 
-def _outlierSimDetection(W, labels=None, tflag=False, subsetIdxes=None):
+def _outlierSimDetection(W, tLabels=None, labels=None, tflag=False,
+                         subsetIdxes=None):
     """ * INTERNAL FUNCTION *
     Look for outliers in fibers to reject
 
     INPUT
         W - similarity matrix
+        tLabels - cluster labels from template
         labels - indices of most similar streamlines for grouping
         tflag - flag for indicating subsetting
         subsetIdxes - subset of indices for subsetting; used with tflag
@@ -712,6 +715,7 @@ def _outlierSimDetection(W, labels=None, tflag=False, subsetIdxes=None):
     """
 
     # Reject fibers that is 1 standard deviations from mean
+    # Outlier removal for templates and subset of templates
     if labels is None:
         if tflag is False:
             W_rowsum = np.nansum(W, 1)
@@ -729,12 +733,16 @@ def _outlierSimDetection(W, labels=None, tflag=False, subsetIdxes=None):
             W = np.delete(W, rejIdx, axis=0)
 
             return W, rejIdx[0]
-
+    # Outlier removal of priors
     else:
+        # Update labels with cluster label instead of streamline label
+        for idx, label in enumerate(labels):
+            labels[idx] = tLabels[label]
+
         rejIdx = []
         for label in np.unique(labels):
             temp = np.where(labels == label)
-            W_outlierthr = np.mean(W[temp]) - np.std(W[temp])
+            W_outlierthr = np.mean(W[temp]) - 1 * np.std(W[temp])
             for idx in temp[0]:
                 if W[idx] < W_outlierthr:
                     rejIdx.append(idx)
