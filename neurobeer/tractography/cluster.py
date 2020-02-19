@@ -651,9 +651,7 @@ def _priorWeightedSimilarity(fiberTree, priorTree, scalarTypeList=[],
                                                       n_jobs=n_jobs)
         print("\nFinished calculating similarity")
 
-    else:   # Calculate weighted similarity
-    # NEEDS TO BE FIXED TO HANDLE HIGHER STREAMLINE COUNTS
-
+    else:   # Calculate weighted similarity (TO BE FIXED)
         if np.sum(scalarWeightList) != 1.0:
             raise ValueError("Weights given do not sum 1.")
 
