@@ -79,7 +79,6 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
         eigval, eigvec = scipy.linalg.eigh(Lsym)
         idx = eigval.argsort()
         eigval, eigvec = eigval[idx], eigvec[:, idx]
-        misc.saveEig(dirpath, eigval, eigvec)
         del Lsym, idx
 
         # 6. Find optimal eigengap and select embedding vector
