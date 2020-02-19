@@ -12,7 +12,6 @@ setup(
              'neurobeer/cli/clusterPrior',
              'neurobeer/cli/clusterUFiber',
              'neurobeer/cli/clusterUFiberPrior',
-             'neurobeer/cli/tractscalar',
              'neurobeer/cli/vtk2nii',
              'neurobeer/cli/xfmData'],
 
