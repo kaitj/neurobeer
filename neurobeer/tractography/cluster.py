@@ -172,7 +172,7 @@ def spectralPriorCluster(fiberData, priorVTK, templateFlag=False,
                                              sigma, pflag, n_jobs)
 
         misc.vprint("Performing outlier removal...", verbose)
-        W, rejIdx = _outlierSimDetection(W, priorLabels=priorLabels,
+        W, rejIdx = _outlierSimDetection(W, tLabels=priorLabels,
                                          labels=labels,
                                          tflag=templateFlag,
                                          subsetIdxes=subsetIdxes)
