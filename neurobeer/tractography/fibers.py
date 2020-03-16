@@ -458,8 +458,10 @@ class FiberTree:
         fidxes = [i for i in range(self.no_of_fibers)]
 
         if len(rejIdx) > 0:
+            print(rejIdx)
             for i in rejIdx:
-                del fidxes[i]
+                print(i)
+                del fidxes[int(i)]
 
         # Get fiber information to convert to VTK form
         for fidx in fidxes:
