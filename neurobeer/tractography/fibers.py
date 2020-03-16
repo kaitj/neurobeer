@@ -457,6 +457,7 @@ class FiberTree:
         # Remove outliers
         fidxes = [i for i in range(self.no_of_fibers)]
 
+        print(rejIdx)
         for i in rejIdx:
             del fidxes[i]
 
