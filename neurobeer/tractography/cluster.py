@@ -102,8 +102,6 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
 
         # 8. Return results
         # Create model with user / default number of chosen samples along fiber
-        print(rejIdx)
-        print(rejIdx.shape)
         outputData = fiberData.convertToVTK(rejIdx)
         outputPolydata = _format_outputVTK(outputData, clusterIdx, colour,
                                            centroids)
@@ -728,7 +726,7 @@ def _outlierSimDetection(W, tLabels=None, labels=None, tflag=False,
             W = np.delete(W, rejIdx[0], axis=0)
             W = np.delete(W, rejIdx[0], axis=1)
 
-            return W, rejIdx
+            return W, rejIdx[0]
         else:
             rejIdx = [i for i in range(W.shape[0]) if i not in subsetIdxes]
             W = np.delete(W, rejIdx, axis=0)
