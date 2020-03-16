@@ -726,12 +726,12 @@ def _outlierSimDetection(W, tLabels=None, labels=None, tflag=False,
             W = np.delete(W, rejIdx[0], axis=0)
             W = np.delete(W, rejIdx[0], axis=1)
 
-            return W, rejIdx[0]
+            return W, np.flip(rejIdx[0])
         else:
             rejIdx = [i for i in range(W.shape[0]) if i not in subsetIdxes]
             W = np.delete(W, rejIdx, axis=0)
 
-            return W, rejIdx[0]
+            return W, np.flip(rejIdx[0])
     # Outlier removal of priors
     else:
         # Update labels with cluster label instead of streamline label
