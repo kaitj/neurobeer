@@ -102,16 +102,18 @@ def spectralClustering(fiberData, scalarDataList=[], scalarTypeList=[],
 
         # 8. Return results
         # Create model with user / default number of chosen samples along fiber
-        outputData = fiberData.convertToVTK(rejIdx[0])
+        print(rejIdx)
+        print(rejIdx.shape)
+        outputData = fiberData.convertToVTK(rejIdx)
         outputPolydata = _format_outputVTK(outputData, clusterIdx, colour,
                                            centroids)
 
         # 9. Also add measurements from those used to cluster
         for i in range(len(scalarTypeList)):
             outputPolydata = addScalarToVTK(outputPolydata, fiberData,
-                                            scalarTypeList[i], rejIdx=rejIdx[0])
+                                            scalarTypeList[i], rejIdx=rejIdx)
 
-        return outputPolydata, clusterIdx, fiberData, rejIdx[0]
+        return outputPolydata, clusterIdx, fiberData, rejIdx
 
 def spectralPriorCluster(fiberData, priorVTK, templateFlag=False,
                          scalarDataList=[], scalarTypeList=[],
