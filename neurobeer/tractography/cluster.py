@@ -221,8 +221,9 @@ def addScalarToVTK(polyData, fiberTree, scalarType, fidxes=None, rejIdx=[]):
     if fidxes is None:
         fidxes = [i for i in range(fiberTree.no_of_fibers)]
 
-        for i in rejIdx:
-            del fidxes[i]
+        if len(rejIdx) > 0:
+            for i in rejIdx:
+                del fidxes[i]
 
         for fidx in fidxes:
             for pidx in range(0, fiberTree.pts_per_fiber):

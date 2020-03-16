@@ -456,8 +456,10 @@ class FiberTree:
 
         # Remove outliers
         fidxes = [i for i in range(self.no_of_fibers)]
-        for i in rejIdx:
-            del fidxes[int(i)]
+
+        if len(rejIdx) > 0:
+            for i in rejIdx:
+                del fidxes[i]
 
         # Get fiber information to convert to VTK form
         for fidx in fidxes:
