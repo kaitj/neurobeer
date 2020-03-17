@@ -741,7 +741,7 @@ def _outlierSimDetection(W, tLabels=None, labels=None, tflag=False,
         rejIdx = []
         for label in np.unique(labels):
             temp = np.where(labels == label)
-            W_outlierthr = np.mean(W[temp]) - 1 * np.std(W[temp])
+            W_outlierthr = np.mean(W) - 1 * np.std(W[temp])
             for idx in temp[0]:
                 if W[idx] < W_outlierthr:
                     rejIdx.append(idx)
