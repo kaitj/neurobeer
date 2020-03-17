@@ -75,6 +75,7 @@ def _fiberDistance_internal(fiberMatrix1, fiberMatrix2, flip=False,
     else:
         label, minDist = [], []
         for i in range(fiberMatrix1.shape[1]):
+            print(distance.shape)
             idx = int(np.argmin(distance[i]))
             label.append(idx)
             minDist.append(distance[0][label[-1]])
