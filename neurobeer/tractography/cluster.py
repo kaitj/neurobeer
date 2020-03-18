@@ -178,7 +178,7 @@ def spectralPriorCluster(fiberData, priorVTK, templateFlag=False,
                                          subsetIdxes=subsetIdxes)
 
         # 2. Identify corresponding cluster indices from similarity
-        labels = np.delete(labels, rejIdx)
+        # labels = np.delete(labels, rejIdx)
         clusterIdx = priorLabels[labels]
         fiberData.addClusterInfo(clusterIdx, priorCentroids)
         colour = _cluster_to_rgb(priorCentroids)
